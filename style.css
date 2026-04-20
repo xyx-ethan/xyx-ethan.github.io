@@ -1363,7 +1363,9 @@ footer::before {
     font-weight: 500;
     color: var(--accent-blue-deep);
     opacity: 0;
-    transition: opacity 0.2s, transform 0.2s;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.2s, transform 0.2s, visibility 0s linear 0.2s;
     margin-left: auto;
     line-height: 1;
 }
@@ -1371,7 +1373,9 @@ footer::before {
 .project-card[data-href]:hover .card-arrow,
 .note-card:hover .card-arrow {
     opacity: 1;
+    visibility: visible;
     transform: translateX(3px);
+    transition: opacity 0.2s, transform 0.2s, visibility 0s linear 0s;
 }
 
 /* Note cards are column-flex, so the arrow needs to be absolutely pinned to
