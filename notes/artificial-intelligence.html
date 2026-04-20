@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CS 6601 Artificial Intelligence - Ethan Xu</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="notes.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap">
+    <script>MathJax={tex:{inlineMath:[['$','$']],displayMath:[['$$','$$']]},svg:{fontCache:'global'}};</script>
+    <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+    <script>(function(){var t=localStorage.getItem('theme');if(t==='light')localStorage.removeItem('theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');})()</script>
+</head>
+<body class="note-page">
+
+<nav class="note-nav">
+    <a href="../index.html#notes" class="back-link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+        Back to Home
+    </a>
+    <div class="note-nav-right">
+        <span class="note-progress-label">Completed</span>
+        <button class="note-download" id="noteDownload" aria-label="Download as PDF" title="Download as PDF">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        </button>
+        <button class="note-theme-toggle" id="noteThemeToggle" aria-label="Toggle theme">
+            <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+    </div>
+</nav>
+
+<aside class="note-sidebar">
+    <div class="note-sidebar-inner">
+        <div class="note-sidebar-header">
+            <span class="note-badge">CS 6601</span>
+            <h2>Artificial Intelligence</h2>
+            <p>10 topics &middot; Georgia Tech</p>
+        </div>
+        <div class="toc-title">Contents</div>
+        <ol class="toc-list"></ol>
+    </div>
+</aside>
+
+<article class="note-content">
+    <header class="note-header">
+        <span class="note-badge">Georgia Tech &middot; CS 6601</span>
+        <h1>Artificial Intelligence</h1>
+        <p class="note-intro">Comprehensive exam-level notes covering search, game playing, probability, Bayes nets, machine learning, HMMs, logic, and planning under uncertainty.</p>
+    </header>
+
+    <!-- Table of Contents -->
+    <div class="toc">
+        <h2>Topics</h2>
+        <ol>
+            <li><a href="#t1">Game Playing</a></li>
+            <li><a href="#t2">Search</a></li>
+            <li><a href="#t3">Simulated Annealing</a></li>
+            <li><a href="#t4">Constraint Satisfaction</a></li>
+            <li><a href="#t5">Probability</a></li>
+            <li><a href="#t6">Bayes Nets</a></li>
+            <li><a href="#t7">Machine Learning</a></li>
+            <li><a href="#t8">Pattern Recognition Through Time</a></li>
+            <li><a href="#t9">Logic and Planning</a></li>
+            <li><a href="#t10">Planning Under Uncertainty</a></li>
+        </ol>
+    </div>
+
+    <div class="note-body">
+
+        <!-- ============================================================ -->
+        <!-- Topic 1: Game Playing -->
+        <!-- ============================================================ -->
+        <h2 id="t1">1. Game Playing</h2>
+        <p>Adversarial search for two-player, zero-sum, perfect-information games. The opponent acts rationally to minimize our utility, so we cannot simply search for a goal &mdash; we must plan against an adversary.</p>
+
+        <h3>1.1 Game Trees</h3>
+        <p>A game tree represents all possible move sequences. Each node is a game state; each edge is a move. Levels alternate between the two players (MAX and MIN). Terminal nodes carry utility values (+1 win, &minus;1 loss, 0 draw, or real-valued scores).</p>
+
+        <h3>1.2 Minimax Algorithm</h3>
+        <p>Minimax computes the optimal strategy assuming both players play perfectly.</p>
+        <ul>
+            <li><strong>MAX nodes</strong> select the child with the <em>highest</em> value.</li>
+            <li><strong>MIN nodes</strong> select the child with the <em>lowest</em> value.</li>
+            <li>Values propagate <strong>bottom-up</strong> from terminal states to the root.</li>
+        </ul>
+        <p>The minimax value of a node $n$ is:</p>
+        $$\text{minimax}(n) = \begin{cases} \text{Utility}(n) & \text{if } n \text{ is terminal} \\ \max_{a} \text{minimax}(\text{child}(n, a)) & \text{if } n \text{ is a MAX node} \\ \min_{a} \text{minimax}(\text{child}(n, a)) & \text{if } n \text{ is a MIN node} \end{cases}$$
+        <p><strong>Complexity:</strong> Time $O(b^d)$, Space $O(bd)$ where $b$ = branching factor and $d$ = depth.</p>
+        <div class="card-def">
+            <strong>Minimax:</strong> A decision rule for two-player zero-sum games that selects the action maximizing the minimum payoff the opponent can force. MAX chooses the move with the highest minimax value; MIN chooses the move with the lowest. Under perfect play by both sides, the minimax value of the root equals the game-theoretic value of the position.
+        </div>
+
+        <h3>1.3 Alpha-Beta Pruning</h3>
+        <p>Alpha-beta pruning eliminates branches that cannot influence the final decision, without changing the result.</p>
+        <ul>
+            <li>$\alpha$ = best value MAX can guarantee so far (initially $-\infty$)</li>
+            <li>$\beta$ = best value MIN can guarantee so far (initially $+\infty$)</li>
+            <li><strong>Prune</strong> when $\alpha \geq \beta$ &mdash; the current branch is provably irrelevant.</li>
+        </ul>
+        <div class="card-note">
+            <strong>Alpha-beta complexity:</strong> With random move ordering, alpha-beta reduces the effective branching factor from $O(b^d)$ to $O(b^{3d/4})$. With perfect move ordering (best moves examined first), it achieves $O(b^{d/2})$ &mdash; effectively doubling the searchable depth for the same computation.
+        </div>
+        <div class="card-caution">
+            <strong>Move ordering matters:</strong> Alpha-beta pruning only achieves its best-case $O(b^{d/2})$ complexity when the best move is examined first at each node. With poor move ordering, pruning is minimal and performance degrades toward the full $O(b^d)$ of minimax. In practice, use iterative deepening with results from the previous depth to order moves, or apply killer-move and history heuristics to approximate good ordering.
+        </div>
+
+        <h3>1.4 Evaluation Functions</h3>
+        <p>Since searching to terminal states is usually infeasible, we use <strong>depth-limited search</strong> with an evaluation function at the cutoff depth. The evaluation function estimates the utility of a non-terminal state.</p>
+        <ul>
+            <li>Must be fast to compute.</li>
+            <li>Must correlate with the true chance of winning.</li>
+            <li>Example for Isolation: $\text{eval}(s) = \text{#my\_moves} - \text{#opponent\_moves}$</li>
+            <li>More aggressive: $\text{eval}(s) = 2 \cdot \text{#my\_moves} - \text{#opponent\_moves}$</li>
+        </ul>
+
+        <h3>1.5 Iterative Deepening</h3>
+        <p>Search to depth 1, then depth 2, then depth 3, etc., within a fixed time limit. When time runs out, return the best move found at the deepest completed level.</p>
+        <ul>
+            <li>Always has a move ready (anytime algorithm).</li>
+            <li>Overhead is small because of exponential growth: the last level dominates total work. Re-doing levels 1 through $d-1$ costs roughly $\frac{1}{b-1}$ of level $d$.</li>
+            <li>Combines the completeness of BFS with the space efficiency of DFS.</li>
+        </ul>
+
+        <h3>1.6 Quiescent Search and the Horizon Effect</h3>
+        <p><strong>Quiescent search:</strong> At the depth limit, if the position is <em>unstable</em> (evaluation fluctuates significantly between consecutive levels), extend the search deeper at that node until a stable (quiescent) position is reached.</p>
+        <p><strong>Horizon effect:</strong> The search may push an unavoidable bad outcome beyond the depth limit by making delaying moves. The agent appears to avoid the loss, but it is merely postponing it. Quiescent search and singular extensions help mitigate this.</p>
+
+
+        <!-- ============================================================ -->
+        <!-- Topic 2: Search -->
+        <!-- ============================================================ -->
+        <h2 id="t2">2. Search</h2>
+        <p>Systematic exploration of state spaces. A search problem is defined by: initial state, actions, transition model, goal test, and path cost.</p>
+
+        <h3>2.1 Breadth-First Search (BFS)</h3>
+        <ul>
+            <li>Explores nodes level by level using a FIFO queue.</li>
+            <li><strong>Complete:</strong> Yes (if branching factor $b$ is finite).</li>
+            <li><strong>Optimal:</strong> Yes, when all step costs are equal.</li>
+            <li><strong>Time:</strong> $O(b^d)$</li>
+            <li><strong>Space:</strong> $O(b^d)$ &mdash; must store the entire frontier.</li>
+        </ul>
+
+        <h3>2.2 Depth-First Search (DFS)</h3>
+        <ul>
+            <li>Explores the deepest node first using a LIFO stack.</li>
+            <li><strong>Complete:</strong> No (can loop in infinite state spaces without cycle detection).</li>
+            <li><strong>Optimal:</strong> No.</li>
+            <li><strong>Time:</strong> $O(b^m)$ where $m$ is the maximum depth.</li>
+            <li><strong>Space:</strong> $O(bm)$ &mdash; only stores the current path and its siblings.</li>
+        </ul>
+
+        <h3>2.3 Uniform Cost Search (UCS)</h3>
+        <ul>
+            <li>Expands the node with the <strong>lowest path cost</strong> $g(n)$, using a priority queue.</li>
+            <li>Equivalent to Dijkstra's algorithm.</li>
+            <li><strong>Complete:</strong> Yes (if step costs $\geq \epsilon > 0$).</li>
+            <li><strong>Optimal:</strong> Yes, for non-negative edge costs.</li>
+            <li><strong>Time &amp; Space:</strong> $O(b^{1 + \lfloor C^*/\epsilon \rfloor})$ where $C^*$ is the optimal cost.</li>
+        </ul>
+
+        <h3>2.4 A* Search</h3>
+        <p>A* uses the evaluation function:</p>
+        $$f(n) = g(n) + h(n)$$
+        <p>where $g(n)$ is the cost from start to $n$, and $h(n)$ is a heuristic estimate of cost from $n$ to the goal.</p>
+        <ul>
+            <li><strong>Admissibility:</strong> $h(n) \leq h^*(n)$ for all $n$, where $h^*(n)$ is the true cost. Guarantees optimality for tree search.</li>
+            <li><strong>Consistency (monotonicity):</strong> $h(n) \leq c(n, n') + h(n')$ for every successor $n'$. Guarantees optimality for graph search.</li>
+            <li>Consistency implies admissibility (but not vice versa).</li>
+        </ul>
+        <div class="card-def">
+            <strong>A* Search:</strong> A best-first graph search algorithm that expands nodes in order of $f(n) = g(n) + h(n)$, where $g(n)$ is the actual cost from the start and $h(n)$ is a heuristic estimate of the remaining cost to the goal. A* is both complete and optimal provided the heuristic is admissible (for tree search) or consistent (for graph search). It is optimally efficient among all algorithms that use the same heuristic information.
+        </div>
+        <div class="card-concept">
+            <strong>Admissible heuristic:</strong> A heuristic $h(n)$ is admissible if it never overestimates the true cost to the goal: $h(n) \leq h^*(n)$ for all $n$. Admissibility guarantees that A* tree search finds the optimal solution because no promising node is skipped. Common admissible heuristics include straight-line (Euclidean) distance and Manhattan distance on grids. A stronger condition, consistency ($h(n) \leq c(n, n') + h(n')$), is needed for optimality in graph search.
+        </div>
+        <div class="card-concept">
+            <strong>A* optimality:</strong> A* with a consistent heuristic expands nodes in non-decreasing order of $f$ values. Any node on the optimal path has $f(n) = g(n) + h(n) \leq g(n) + h^*(n) = C^*$, so it will be expanded before any suboptimal goal node $n'$ with $f(n') = g(n') > C^*$.
+        </div>
+
+        <h3>2.5 Bidirectional Search</h3>
+        <p>Run two simultaneous searches: forward from the start and backward from the goal. They meet in the middle.</p>
+        <ul>
+            <li><strong>Time &amp; Space:</strong> $O(b^{d/2})$ &mdash; exponentially better than unidirectional search.</li>
+            <li>Requires that predecessors of a state be efficiently computable.</li>
+        </ul>
+
+        <h3>2.6 Search Strategy Comparison</h3>
+        <table>
+            <tr><th>Strategy</th><th>Complete?</th><th>Optimal?</th><th>Time</th><th>Space</th></tr>
+            <tr><td>BFS</td><td>Yes</td><td>Yes*</td><td>$O(b^d)$</td><td>$O(b^d)$</td></tr>
+            <tr><td>DFS</td><td>No</td><td>No</td><td>$O(b^m)$</td><td>$O(bm)$</td></tr>
+            <tr><td>UCS</td><td>Yes</td><td>Yes</td><td>$O(b^{1+\lfloor C^*/\epsilon\rfloor})$</td><td>Same</td></tr>
+            <tr><td>A*</td><td>Yes</td><td>Yes</td><td>$O(b^d)$ worst case</td><td>$O(b^d)$</td></tr>
+            <tr><td>Bidirectional</td><td>Yes</td><td>Yes*</td><td>$O(b^{d/2})$</td><td>$O(b^{d/2})$</td></tr>
+        </table>
+        <p><em>*BFS optimal only with uniform step costs. Bidirectional optimal depends on implementation.</em></p>
+
+
+        <!-- ============================================================ -->
+        <!-- Topic 3: Simulated Annealing -->
+        <!-- ============================================================ -->
+        <h2 id="t3">3. Simulated Annealing</h2>
+        <p>Optimization techniques that escape local optima through controlled randomness. Applicable when the state space is too large for systematic search.</p>
+
+        <h3>3.1 Hill Climbing and Its Limitations</h3>
+        <p>Hill climbing (greedy local search) repeatedly moves to the neighbor with the highest value. It is fast but suffers from:</p>
+        <ul>
+            <li><strong>Local optima:</strong> peaks that are not the global maximum.</li>
+            <li><strong>Ridges:</strong> narrow elevated regions that are hard to traverse.</li>
+            <li><strong>Plateaus:</strong> flat regions with no uphill direction; includes shoulders (eventually lead somewhere) and flat maxima.</li>
+        </ul>
+
+        <h3>3.2 Simulated Annealing (SA)</h3>
+        <p>Inspired by the metallurgical process of annealing. SA allows <em>downhill</em> moves with a probability that decreases over time.</p>
+        <p>For a proposed move with energy change $\Delta E$:</p>
+        <ul>
+            <li>If $\Delta E > 0$ (improving), always accept.</li>
+            <li>If $\Delta E \leq 0$ (worsening), accept with probability:</li>
+        </ul>
+        $$P(\text{accept}) = e^{\Delta E / T}$$
+        <p>where $T$ is the current temperature.</p>
+        <ul>
+            <li>High $T$: almost all moves accepted (random walk / exploration).</li>
+            <li>Low $T$: only improving moves accepted (hill climbing / exploitation).</li>
+            <li>As $T \to 0$, SA converges to hill climbing.</li>
+        </ul>
+        <div class="card-def">
+            <strong>Simulated Annealing:</strong> A probabilistic local search algorithm that escapes local optima by accepting worse solutions with a probability $P = e^{\Delta E / T}$ that decreases as the temperature $T$ is lowered over time. At high temperatures the search behaves like a random walk (exploration); at low temperatures it behaves like hill climbing (exploitation). With a sufficiently slow cooling schedule, SA converges to the global optimum with probability 1.
+        </div>
+        <div class="card-concept">
+            <strong>SA convergence:</strong> If the cooling schedule decreases $T$ slowly enough (e.g., $T(t) = T_0 / \log(1+t)$), SA will find the global optimum with probability approaching 1. In practice, faster geometric schedules like $T(t) = T_0 \cdot \alpha^t$ with $0.9 \leq \alpha < 1$ are used.
+        </div>
+
+        <h3>3.3 Cooling Schedule</h3>
+        <p>The cooling schedule determines how $T$ decreases over time and controls the exploration-exploitation tradeoff:</p>
+        <ul>
+            <li><strong>Too fast:</strong> gets stuck in local optima (insufficient exploration).</li>
+            <li><strong>Too slow:</strong> wastes computation (too much random wandering).</li>
+            <li>Common schedule: geometric decay $T_{k+1} = \alpha \cdot T_k$ with $\alpha \in [0.90, 0.99]$.</li>
+        </ul>
+
+        <h3>3.4 Genetic Algorithms</h3>
+        <p>Population-based search inspired by natural selection:</p>
+        <ol>
+            <li><strong>Selection:</strong> Choose parents based on fitness (e.g., roulette wheel, tournament selection).</li>
+            <li><strong>Crossover:</strong> Combine parts of two parents to produce offspring (single-point, two-point, or uniform crossover).</li>
+            <li><strong>Mutation:</strong> Randomly alter offspring with small probability to maintain diversity.</li>
+        </ol>
+        <p>The population evolves over generations, preserving and combining good building blocks (schema theory).</p>
+
+
+        <!-- ============================================================ -->
+        <!-- Topic 4: Constraint Satisfaction -->
+        <!-- ============================================================ -->
+        <h2 id="t4">4. Constraint Satisfaction</h2>
+        <p>CSPs model problems through variables, domains, and constraints rather than explicit state-space search. The goal is to find an assignment of values to variables that satisfies all constraints simultaneously.</p>
+
+        <h3>4.1 CSP Formulation</h3>
+        <p>A CSP is defined by the triple $(X, D, C)$:</p>
+        <ul>
+            <li>$X = \{X_1, X_2, \dots, X_n\}$: a set of variables.</li>
+            <li>$D = \{D_1, D_2, \dots, D_n\}$: a set of domains (possible values for each variable).</li>
+            <li>$C$: a set of constraints specifying allowed combinations of values.</li>
+        </ul>
+        <p><strong>Example &mdash; Map Coloring:</strong> Variables = regions, Domains = {Red, Green, Blue}, Constraints = adjacent regions must have different colors.</p>
+        <div class="card-def">
+            <strong>Constraint Satisfaction Problem (CSP):</strong> A problem defined by a set of variables $X$, a set of domains $D$ (one per variable), and a set of constraints $C$ that specify which combinations of values are allowed. A solution is a complete assignment of values to all variables such that every constraint is satisfied. CSPs abstract away the notion of path cost and focus purely on feasibility.
+        </div>
+        <div class="card-example">
+            <strong>Map coloring:</strong> Consider coloring the map of Australia with 3 colors (Red, Green, Blue). The 7 states/territories are variables, each with domain $\{R, G, B\}$. Adjacent regions must differ in color, yielding constraints like $\text{WA} \neq \text{NT}$, $\text{NT} \neq \text{SA}$, etc. Backtracking with MRV picks SA first (most neighbors = 5), assigns it Red, then propagates constraints via forward checking. With AC-3, the problem can often be solved with zero backtracks.
+        </div>
+
+        <h3>4.2 Backtracking Search</h3>
+        <p>Depth-first search with one variable assigned per level. If a partial assignment violates a constraint, <strong>backtrack</strong> immediately (prune).</p>
+        <ul>
+            <li>Assign variables one at a time (not all at once).</li>
+            <li>Check constraints as soon as a variable is assigned.</li>
+            <li>Worst case: $O(d^n)$ where $d$ = domain size, $n$ = number of variables.</li>
+        </ul>
+
+        <h3>4.3 Arc Consistency (AC-3)</h3>
+        <p>A variable $X_i$ is arc-consistent with $X_j$ if for <em>every</em> value in $D_i$, there exists some value in $D_j$ that satisfies the constraint between them.</p>
+        <p><strong>AC-3 algorithm:</strong></p>
+        <ol>
+            <li>Initialize a queue with all arcs $(X_i, X_j)$.</li>
+            <li>For each arc, remove values from $D_i$ that have no consistent partner in $D_j$.</li>
+            <li>If $D_i$ changed, re-add all arcs $(X_k, X_i)$ to the queue.</li>
+            <li>If any domain becomes empty, the CSP is unsolvable.</li>
+        </ol>
+        <p><strong>Complexity:</strong> $O(ed^3)$ where $e$ = number of arcs, $d$ = max domain size.</p>
+
+        <h3>4.4 Forward Checking</h3>
+        <p>After assigning a value to $X_i$, immediately eliminate inconsistent values from the domains of all <em>unassigned</em> neighbors. If any neighbor's domain becomes empty, backtrack.</p>
+        <p>Forward checking is weaker than full arc consistency but cheaper per step.</p>
+
+        <h3>4.5 Variable and Value Ordering Heuristics</h3>
+        <ul>
+            <li><strong>MRV (Minimum Remaining Values):</strong> Choose the variable with the fewest legal values remaining. Also called <em>fail-first</em> &mdash; it detects failures early, reducing the search tree.</li>
+            <li><strong>Degree heuristic:</strong> Tie-breaker for MRV. Choose the variable involved in the most constraints with unassigned variables.</li>
+            <li><strong>LCV (Least Constraining Value):</strong> Choose the value that rules out the fewest values in neighboring domains. This maximizes flexibility for future assignments.</li>
+        </ul>
+        <div class="card-concept">
+            <strong>MRV vs. LCV:</strong> MRV is for <em>variable</em> ordering (fail-first: try the hardest variable next to detect dead ends early). LCV is for <em>value</em> ordering (fail-last: try the least restrictive value first to maximize chance of success).
+        </div>
+
+
+        <!-- ============================================================ -->
+        <!-- Topic 5: Probability -->
+        <!-- ============================================================ -->
+        <h2 id="t5">5. Probability</h2>
+        <p>The mathematical framework for reasoning under uncertainty. AI agents must handle incomplete information and noisy observations.</p>
+
+        <h3>5.1 Probability Axioms</h3>
+        <p>For a sample space $\Omega$ and events $A, B \subseteq \Omega$:</p>
+        <ol>
+            <li>$0 \leq P(A) \leq 1$ for all events $A$.</li>
+            <li>$P(\Omega) = 1$.</li>
+            <li><strong>Additivity:</strong> If $A$ and $B$ are mutually exclusive ($A \cap B = \emptyset$), then $P(A \cup B) = P(A) + P(B)$.</li>
+        </ol>
+        <p>Useful consequences:</p>
+        <ul>
+            <li>$P(\neg A) = 1 - P(A)$</li>
+            <li>$P(A \cup B) = P(A) + P(B) - P(A \cap B)$ (inclusion-exclusion)</li>
+        </ul>
+
+        <h3>5.2 Conditional Probability</h3>
+        <p>The probability of $A$ given that $B$ is known to have occurred:</p>
+        $$P(A \mid B) = \frac{P(A \cap B)}{P(B)}, \quad P(B) > 0$$
+        <p>This is the primary mechanism for <strong>updating beliefs</strong> given new evidence.</p>
+        <p>From this definition follows the <strong>product rule</strong>:</p>
+        $$P(A \cap B) = P(A \mid B) \cdot P(B) = P(B \mid A) \cdot P(A)$$
+
+        <h3>5.3 Law of Total Probability</h3>
+        <p>If $\{A_1, A_2, \dots, A_n\}$ is a partition of $\Omega$ (mutually exclusive, collectively exhaustive), then:</p>
+        $$P(B) = \sum_{i=1}^{n} P(B \mid A_i) \, P(A_i)$$
+        <p>This allows computing $P(B)$ by summing over all possible "causes" $A_i$.</p>
+
+        <h3>5.4 Bayes' Rule</h3>
+        <p>Bayes' rule relates $P(\text{cause} \mid \text{effect})$ to $P(\text{effect} \mid \text{cause})$:</p>
+        $$P(A \mid B) = \frac{P(B \mid A) \, P(A)}{P(B)}$$
+        <p>In terms of named components:</p>
+        $$\underbrace{P(A \mid B)}_{\text{posterior}} = \frac{\overbrace{P(B \mid A)}^{\text{likelihood}} \cdot \overbrace{P(A)}^{\text{prior}}}{\underbrace{P(B)}_{\text{evidence}}}$$
+        <div class="card-def">
+            <strong>Bayes' Theorem:</strong> A formula for inverting conditional probabilities: $P(A \mid B) = P(B \mid A) \, P(A) \;/\; P(B)$. It updates a prior belief $P(A)$ using the likelihood $P(B \mid A)$ of observed evidence to produce a posterior belief $P(A \mid B)$. The denominator $P(B)$ is a normalizing constant computed via the law of total probability. Bayes' theorem is the foundation of all probabilistic inference in AI.
+        </div>
+        <div class="card-concept">
+            <strong>Diagnostic vs. causal reasoning:</strong> Bayes' rule lets us invert directions. If we know $P(\text{symptom} \mid \text{disease})$ (causal, easy to estimate), we can compute $P(\text{disease} \mid \text{symptom})$ (diagnostic, what we need).
+        </div>
+        <div class="card-example">
+            <strong>Medical test (base rate fallacy):</strong> A disease affects 1 in 1000 people. A test has 99% sensitivity ($P(+ \mid \text{sick}) = 0.99$) and 1% false positive rate ($P(+ \mid \text{healthy}) = 0.01$). If you test positive, what is $P(\text{sick} \mid +)$? By Bayes' rule: $P(\text{sick} \mid +) = \frac{0.99 \times 0.001}{0.99 \times 0.001 + 0.01 \times 0.999} \approx 9\%$. Despite the accurate test, the low base rate means most positives are false positives.
+        </div>
+
+        <h3>5.5 Independence and Conditional Independence</h3>
+        <p><strong>Independence:</strong> $A$ and $B$ are independent if:</p>
+        $$P(A \cap B) = P(A) \cdot P(B) \quad \Leftrightarrow \quad P(A \mid B) = P(A)$$
+        <p><strong>Conditional independence:</strong> $A$ and $B$ are conditionally independent given $C$ if:</p>
+        $$P(A \cap B \mid C) = P(A \mid C) \cdot P(B \mid C)$$
+        <p>Conditional independence is the key to compact probabilistic models (Bayes nets). Two variables may be marginally dependent but conditionally independent (or vice versa).</p>
+
+
+        <!-- ============================================================ -->
+        <!-- Topic 6: Bayes Nets -->
+        <!-- ============================================================ -->
+        <h2 id="t6">6. Bayes Nets</h2>
+        <p>Bayesian networks are directed acyclic graphs (DAGs) that compactly represent a joint probability distribution using conditional independence relationships.</p>
+
+        <h3>6.1 Structure and Semantics</h3>
+        <p>A Bayes net consists of:</p>
+        <ul>
+            <li><strong>Nodes:</strong> random variables.</li>
+            <li><strong>Edges:</strong> direct probabilistic dependencies (parent &rarr; child).</li>
+            <li><strong>CPTs (Conditional Probability Tables):</strong> each node stores $P(X_i \mid \text{Parents}(X_i))$.</li>
+        </ul>
+        <div class="card-def">
+            <strong>Bayesian Network:</strong> A directed acyclic graph (DAG) where each node represents a random variable and each directed edge encodes a direct probabilistic dependency. Each node stores a conditional probability table (CPT) $P(X_i \mid \text{Parents}(X_i))$. The full joint distribution factorizes as $P(X_1, \ldots, X_n) = \prod_i P(X_i \mid \text{Parents}(X_i))$, which is exponentially more compact than a flat joint table when each variable has few parents.
+        </div>
+        <p>The joint distribution factorizes as:</p>
+        $$P(X_1, X_2, \dots, X_n) = \prod_{i=1}^{n} P(X_i \mid \text{Parents}(X_i))$$
+        <p><strong>Compactness:</strong> Instead of $O(2^n)$ entries for the full joint table, a Bayes net with $n$ Boolean variables and at most $k$ parents per node requires $O(n \cdot 2^k)$ parameters.</p>
+
+        <h3>6.2 D-Separation</h3>
+        <p>D-separation determines <strong>conditional independence</strong> directly from the graph structure. There are three canonical cases:</p>
+        <table>
+            <tr><th>Structure</th><th>Name</th><th>Flow without evidence</th><th>Flow given evidence on B</th></tr>
+            <tr><td>$A \to B \to C$</td><td>Chain</td><td>Yes (A and C dependent)</td><td>Blocked (A &perp; C | B)</td></tr>
+            <tr><td>$A \leftarrow B \to C$</td><td>Fork (common cause)</td><td>Yes (A and C dependent)</td><td>Blocked (A &perp; C | B)</td></tr>
+            <tr><td>$A \to B \leftarrow C$</td><td>Collider (common effect)</td><td>Blocked (A &perp; C)</td><td>Unblocked! (A and C become dependent)</td></tr>
+        </table>
+        <div class="card-concept">
+            <strong>Explaining away (collider):</strong> In a collider $A \to B \leftarrow C$, $A$ and $C$ are marginally independent. But once we observe $B$ (or any descendant of $B$), knowing about $A$ changes our belief about $C$. Example: two independent causes of a car not starting &mdash; once we know it won't start, ruling out one cause makes the other more likely.
+        </div>
+        <p><strong>General d-separation rule:</strong> $X$ and $Y$ are d-separated given $Z$ if <em>every</em> undirected path between $X$ and $Y$ is blocked. A path is blocked if it contains a node $V$ such that either: (a) $V \in Z$ and $V$ is in a chain or fork, or (b) $V \notin Z$ and $V$ is a collider (and no descendant of $V$ is in $Z$).</p>
+
+        <h3>6.3 Inference by Enumeration</h3>
+        <p>To compute $P(Q \mid e)$, sum over all values of hidden variables $H$:</p>
+        $$P(Q \mid e) = \frac{P(Q, e)}{P(e)} = \frac{\sum_{h} P(Q, e, h)}{\sum_{q} \sum_{h} P(q, e, h)}$$
+        <p>This is exact but <strong>exponential</strong> in the number of hidden variables.</p>
+
+        <h3>6.4 Variable Elimination</h3>
+        <p>Optimizes enumeration by factoring out variables one at a time. Instead of summing over the full joint, we:</p>
+        <ol>
+            <li>Express the joint as a product of factors (CPTs).</li>
+            <li>Eliminate (sum out) hidden variables one at a time, creating intermediate factors.</li>
+            <li>The <strong>elimination order</strong> affects efficiency &mdash; choosing a good order is NP-hard in general, but heuristics (min-neighbors, min-fill) work well in practice.</li>
+        </ol>
+
+        <h3>6.5 Approximate Inference: Sampling Methods</h3>
+        <p>For large networks, exact inference is intractable. Sampling methods provide approximate answers:</p>
+        <ul>
+            <li><strong>Rejection sampling:</strong> Generate samples from the prior, reject those inconsistent with evidence. Simple but wasteful &mdash; if evidence is unlikely, most samples are rejected.</li>
+            <li><strong>Likelihood weighting:</strong> Fix evidence variables and weight each sample by $\prod P(e_i \mid \text{parents}(e_i))$. All samples are consistent with evidence, so none are wasted. But downstream evidence is not handled well.</li>
+            <li><strong>Gibbs sampling (MCMC):</strong> Start with a random assignment. Repeatedly pick a non-evidence variable and resample it given its <strong>Markov blanket</strong> (parents, children, and children's other parents). Converges to the true posterior over time.</li>
+        </ul>
+
+        <h3>6.6 Naive Bayes Classifier</h3>
+        <p>Assumes all features $F_1, \dots, F_n$ are conditionally independent given the class $C$:</p>
+        $$P(C \mid F_1, \dots, F_n) \propto P(C) \prod_{i=1}^{n} P(F_i \mid C)$$
+        <p>Despite the strong independence assumption, Naive Bayes works well in many practical classification tasks (spam detection, text classification).</p>
+
+
+        <!-- ============================================================ -->
+        <!-- Topic 7: Machine Learning -->
+        <!-- ============================================================ -->
+        <h2 id="t7">7. Machine Learning</h2>
+        <p>Learning patterns from data. Supervised learning: given labeled examples $(x, y)$, learn $f: X \to Y$. Classification (discrete $Y$) vs. regression (continuous $Y$).</p>
+
+        <h3>7.1 k-Nearest Neighbors (k-NN)</h3>
+        <div class="card-def">
+            <strong>k-Nearest Neighbors (k-NN):</strong> A non-parametric, instance-based learning algorithm that classifies a query point by majority vote among its $k$ closest training examples under a chosen distance metric. The training data itself serves as the model, requiring no explicit training phase. At prediction time the algorithm computes distances to all training points, making it $O(n)$ per query without indexing structures such as KD-trees.
+        </div>
+        <ul>
+            <li>Classify a query point by majority vote of its $k$ nearest training examples.</li>
+            <li><strong>Non-parametric:</strong> no explicit model; the training data <em>is</em> the model.</li>
+            <li>Sensitive to the choice of distance metric (Euclidean, Manhattan, etc.) and the value of $k$.</li>
+            <li>Small $k$: low bias, high variance (overfitting). Large $k$: high bias, low variance (underfitting).</li>
+            <li>Curse of dimensionality: in high dimensions, all points become nearly equidistant.</li>
+        </ul>
+
+        <h3>7.2 Decision Trees</h3>
+        <p>Recursively partition the feature space by selecting the feature that provides the most information.</p>
+        <p><strong>Entropy</strong> of a set $S$ with $c$ classes:</p>
+        $$H(S) = -\sum_{i=1}^{c} p_i \log_2 p_i$$
+        <p>where $p_i$ is the proportion of class $i$ in $S$. Entropy is maximized when all classes are equally likely and zero when the set is pure (all one class).</p>
+        <p><strong>Information Gain</strong> for splitting on attribute $A$:</p>
+        $$\text{IG}(S, A) = H(S) - \sum_{v \in \text{Values}(A)} \frac{|S_v|}{|S|} H(S_v)$$
+        <p>Choose the attribute with the highest information gain at each node. Stop when a node is pure or no further splits improve the gain.</p>
+        <ul>
+            <li><strong>Pruning:</strong> Remove branches that do not improve validation accuracy to prevent overfitting.</li>
+            <li><strong>Gain ratio:</strong> Normalizes information gain by split information to avoid bias toward many-valued attributes.</li>
+        </ul>
+
+        <h3>7.3 Neural Networks</h3>
+        <p>Layers of interconnected nodes with trainable weights. Each node computes:</p>
+        $$z = \sum_i w_i x_i + b, \quad a = \sigma(z)$$
+        <p>Common activation functions:</p>
+        <ul>
+            <li><strong>Sigmoid:</strong> $\sigma(z) = \frac{1}{1 + e^{-z}}$, output in $(0, 1)$.</li>
+            <li><strong>ReLU:</strong> $\sigma(z) = \max(0, z)$, avoids vanishing gradient problem.</li>
+        </ul>
+        <p><strong>Backpropagation:</strong> Compute the gradient of the loss function with respect to each weight by applying the chain rule layer by layer from output to input. Use gradient descent to update weights:</p>
+        $$w \leftarrow w - \eta \frac{\partial \mathcal{L}}{\partial w}$$
+        <p>where $\eta$ is the learning rate.</p>
+
+        <h3>7.4 Support Vector Machines (SVMs)</h3>
+        <p>Find the <strong>maximum-margin hyperplane</strong> separating two classes. The margin is the distance between the hyperplane and the nearest data points (support vectors).</p>
+        <p>For a hyperplane $\mathbf{w} \cdot \mathbf{x} + b = 0$, the margin is $\frac{2}{\|\mathbf{w}\|}$. The optimization problem:</p>
+        $$\min_{\mathbf{w}, b} \frac{1}{2}\|\mathbf{w}\|^2 \quad \text{s.t.} \quad y_i(\mathbf{w} \cdot \mathbf{x}_i + b) \geq 1 \;\; \forall i$$
+        <p><strong>Kernel trick:</strong> Map data to a higher-dimensional space via $\phi(\mathbf{x})$ without computing $\phi$ explicitly. The kernel $K(\mathbf{x}_i, \mathbf{x}_j) = \phi(\mathbf{x}_i) \cdot \phi(\mathbf{x}_j)$ enables non-linear decision boundaries. Common kernels: polynomial, RBF (Gaussian).</p>
+
+        <h3>7.5 Boosting (AdaBoost)</h3>
+        <p>Combine multiple <strong>weak learners</strong> (slightly better than random) into a strong learner:</p>
+        <ol>
+            <li>Train a weak learner on the weighted training data.</li>
+            <li>Increase weights on misclassified examples.</li>
+            <li>Train the next weak learner on the re-weighted data.</li>
+            <li>Final prediction: weighted majority vote of all weak learners.</li>
+        </ol>
+        <p>The weight of learner $t$ is: $\alpha_t = \frac{1}{2} \ln\!\left(\frac{1 - \epsilon_t}{\epsilon_t}\right)$ where $\epsilon_t$ is its weighted error rate.</p>
+
+        <h3>7.6 Bias-Variance Tradeoff</h3>
+        <p>For a model's expected prediction error:</p>
+        $$\text{Error} = \text{Bias}^2 + \text{Variance} + \text{Irreducible Noise}$$
+        <ul>
+            <li><strong>High bias (underfitting):</strong> model is too simple, misses real patterns.</li>
+            <li><strong>High variance (overfitting):</strong> model is too complex, fits noise in training data.</li>
+        </ul>
+        <p><strong>Cross-validation:</strong> Split data into $k$ folds; train on $k-1$ folds and validate on the remaining one; rotate through all $k$ folds. Provides a robust estimate of generalization error for model selection.</p>
+        <div class="card-caution">
+            <strong>Overfitting vs. underfitting:</strong> A model that memorizes the training data (e.g., $k = 1$ in k-NN, an unpruned decision tree) achieves near-zero training error but generalizes poorly &mdash; this is overfitting. Conversely, a model that is too simple (e.g., $k = n$ in k-NN, a shallow tree) fails to capture real patterns &mdash; this is underfitting. Always evaluate on held-out data using cross-validation, and tune model complexity to minimize validation error, not training error.
+        </div>
+
+
+        <!-- ============================================================ -->
+        <!-- Topic 8: Pattern Recognition Through Time -->
+        <!-- ============================================================ -->
+        <h2 id="t8">8. Pattern Recognition Through Time</h2>
+        <p>Hidden Markov Models (HMMs) for modeling sequential/temporal data where the underlying process is not directly observable.</p>
+
+        <h3>8.1 Markov Chains</h3>
+        <p>A sequence of random variables $X_1, X_2, \dots$ satisfying the <strong>Markov property</strong>:</p>
+        $$P(X_t \mid X_{t-1}, X_{t-2}, \dots, X_1) = P(X_t \mid X_{t-1})$$
+        <p>The future depends only on the present, not the past. Fully characterized by transition probabilities $a_{ij} = P(X_t = j \mid X_{t-1} = i)$.</p>
+
+        <h3>8.2 Hidden Markov Model Definition</h3>
+        <div class="card-def">
+            <strong>Hidden Markov Model (HMM):</strong> A generative probabilistic model for sequential data defined by the tuple $\lambda = (A, B, \pi)$: a state transition matrix $A$, an emission (observation) matrix $B$, and an initial state distribution $\pi$. The system transitions between hidden states according to a first-order Markov chain, and each hidden state emits an observable output. The three core problems &mdash; evaluation (Forward), decoding (Viterbi), and learning (Baum-Welch) &mdash; are each solved in $O(N^2 T)$ time.
+        </div>
+        <p>An HMM is defined by the tuple $\lambda = (A, B, \pi)$:</p>
+        <ul>
+            <li>$A = [a_{ij}]$: <strong>transition matrix</strong> &mdash; $a_{ij} = P(q_{t+1} = S_j \mid q_t = S_i)$.</li>
+            <li>$B = [b_j(o_k)]$: <strong>emission (observation) matrix</strong> &mdash; $b_j(o_k) = P(O_t = o_k \mid q_t = S_j)$.</li>
+            <li>$\pi = [\pi_i]$: <strong>initial state distribution</strong> &mdash; $\pi_i = P(q_1 = S_i)$.</li>
+        </ul>
+        <p>At each time step, the system is in a <em>hidden</em> state $q_t$ and emits an <em>observable</em> output $O_t$.</p>
+
+        <h3>8.3 Three Fundamental Problems</h3>
+
+        <p><strong>Problem 1 &mdash; Evaluation:</strong> Given model $\lambda$ and observation sequence $O = O_1, \dots, O_T$, compute $P(O \mid \lambda)$.</p>
+        <p>Solved by the <strong>Forward algorithm</strong>. Define the forward variable:</p>
+        $$\alpha_t(j) = P(O_1, O_2, \dots, O_t, \; q_t = S_j \mid \lambda)$$
+        <p>Recurrence:</p>
+        <ul>
+            <li><strong>Initialization:</strong> $\alpha_1(j) = \pi_j \cdot b_j(O_1)$</li>
+            <li><strong>Induction:</strong></li>
+        </ul>
+        $$\alpha_t(j) = \left[\sum_{i=1}^{N} \alpha_{t-1}(i) \cdot a_{ij}\right] \cdot b_j(O_t)$$
+        <ul>
+            <li><strong>Termination:</strong> $P(O \mid \lambda) = \sum_{i=1}^{N} \alpha_T(i)$</li>
+        </ul>
+        <p><strong>Complexity:</strong> $O(N^2 T)$ instead of naive $O(N^T)$, where $N$ = number of states, $T$ = sequence length.</p>
+
+        <div class="card-concept">
+            <strong>Forward algorithm intuition:</strong> $\alpha_t(j)$ is the probability of having seen observations $O_1, \dots, O_t$ and being in state $S_j$ at time $t$. We build this up incrementally: at each step, sum over all ways to arrive at $S_j$ from any state $S_i$ at $t-1$, weighted by the transition probability $a_{ij}$, then multiply by the emission probability $b_j(O_t)$.
+        </div>
+
+        <p><strong>Problem 2 &mdash; Decoding:</strong> Find the most likely state sequence $Q^* = \arg\max_Q P(Q \mid O, \lambda)$.</p>
+        <p>Solved by the <strong>Viterbi algorithm</strong>. Same structure as Forward, but replaces <em>sum</em> with <em>max</em>:</p>
+        $$\delta_t(j) = \max_{q_1, \dots, q_{t-1}} P(q_1, \dots, q_{t-1}, q_t = S_j, O_1, \dots, O_t \mid \lambda)$$
+        <p>Recurrence:</p>
+        $$\delta_t(j) = \max_{i} \left[\delta_{t-1}(i) \cdot a_{ij}\right] \cdot b_j(O_t)$$
+        <p>Maintain backpointers $\psi_t(j) = \arg\max_i [\delta_{t-1}(i) \cdot a_{ij}]$ to trace back the optimal state sequence.</p>
+
+        <p><strong>Problem 3 &mdash; Learning:</strong> Adjust $\lambda = (A, B, \pi)$ to maximize $P(O \mid \lambda)$.</p>
+        <p>Solved by the <strong>Baum-Welch algorithm</strong> (a special case of EM):</p>
+        <ol>
+            <li><strong>E-step:</strong> Compute expected state occupancies and transitions using Forward-Backward.</li>
+            <li><strong>M-step:</strong> Re-estimate $A$, $B$, $\pi$ from the expected counts.</li>
+            <li>Repeat until convergence (guaranteed to reach a local maximum of likelihood).</li>
+        </ol>
+
+
+        <!-- ============================================================ -->
+        <!-- Topic 9: Logic and Planning -->
+        <!-- ============================================================ -->
+        <h2 id="t9">9. Logic and Planning</h2>
+        <p>Formal reasoning systems and automated planning for deterministic environments.</p>
+
+        <h3>9.1 Propositional Logic</h3>
+        <p>Propositions are statements that are either true or false. Combined with logical connectives:</p>
+        <table>
+            <tr><th>Connective</th><th>Symbol</th><th>Meaning</th></tr>
+            <tr><td>Negation</td><td>$\neg P$</td><td>NOT $P$</td></tr>
+            <tr><td>Conjunction</td><td>$P \land Q$</td><td>$P$ AND $Q$</td></tr>
+            <tr><td>Disjunction</td><td>$P \lor Q$</td><td>$P$ OR $Q$</td></tr>
+            <tr><td>Implication</td><td>$P \Rightarrow Q$</td><td>If $P$ then $Q$</td></tr>
+            <tr><td>Biconditional</td><td>$P \Leftrightarrow Q$</td><td>$P$ if and only if $Q$</td></tr>
+        </table>
+        <p>Key inference rules:</p>
+        <ul>
+            <li><strong>Modus Ponens:</strong> From $P$ and $P \Rightarrow Q$, infer $Q$.</li>
+            <li><strong>Resolution:</strong> From $P \lor Q$ and $\neg P \lor R$, infer $Q \lor R$. Basis for efficient automated theorem proving.</li>
+        </ul>
+        <div class="card-def">
+            <strong>Resolution Refutation:</strong> A proof technique that establishes a statement $\alpha$ by showing that $\neg \alpha$ leads to a contradiction. Convert the knowledge base and $\neg \alpha$ to conjunctive normal form (CNF), then repeatedly apply the resolution rule &mdash; resolving complementary literals across clauses &mdash; until the empty clause (a contradiction) is derived. If the empty clause is produced, $\alpha$ is proven; if no new resolvents can be generated, $\alpha$ cannot be proven from the knowledge base.
+        </div>
+
+        <h3>9.2 First-Order Logic (FOL)</h3>
+        <p>Extends propositional logic with variables, predicates, functions, and quantifiers:</p>
+        <ul>
+            <li><strong>Predicates:</strong> $\text{OnTable}(x)$, $\text{Loves}(x, y)$ &mdash; express properties and relations.</li>
+            <li><strong>Universal quantifier:</strong> $\forall x \; P(x)$ &mdash; "for all $x$, $P(x)$ holds."</li>
+            <li><strong>Existential quantifier:</strong> $\exists x \; P(x)$ &mdash; "there exists an $x$ such that $P(x)$ holds."</li>
+        </ul>
+        <p><strong>Unification:</strong> Finding a substitution $\theta$ that makes two expressions identical. Example: Unify $\text{Knows}(John, x)$ with $\text{Knows}(y, Jane)$ yields $\theta = \{y/John, x/Jane\}$. Unification is essential for applying inference rules in FOL.</p>
+
+        <h3>9.3 Classical Planning (STRIPS)</h3>
+        <p>STRIPS (Stanford Research Institute Problem Solver) represents planning problems with:</p>
+        <ul>
+            <li><strong>States:</strong> Sets of ground atomic propositions (e.g., $\{\text{On}(A,B), \text{Clear}(A), \text{OnTable}(B)\}$).</li>
+            <li><strong>Actions:</strong> Defined by:
+                <ul>
+                    <li><em>Preconditions:</em> propositions that must be true for the action to apply.</li>
+                    <li><em>Effects:</em> propositions added (add list) and removed (delete list) after the action.</li>
+                </ul>
+            </li>
+            <li><strong>Goal:</strong> Find a sequence of actions transforming the initial state into a state satisfying the goal conditions.</li>
+        </ul>
+
+        <h3>9.4 Situation Calculus</h3>
+        <p>Represents dynamic worlds in first-order logic. A <em>situation</em> is a history of actions. Key elements:</p>
+        <ul>
+            <li><strong>Fluents:</strong> Predicates whose truth varies across situations, e.g., $\text{On}(A, B, s)$.</li>
+            <li><strong>Successor-state axioms:</strong> Describe how fluents change. Address the <strong>frame problem</strong> by specifying what <em>doesn't</em> change.</li>
+        </ul>
+
+        <h3>9.5 GraphPlan</h3>
+        <p>Builds a layered <strong>planning graph</strong> alternating between proposition layers and action layers:</p>
+        <ol>
+            <li>Start with the initial state propositions.</li>
+            <li>Add all applicable actions and their effects.</li>
+            <li>Identify <strong>mutex</strong> (mutual exclusion) relations between actions and propositions.</li>
+            <li>Expand until all goal propositions appear in the same layer without mutex conflicts.</li>
+            <li>Extract a valid plan by backward search through the graph.</li>
+        </ol>
+        <p>The planning graph provides a <strong>powerful heuristic</strong> for the reachability of goals and is the basis for the level-based heuristic used by many modern planners.</p>
+
+
+        <!-- ============================================================ -->
+        <!-- Topic 10: Planning Under Uncertainty -->
+        <!-- ============================================================ -->
+        <h2 id="t10">10. Planning Under Uncertainty</h2>
+        <p>Decision making when actions have uncertain outcomes. Markov Decision Processes provide the mathematical framework for sequential decision making under uncertainty.</p>
+
+        <h3>10.1 MDP Definition</h3>
+        <div class="card-def">
+            <strong>Markov Decision Process (MDP):</strong> A mathematical framework for sequential decision making under uncertainty, defined by the tuple $(S, A, T, R, \gamma)$: states, actions, a transition function $T(s, a, s') = P(s' \mid s, a)$, a reward function $R(s, a)$, and a discount factor $\gamma \in [0, 1)$. The Markov property ensures the next state depends only on the current state and action, not on history. The goal is to find a policy $\pi^*$ that maximizes expected cumulative discounted reward.
+        </div>
+        <p>An MDP is defined by the tuple $(S, A, T, R, \gamma)$:</p>
+        <ul>
+            <li>$S$: finite set of <strong>states</strong>.</li>
+            <li>$A$: finite set of <strong>actions</strong>.</li>
+            <li>$T(s, a, s') = P(s' \mid s, a)$: <strong>transition function</strong> &mdash; probability of reaching $s'$ from $s$ via action $a$.</li>
+            <li>$R(s, a)$: <strong>reward function</strong> &mdash; immediate reward for taking action $a$ in state $s$.</li>
+            <li>$\gamma \in [0, 1)$: <strong>discount factor</strong>.</li>
+        </ul>
+        <p>A <strong>policy</strong> $\pi: S \to A$ maps states to actions. The optimal policy $\pi^*$ maximizes expected cumulative discounted reward.</p>
+
+        <h3>10.2 Bellman Equation</h3>
+        <p>The optimal value function $V^*(s)$ satisfies the <strong>Bellman optimality equation</strong>:</p>
+        $$V^*(s) = \max_{a} \left[ R(s, a) + \gamma \sum_{s'} T(s, a, s') \, V^*(s') \right]$$
+        <p>The optimal policy is then:</p>
+        $$\pi^*(s) = \arg\max_{a} \left[ R(s, a) + \gamma \sum_{s'} T(s, a, s') \, V^*(s') \right]$$
+        <div class="card-concept">
+            <strong>Bellman equation as a fixed point:</strong> The Bellman optimality equation expresses $V^*(s)$ recursively in terms of itself: the value of a state equals the best immediate reward plus the discounted expected value of the next state. This self-consistency condition has a unique solution, and both value iteration (repeated application of the Bellman backup operator) and policy iteration converge to it. The discount factor $\gamma < 1$ makes the operator a contraction, guaranteeing convergence.
+        </div>
+
+        <h3>10.3 Value Iteration</h3>
+        <p>Iteratively update the value function until convergence:</p>
+        $$V_{k+1}(s) = \max_{a} \left[ R(s, a) + \gamma \sum_{s'} T(s, a, s') \, V_k(s') \right]$$
+        <ul>
+            <li>Initialize $V_0(s) = 0$ for all $s$ (or any values).</li>
+            <li>Repeat until $\max_s |V_{k+1}(s) - V_k(s)| < \epsilon$.</li>
+            <li><strong>Convergence:</strong> Guaranteed because the Bellman operator is a contraction mapping with factor $\gamma$.</li>
+            <li><strong>Complexity per iteration:</strong> $O(|S|^2 |A|)$.</li>
+        </ul>
+
+        <h3>10.4 Policy Iteration</h3>
+        <p>Alternates between two steps:</p>
+        <ol>
+            <li><strong>Policy Evaluation:</strong> Given policy $\pi$, solve for $V^\pi(s)$:
+                $$V^\pi(s) = R(s, \pi(s)) + \gamma \sum_{s'} T(s, \pi(s), s') \, V^\pi(s')$$
+                This is a system of $|S|$ linear equations in $|S|$ unknowns &mdash; solvable directly or iteratively.
+            </li>
+            <li><strong>Policy Improvement:</strong> Update the policy greedily:
+                $$\pi'(s) = \arg\max_{a} \left[ R(s, a) + \gamma \sum_{s'} T(s, a, s') \, V^\pi(s') \right]$$
+            </li>
+        </ol>
+        <p>Repeat until the policy no longer changes. Converges in a finite number of iterations (the number of deterministic policies is finite).</p>
+        <div class="card-concept">
+            <strong>Value iteration vs. policy iteration:</strong> Value iteration performs many small updates; convergence can be slow but each step is cheap. Policy iteration converges in fewer outer iterations, but each policy evaluation step can be expensive (solving a linear system). In practice, policy iteration often converges faster for small to moderate state spaces.
+        </div>
+
+        <h3>10.5 Discount Factor $\gamma$</h3>
+        <ul>
+            <li>$\gamma$ close to 0: agent is <strong>myopic</strong>, cares only about immediate reward.</li>
+            <li>$\gamma$ close to 1: agent is <strong>far-sighted</strong>, values future rewards almost as much as immediate ones.</li>
+            <li>$\gamma < 1$ ensures the infinite sum of rewards converges and prevents infinite utility in cyclic environments.</li>
+            <li>The effective planning horizon is roughly $\frac{1}{1 - \gamma}$ steps.</li>
+        </ul>
+
+        <h3>10.6 POMDPs: Partial Observability</h3>
+        <p>In a Partially Observable MDP, the agent cannot directly observe the state. Instead:</p>
+        <ul>
+            <li>The agent maintains a <strong>belief state</strong> $b(s)$ &mdash; a probability distribution over states.</li>
+            <li>After taking action $a$ and receiving observation $o$, the belief is updated via Bayes' rule.</li>
+            <li>The POMDP can be converted to a continuous-state MDP over belief space, but this is computationally much harder than a standard MDP.</li>
+        </ul>
+
+        <h3>10.7 Reinforcement Learning: Q-Learning</h3>
+        <p>When the transition function $T$ and reward function $R$ are <strong>unknown</strong>, the agent must learn from experience. Q-learning learns the optimal action-value function directly:</p>
+        $$Q(s, a) \leftarrow Q(s, a) + \alpha \left[ r + \gamma \max_{a'} Q(s', a') - Q(s, a) \right]$$
+        <p>where:</p>
+        <ul>
+            <li>$\alpha$: learning rate (step size).</li>
+            <li>$r$: observed reward after taking action $a$ in state $s$.</li>
+            <li>$s'$: resulting state.</li>
+            <li>$\gamma \max_{a'} Q(s', a')$: estimated optimal future value.</li>
+        </ul>
+        <div class="card-concept">
+            <strong>Q-learning properties:</strong> Q-learning is <em>model-free</em> (doesn't need $T$ or $R$) and <em>off-policy</em> (learns the optimal policy regardless of the exploration policy used, as long as all state-action pairs are visited infinitely often). The exploration-exploitation dilemma is typically managed with an $\epsilon$-greedy strategy.
+        </div>
+
+
+    </div>
+</article>
+
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+<script src="notes.js"></script>
+</body>
+</html>

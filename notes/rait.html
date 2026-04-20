@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CS 7638 Robotics: AI Techniques - Ethan Xu</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="notes.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap">
+    <script>
+    MathJax = { tex: { inlineMath: [['$','$']], displayMath: [['$$','$$']] }, svg: { fontCache: 'global' } };
+    </script>
+    <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+    <script>(function(){var t=localStorage.getItem('theme');if(t==='light')localStorage.removeItem('theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');})()</script>
+</head>
+<body class="note-page">
+
+<nav class="note-nav">
+    <a href="../index.html#notes" class="back-link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+        Back to Home
+    </a>
+    <div class="note-nav-right">
+        <span class="note-progress-label">Completed</span>
+        <button class="note-download" id="noteDownload" aria-label="Download as PDF" title="Download as PDF">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        </button>
+        <button class="note-theme-toggle" id="noteThemeToggle" aria-label="Toggle theme">
+            <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+    </div>
+</nav>
+
+<aside class="note-sidebar">
+    <div class="note-sidebar-inner">
+        <div class="note-sidebar-header">
+            <span class="note-badge">CS 7638</span>
+            <h2>Robotics: AI Techniques</h2>
+            <p>7 topics &middot; Georgia Tech</p>
+        </div>
+        <div class="toc-title">Contents</div>
+        <ol class="toc-list"></ol>
+    </div>
+</aside>
+
+<article class="note-content">
+    <header class="note-header">
+        <span class="note-badge">Georgia Tech &middot; CS 7638</span>
+        <h1>Robotics: AI Techniques</h1>
+        <p class="note-intro">Comprehensive course notes on programming self-driving cars. Covers probabilistic localization, Kalman and particle filters for state estimation, PID control, search-based planning, SLAM, and the kinematic bicycle model. Taught by Sebastian Thrun.</p>
+    </header>
+
+    <div class="toc">
+        <h2>Topics</h2>
+        <ol>
+            <li><a href="#t1">Localization (Histogram Filters)</a></li>
+            <li><a href="#t2">Kalman Filters</a></li>
+            <li><a href="#t3">Particle Filters</a></li>
+            <li><a href="#t4">PID Control</a></li>
+            <li><a href="#t5">Search</a></li>
+            <li><a href="#t6">SLAM</a></li>
+            <li><a href="#t7">Kinematic Bicycle Model</a></li>
+        </ol>
+    </div>
+
+    <div class="note-body">
+
+<!-- ============================================================ -->
+<h2 id="t1">1. Localization (Histogram Filters)</h2>
+<p>Localization answers the fundamental question: <em>where am I?</em> A robot has sensors and actuators, but it doesn't know its position in the world. GPS offers only 2&ndash;10 meters of accuracy &mdash; far too imprecise for autonomous driving, which requires centimeter-level precision. Histogram filters (also called discrete Bayes filters) solve this by maintaining a probability distribution over a discretized world.</p>
+<div class="card-def">
+    <strong>Histogram Filter (Discrete Bayes Filter):</strong> A localization algorithm that maintains a probability distribution over a discretized state space (grid of cells). It alternates between two steps: a measurement update that multiplies each cell's probability by the sensor likelihood and renormalizes (Bayes' rule), and a motion update that shifts and blurs the distribution via convolution (total probability theorem). Histogram filters can represent multimodal beliefs but scale exponentially with the number of state dimensions.
+</div>
+
+<h3>1.1 Belief Representation</h3>
+<p>We represent the world as a 1D array of grid cells. The robot's <strong>belief</strong> is a probability vector $p = [p_1, p_2, \ldots, p_n]$ where $p_i$ is the probability that the robot is in cell $i$. The probabilities must satisfy:</p>
+$$\sum_{i=1}^{n} p_i = 1$$
+<p>When the robot has no idea where it is, the belief is a <strong>uniform distribution</strong>: $p_i = 1/n$ for all $i$. This represents maximum confusion.</p>
+
+<h3>1.2 Measurement Update (Sense)</h3>
+<p>When the robot takes a sensor reading $Z$, it updates its belief using <strong>Bayes' Rule</strong>. Each cell is multiplied by the likelihood of that measurement given that the robot is in that cell:</p>
+$$\bar{p}_i = p_i \cdot P(Z \mid x_i)$$
+<p>where $P(Z \mid x_i)$ is the measurement model. In practice, we define two probabilities:</p>
+<ul>
+    <li>$p_{\text{hit}}$ &mdash; probability of the sensor correctly matching the cell's feature (e.g., 0.6)</li>
+    <li>$p_{\text{miss}}$ &mdash; probability of a false match (e.g., 0.2)</li>
+</ul>
+<p>After multiplying, the values no longer sum to 1, so we <strong>normalize</strong>:</p>
+$$p_i' = \frac{\bar{p}_i}{\sum_{j=1}^{n} \bar{p}_j}$$
+<p>The measurement update <em>sharpens</em> the distribution &mdash; it gains information and makes the belief more peaked around likely positions.</p>
+
+<h3>1.3 Motion Update (Move)</h3>
+<p>When the robot moves, we shift the entire belief distribution. For <strong>exact motion</strong> (moving exactly $U$ cells to the right in a cyclic world):</p>
+$$p_i' = p_{(i - U) \bmod n}$$
+<p>For <strong>inexact motion</strong>, the robot might undershoot or overshoot. We model this with three probabilities:</p>
+<ul>
+    <li>$p_{\text{exact}}$ &mdash; probability of moving exactly $U$ cells (e.g., 0.8)</li>
+    <li>$p_{\text{over}}$ &mdash; probability of moving $U+1$ cells (e.g., 0.1)</li>
+    <li>$p_{\text{under}}$ &mdash; probability of moving $U-1$ cells (e.g., 0.1)</li>
+</ul>
+<p>The motion update uses the <strong>total probability theorem</strong> (convolution):</p>
+$$p_i' = p_{\text{exact}} \cdot p_{(i-U) \bmod n} + p_{\text{over}} \cdot p_{(i-U-1) \bmod n} + p_{\text{under}} \cdot p_{(i-U+1) \bmod n}$$
+<p>Motion always <em>blurs</em> the distribution &mdash; it loses information and increases uncertainty. If we apply motion infinitely many times without sensing, the distribution converges to the <strong>uniform distribution</strong> (maximum entropy / limit distribution).</p>
+
+<h3>1.4 The Localization Cycle</h3>
+<p>A complete localizer alternates between <strong>sense</strong> (measurement update) and <strong>move</strong> (motion update):</p>
+<ol>
+    <li>Start with uniform prior $p$</li>
+    <li>Sense: $p \leftarrow \text{normalize}(p \cdot \text{likelihood})$ &mdash; sharpens belief</li>
+    <li>Move: $p \leftarrow \text{convolve}(p, \text{motion model})$ &mdash; blurs belief</li>
+    <li>Repeat steps 2&ndash;3</li>
+</ol>
+<p>Over time, the distribution converges to a sharp peak at the robot's true location, even starting from total uncertainty.</p>
+
+<h3>1.5 Python Implementation</h3>
+<pre><code class="language-python">def sense(p, Z):
+    q = []
+    for i in range(len(p)):
+        hit = (Z == world[i])
+        q.append(p[i] * (hit * pHit + (1 - hit) * pMiss))
+    s = sum(q)
+    for i in range(len(q)):
+        q[i] = q[i] / s
+    return q
+
+def move(p, U):
+    q = []
+    for i in range(len(p)):
+        s = pExact * p[(i - U) % len(p)]
+        s += pOvershoot * p[(i - U - 1) % len(p)]
+        s += pUndershoot * p[(i - U + 1) % len(p)]
+        q.append(s)
+    return q
+
+# Main loop
+for k in range(len(measurements)):
+    p = sense(p, measurements[k])
+    p = move(p, motions[k])</code></pre>
+
+<h3>1.6 Worked Example</h3>
+<p>Suppose we have 5 cells, world = [green, red, red, green, green], and the robot senses <strong>red</strong>. Starting from a uniform prior:</p>
+<pre><code class="language-python">p = [0.2, 0.2, 0.2, 0.2, 0.2]
+world = ['green', 'red', 'red', 'green', 'green']
+pHit, pMiss = 0.6, 0.2
+
+# After sensing 'red':
+# cells 1,2 are red  → multiply by 0.6 → 0.12
+# cells 0,3,4 are green → multiply by 0.2 → 0.04
+# Raw:  [0.04, 0.12, 0.12, 0.04, 0.04]  sum = 0.36
+# Normalized: [1/9, 1/3, 1/3, 1/9, 1/9]
+# ≈ [0.111, 0.333, 0.333, 0.111, 0.111]
+</code></pre>
+<div class="card-concept">
+<strong>Histogram filter convergence:</strong> After one measurement, the robot is 3x more likely to be at a red cell than a green cell. After a second sense + move cycle, the distribution sharpens further, converging on the true position.
+</div>
+
+<h3>1.7 Key Takeaways</h3>
+<div class="card-note">
+<ul>
+    <li>Measurement update uses <strong>Bayes' Rule</strong> (multiplication/product) &mdash; gains information</li>
+    <li>Motion update uses <strong>Total Probability</strong> (convolution/addition) &mdash; loses information</li>
+    <li>Histogram filters work on <strong>discrete</strong> state spaces and can represent <strong>multimodal</strong> distributions</li>
+    <li>Computational complexity scales <strong>exponentially</strong> with the number of dimensions &mdash; works well for 1D&ndash;3D, impractical for higher</li>
+</ul>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="t2">2. Kalman Filters</h2>
+<p>While histogram filters discretize the world, Kalman filters operate in <strong>continuous</strong> space using Gaussian distributions. They are the workhorse of state estimation in robotics, especially for tracking the position and velocity of objects from noisy sensor data.</p>
+<div class="card-def">
+    <strong>Kalman Filter:</strong> An optimal recursive state estimator for linear-Gaussian systems. It represents belief as a Gaussian $\mathcal{N}(\mu, \Sigma)$ and alternates between a prediction step (which adds motion uncertainty) and an update step (which fuses a new measurement via the Kalman gain $K$). The Kalman gain automatically balances trust between the prediction and the measurement based on their respective uncertainties. For a state of dimension $n$, each cycle runs in $O(n^3)$ time due to matrix operations.
+</div>
+<div class="card-caution">
+    <strong>Linearity and Gaussianity assumptions:</strong> The standard Kalman filter assumes that the state transition and measurement models are linear and that all noise is Gaussian. When these assumptions are violated (e.g., a robot turning in a circle, a radar bearing measurement), the filter can diverge or produce overconfident estimates. Use the Extended Kalman Filter (EKF) for mildly non-linear systems (linearizes via Jacobians) or the Unscented Kalman Filter (UKF) for stronger non-linearity.
+</div>
+
+<h3>2.1 Filter Comparison</h3>
+<table>
+    <thead><tr><th></th><th>State Space</th><th>Belief</th><th>Efficiency</th><th>In Robotics</th></tr></thead>
+    <tbody>
+        <tr><td><strong>Histogram</strong></td><td>Discrete</td><td>Multimodal</td><td>Exponential</td><td>Approximate</td></tr>
+        <tr><td><strong>Kalman</strong></td><td>Continuous</td><td>Unimodal</td><td>Quadratic</td><td>Approximate*</td></tr>
+        <tr><td><strong>Particle</strong></td><td>Continuous</td><td>Multimodal</td><td>Exponential</td><td>Approximate</td></tr>
+    </tbody>
+</table>
+<p><em>*Kalman filters are exact for linear systems with Gaussian noise; approximate for non-linear systems.</em></p>
+
+<h3>2.2 Gaussian Distribution</h3>
+<p>A 1D Gaussian is fully characterized by two parameters: the <strong>mean</strong> $\mu$ (location of the peak) and the <strong>variance</strong> $\sigma^2$ (spread/uncertainty):</p>
+$$f(x) = \frac{1}{\sqrt{2\pi\sigma^2}} \exp\!\left(-\frac{(x - \mu)^2}{2\sigma^2}\right)$$
+<p>Properties: unimodal, symmetric, and the area under the curve integrates to 1. A <strong>small</strong> $\sigma^2$ means high certainty (narrow, peaked), a <strong>large</strong> $\sigma^2$ means low certainty (wide, flat). For self-driving cars, we prefer the most certain (narrowest) Gaussian to minimize collision risk.</p>
+
+<h3>2.3 Measurement Update</h3>
+<p>When we multiply two Gaussians (prior belief $(\mu, \sigma^2)$ and measurement $(\nu, r^2)$), the result is a <strong>new Gaussian</strong> with:</p>
+$$\mu' = \frac{r^2 \mu + \sigma^2 \nu}{\sigma^2 + r^2} \qquad \sigma^{2\prime} = \frac{1}{\frac{1}{\sigma^2} + \frac{1}{r^2}}$$
+<p>The new mean $\mu'$ is a <strong>weighted average</strong> &mdash; it shifts toward whichever Gaussian is more certain (has smaller variance). The new variance $\sigma^{2\prime}$ is <strong>always smaller</strong> than either input variance. This is counterintuitive but makes sense: combining two sources of information always reduces uncertainty.</p>
+
+<h3>2.4 Motion Update (Prediction)</h3>
+<p>When the robot moves by $u$ with motion uncertainty $r^2$, the prediction step simply <strong>adds</strong> the means and variances:</p>
+$$\mu' = \mu + u \qquad \sigma^{2\prime} = \sigma^2 + r^2$$
+<p>This is much simpler than the measurement update. Motion always <em>increases</em> uncertainty because the robot's actuators are noisy.</p>
+
+<h3>2.5 Complete 1D Kalman Filter</h3>
+<pre><code class="language-python">def update(mean1, var1, mean2, var2):
+    new_mean = (var2 * mean1 + var1 * mean2) / (var1 + var2)
+    new_var = 1 / (1 / var1 + 1 / var2)
+    return [new_mean, new_var]
+
+def predict(mean1, var1, mean2, var2):
+    new_mean = mean1 + mean2
+    new_var = var1 + var2
+    return [new_mean, new_var]
+
+# Main Kalman filter loop
+mu, sig = 0, 10000  # initial: unknown position, huge uncertainty
+for n in range(len(measurements)):
+    [mu, sig] = update(mu, sig, measurements[n], measurement_sig)
+    [mu, sig] = predict(mu, sig, motion[n], motion_sig)</code></pre>
+
+<h3>2.6 Multi-Dimensional Kalman Filter</h3>
+<p>In higher dimensions (e.g., tracking position and velocity), the state is a vector $\mathbf{x}$ and the uncertainty is a covariance matrix $\mathbf{P}$. The filter uses matrix operations:</p>
+
+<p><strong>Prediction step:</strong></p>
+$$\mathbf{x}' = \mathbf{F}\mathbf{x} + \mathbf{u} \qquad \mathbf{P}' = \mathbf{F}\mathbf{P}\mathbf{F}^\top + \mathbf{Q}$$
+
+<p><strong>Update step:</strong></p>
+$$\mathbf{K} = \mathbf{P}'\mathbf{H}^\top (\mathbf{H}\mathbf{P}'\mathbf{H}^\top + \mathbf{R})^{-1}$$
+$$\mathbf{x}'' = \mathbf{x}' + \mathbf{K}(\mathbf{z} - \mathbf{H}\mathbf{x}')$$
+$$\mathbf{P}'' = (\mathbf{I} - \mathbf{K}\mathbf{H})\mathbf{P}'$$
+
+<p>Where $\mathbf{F}$ is the state transition matrix, $\mathbf{H}$ is the measurement matrix, $\mathbf{R}$ is the measurement noise covariance, $\mathbf{Q}$ is the process noise, and $\mathbf{K}$ is the <strong>Kalman gain</strong> that determines how much we trust the measurement versus the prediction.</p>
+
+<p>For a 2D state $\mathbf{x} = [x, \dot{x}]^\top$ (position and velocity) with position-only measurements:</p>
+$$\mathbf{F} = \begin{pmatrix} 1 & \Delta t \\ 0 & 1 \end{pmatrix} \qquad \mathbf{H} = \begin{pmatrix} 1 & 0 \end{pmatrix}$$
+<div class="card-concept">
+<strong>Kalman velocity inference:</strong> Even though we only <em>measure</em> position, the Kalman filter <em>infers</em> velocity from the pattern of position measurements over time. The off-diagonal elements of $\mathbf{P}$ capture the correlation between position and velocity.
+</div>
+
+<h3>2.7 Worked Example (1D)</h3>
+<p>Measurements: [5, 6, 7, 9, 10]. Motions: [1, 1, 2, 1, 1]. Initial: $\mu = 0$, $\sigma^2 = 10000$ (unknown), measurement noise $= 4$, motion noise $= 2$.</p>
+<pre><code class="language-python">measurements = [5., 6., 7., 9., 10.]
+motions = [1., 1., 2., 1., 1.]
+measurement_sig = 4.
+motion_sig = 2.
+mu = 0.
+sig = 10000.
+
+for n in range(len(measurements)):
+    # Measurement update
+    mu, sig = update(mu, sig, measurements[n], measurement_sig)
+    print(f"update:  mu={mu:.2f}, sig={sig:.2f}")
+    # Motion prediction
+    mu, sig = predict(mu, sig, motions[n], motion_sig)
+    print(f"predict: mu={mu:.2f}, sig={sig:.2f}")
+
+# Output:
+# update:  mu=5.00, sig=3.98   ← first measurement dominates (prior was huge)
+# predict: mu=6.00, sig=5.98   ← add motion, uncertainty grows
+# update:  mu=6.00, sig=2.40   ← second measurement sharpens
+# ...
+# Final:   mu=10.99, sig=4.01  ← tracks the true position accurately
+</code></pre>
+
+<h3>2.8 Summary</h3>
+<div class="card-note">
+<ul>
+    <li><strong>Measurement</strong> = Bayes rule = multiply Gaussians &rarr; variance <em>decreases</em> (more certain)</li>
+    <li><strong>Motion</strong> = total probability = add Gaussians &rarr; variance <em>increases</em> (less certain)</li>
+    <li>Kalman filters are <strong>exact for linear systems</strong> with Gaussian noise; approximate otherwise</li>
+    <li>The Kalman gain $\mathbf{K}$ automatically balances trust between prediction and measurement</li>
+</ul>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="t3">3. Particle Filters</h2>
+<p>Particle filters (also called Monte Carlo Localization) are the most <strong>flexible</strong> and <strong>easiest to program</strong> of the three filter families. They use a set of random samples (particles) to represent an arbitrary probability distribution over continuous state space.</p>
+<div class="card-def">
+    <strong>Particle Filter (Sequential Monte Carlo):</strong> A sample-based state estimation algorithm that represents the belief distribution as a set of $N$ weighted particles (hypothesized states). Each cycle consists of three steps: propagate every particle through the motion model with added noise, compute importance weights by evaluating measurement likelihood, and resample particles proportional to their weights. The resulting particle cloud approximates the true posterior distribution.
+</div>
+<div class="card-concept">
+    <strong>Non-linear, non-Gaussian capability:</strong> Unlike Kalman filters which are restricted to unimodal Gaussians and linear models, particle filters can represent arbitrary multimodal distributions and handle highly non-linear dynamics. This makes them ideal for the "kidnapped robot" problem (sudden teleportation), ambiguous landmarks (multiple plausible positions), and complex sensor models. The trade-off is computational cost: accuracy scales with $N$, and high-dimensional state spaces require exponentially many particles.
+</div>
+
+<h3>3.1 Why Particle Filters?</h3>
+<p>Histogram filters scale exponentially with state dimensions. Kalman filters are restricted to unimodal Gaussians (can't handle "kidnapped robot" or ambiguous landmarks). Particle filters handle <strong>continuous state</strong>, <strong>multimodal</strong> distributions, and <strong>non-linear</strong> dynamics. The trade-off: they are approximate.</p>
+
+<h3>3.2 The Robot Model</h3>
+<p>Each particle is a full robot state hypothesis $\mathbf{s}_i = (x_i, y_i, \theta_i)$ with:</p>
+<ul>
+    <li><code>set(x, y, theta)</code> &mdash; initialize position and heading</li>
+    <li><code>move(turn, distance)</code> &mdash; apply motion with Gaussian noise on turn and forward</li>
+    <li><code>sense()</code> &mdash; return distances to known landmarks</li>
+    <li><code>measurement_prob(Z)</code> &mdash; compute $P(Z \mid \mathbf{s}_i)$ using Gaussian distance model</li>
+</ul>
+<p>The measurement probability for particle $i$ is the product of Gaussian likelihoods over all landmarks:</p>
+$$w_i = \prod_{j=1}^{L} \frac{1}{\sqrt{2\pi\sigma_s^2}} \exp\!\left(-\frac{(d_{ij} - z_j)^2}{2\sigma_s^2}\right)$$
+<p>where $d_{ij}$ is the predicted distance from particle $i$ to landmark $j$, and $z_j$ is the actual measured distance.</p>
+
+<h3>3.3 The Particle Filter Algorithm</h3>
+<ol>
+    <li><strong>Initialization:</strong> Create $N$ particles (e.g., $N = 1000$) with random positions and headings uniformly distributed in the world:
+<pre><code class="language-python">p = []
+for i in range(N):
+    x = robot()
+    x.set_noise(0.05, 0.05, 5.0)
+    p.append(x)</code></pre>
+    </li>
+    <li><strong>Motion update:</strong> Apply the same control command (turn, distance) to every particle. Each particle independently adds noise, so they spread differently:
+<pre><code class="language-python">p2 = []
+for i in range(N):
+    p2.append(p[i].move(turn, distance))
+p = p2</code></pre>
+    </li>
+    <li><strong>Importance weights:</strong> Compare each particle's predicted measurements with the robot's actual measurements. Particles close to the true position will have high weights:
+<pre><code class="language-python">w = []
+for i in range(N):
+    w.append(p[i].measurement_prob(Z))</code></pre>
+    </li>
+    <li><strong>Resampling:</strong> Draw $N$ new particles with replacement, probability proportional to weights. High-weight particles get duplicated; low-weight particles disappear.</li>
+</ol>
+
+<h3>3.4 Resampling Wheel Algorithm</h3>
+<p>An efficient $O(N)$ resampling method that avoids sorting:</p>
+<pre><code class="language-python">p3 = []
+index = int(random.random() * N)
+beta = 0.0
+mw = max(w)
+for i in range(N):
+    beta += random.random() * 2.0 * mw
+    while beta > w[index]:
+        beta -= w[index]
+        index = (index + 1) % N
+    p3.append(p[index])
+p = p3</code></pre>
+<p>Think of the weights as sectors on a roulette wheel. We spin the wheel $N$ times, and larger sectors (higher weights) get selected more often. A particle with $\alpha_i = 0.1$ might never be sampled; one with $\alpha_i = 0.4$ will likely appear multiple times.</p>
+
+<h3>3.5 Complete Particle Filter</h3>
+<p>Putting it all together in a single loop:</p>
+<pre><code class="language-python">N = 1000
+myrobot = robot()
+myrobot.set_noise(0.05, 0.05, 5.0)
+
+# Initialize N random particles
+p = [robot() for _ in range(N)]
+for x in p:
+    x.set_noise(0.05, 0.05, 5.0)
+
+for t in range(50):  # 50 iterations
+    # Robot moves
+    myrobot = myrobot.move(0.1, 5.0)
+    Z = myrobot.sense()
+
+    # 1. Move all particles with same command
+    p = [x.move(0.1, 5.0) for x in p]
+
+    # 2. Compute importance weights
+    w = [x.measurement_prob(Z) for x in p]
+
+    # 3. Resample using resampling wheel
+    p3 = []
+    index = int(random.random() * N)
+    beta = 0.0
+    mw = max(w)
+    for i in range(N):
+        beta += random.random() * 2.0 * mw
+        while beta > w[index]:
+            beta -= w[index]
+            index = (index + 1) % N
+        p3.append(p[index])
+    p = p3
+
+    # Estimate position = average of particles
+    x_est = sum([x.x for x in p]) / N
+    y_est = sum([x.y for x in p]) / N
+</code></pre>
+<div class="card-example">
+<strong>Resampling probability:</strong> Given weights $w = [0.6, 1.2, 2.4, 0.6, 1.2]$ with sum $W = 6$, the normalized probability of selecting particle 3 is $\alpha_3 = 2.4/6 = 0.4$. The probability of <em>never</em> sampling particle 3 in 5 draws is $(1 - 0.4)^5 = 0.6^5 \approx 0.078$ &mdash; unlikely but possible.
+</div>
+
+<h3>3.6 Key Takeaways</h3>
+<div class="card-note">
+<ul>
+    <li>Particle filters are the most <strong>flexible</strong> filter: continuous, multimodal, non-linear</li>
+    <li>Accuracy improves with more particles ($N$), but so does computation</li>
+    <li>The resampling step is the key innovation: survival of the fittest for hypotheses</li>
+    <li>No matrix math needed &mdash; just simulation + sampling</li>
+</ul>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="t4">4. PID Control</h2>
+<p>Once we know where we are (localization) and where we want to go (planning), we need to actually steer the robot. PID control is the most widely used method for following a reference trajectory. The Google self-driving car uses a version of PID control.</p>
+<div class="card-def">
+    <strong>PID Controller:</strong> A feedback control law that computes a steering correction $\alpha = -\tau_p \cdot e - \tau_d \cdot \dot{e} - \tau_i \cdot \int e \, dt$, where $e$ is the crosstrack error (CTE). The Proportional term steers toward the reference path, the Derivative term damps oscillations by opposing the rate of change of error, and the Integral term eliminates steady-state bias by accumulating past error. The three gains $(\tau_p, \tau_d, \tau_i)$ are tuned via methods like Twiddle (coordinate descent).
+</div>
+<div class="card-caution">
+    <strong>Derivative term amplifies noise:</strong> The D-term computes the discrete difference $\text{CTE}_t - \text{CTE}_{t-1}$, which is essentially a high-pass filter. If the sensor readings are noisy, small random fluctuations between consecutive time steps produce large derivative values, causing erratic steering commands. In practice, apply a low-pass filter to the error signal before differentiating, or use a moving average of the last several derivative terms to smooth the response.
+</div>
+
+<h3>4.1 Path Smoothing</h3>
+<p>Search algorithms produce jagged paths with sharp 90-degree turns. Real vehicles need <strong>smooth paths</strong>. We optimize a path $\mathbf{y}$ to balance two criteria:</p>
+<ol>
+    <li><strong>Data fidelity:</strong> stay close to the original path $\mathbf{x}$: $\quad \min \sum_i (x_i - y_i)^2$</li>
+    <li><strong>Smoothness:</strong> minimize differences between consecutive points: $\quad \min \sum_i (y_i - y_{i+1})^2$</li>
+</ol>
+<p>The combined gradient descent update rule (with weights $\alpha$ for data and $\beta$ for smoothing):</p>
+$$y_i \leftarrow y_i + \alpha(x_i - y_i) + \beta(y_{i+1} + y_{i-1} - 2y_i)$$
+<p>Important special cases:</p>
+<ul>
+    <li>$\alpha$ only ($\beta = 0$): original path unchanged</li>
+    <li>$\beta$ only ($\alpha = 0$): all points collapse to a straight line (start/end fixed) or single point</li>
+    <li>Both $\alpha$ and $\beta$: a smooth curve that approximates the original path</li>
+</ul>
+<pre><code class="language-python">def smooth(path, weight_data=0.5, weight_smooth=0.1, tolerance=0.000001):
+    newpath = deepcopy(path)
+    change = tolerance
+    while change >= tolerance:
+        change = 0.0
+        for i in range(1, len(path) - 1):
+            for j in range(len(path[0])):
+                aux = newpath[i][j]
+                newpath[i][j] += weight_data * (path[i][j] - newpath[i][j]) + \
+                    weight_smooth * (newpath[i-1][j] + newpath[i+1][j] - 2.0 * newpath[i][j])
+                change += abs(aux - newpath[i][j])
+    return newpath</code></pre>
+
+<h3>4.2 Crosstrack Error (CTE)</h3>
+<p>The <strong>crosstrack error</strong> is the lateral distance from the robot's current position to the nearest point on the reference trajectory. All PID terms operate on the CTE. For a simple case where the reference is the x-axis, $\text{CTE} = y_{\text{robot}}$.</p>
+<p>For a segmented path, compute CTE relative to the current line segment $(P_1, P_2)$ using the dot product:</p>
+$$u = \frac{R_x \Delta x + R_y \Delta y}{\Delta x^2 + \Delta y^2} \qquad \text{CTE} = \frac{R_y \Delta x - R_x \Delta y}{\Delta x^2 + \Delta y^2}$$
+<p>where $R_x = x - x_1$, $R_y = y - y_1$, $\Delta x = x_2 - x_1$, $\Delta y = y_2 - y_1$. When $u > 1$, switch to the next segment.</p>
+
+<h3>4.3 P-Controller (Proportional)</h3>
+<p>The simplest controller steers proportionally to the error:</p>
+$$\alpha = -\tau_p \cdot \text{CTE}$$
+<p>The larger the error, the more we steer toward the trajectory. However, a P-controller always <strong>overshoots</strong> &mdash; when CTE reaches 0, the robot's wheels are straight but its heading still points toward the trajectory, so it crosses over and oscillates. This is called <strong>marginally stable</strong> behavior. Increasing $\tau_p$ makes oscillations faster but doesn't eliminate them.</p>
+
+<h3>4.4 PD-Controller (Proportional-Derivative)</h3>
+<p>Adding a <strong>derivative</strong> term that responds to the <em>rate of change</em> of the error:</p>
+$$\alpha = -\tau_p \cdot \text{CTE} - \tau_d \cdot \frac{d(\text{CTE})}{dt}$$
+<p>In discrete time: $\frac{d(\text{CTE})}{dt} \approx \text{CTE}_t - \text{CTE}_{t-1}$</p>
+<p>The D-term acts as a <strong>damper</strong>. As the robot approaches the trajectory (CTE decreasing), the derivative is negative, which counter-steers to prevent overshoot. The result: smooth, graceful convergence without oscillation.</p>
+<pre><code class="language-python">crosstrack_error = robot.y
+for i in range(n):
+    diff_cte = robot.y - crosstrack_error
+    crosstrack_error = robot.y
+    steer = -tau_p * crosstrack_error - tau_d * diff_cte
+    robot.move(steer, speed)</code></pre>
+
+<h3>4.5 PID-Controller (Proportional-Integral-Derivative)</h3>
+<p>The full PID controller adds an <strong>integral</strong> term that accumulates past error:</p>
+$$\alpha = -\tau_p \cdot \text{CTE} - \tau_d \cdot \frac{d(\text{CTE})}{dt} - \tau_i \cdot \sum_{t=0}^{T} \text{CTE}_t$$
+<p>The I-term compensates for <strong>systematic bias</strong> (e.g., a misaligned steering wheel that causes the robot to drift). Even a small constant bias will accumulate in the integral, eventually producing enough correction to eliminate the offset. Summary of each term's role:</p>
+<ul>
+    <li><strong>P</strong> &mdash; minimizes the current error (steers toward reference)</li>
+    <li><strong>I</strong> &mdash; compensates systematic drift/bias (eliminates steady-state error)</li>
+    <li><strong>D</strong> &mdash; avoids overshoot (dampens oscillation)</li>
+</ul>
+
+<h3>4.6 Twiddle (Parameter Optimization)</h3>
+<p>How do we find good values for $\tau_p, \tau_i, \tau_d$? <strong>Twiddle</strong> is a coordinate-descent algorithm:</p>
+<pre><code class="language-python">p = [0, 0, 0]      # initial parameters [tau_p, tau_d, tau_i]
+dp = [1, 1, 1]     # step sizes
+best_err = run(p)   # evaluate initial error
+
+while sum(dp) > tolerance:
+    for i in range(len(p)):
+        p[i] += dp[i]
+        err = run(p)
+        if err < best_err:
+            best_err = err
+            dp[i] *= 1.1       # success: increase step
+        else:
+            p[i] -= 2 * dp[i]  # try other direction
+            err = run(p)
+            if err < best_err:
+                best_err = err
+                dp[i] *= 1.1
+            else:
+                p[i] += dp[i]  # undo: neither direction helped
+                dp[i] *= 0.9   # shrink step</code></pre>
+
+<!-- ============================================================ -->
+<h2 id="t5">5. Search</h2>
+<p>Search algorithms find the minimum-cost path from a start location to a goal in a discretized world. This is the "planning" component of the self-driving car pipeline.</p>
+<div class="card-def">
+    <strong>A* for Robotics Path Planning:</strong> A* finds the minimum-cost path on a grid by expanding cells in order of $f(n) = g(n) + h(n)$, where $g(n)$ is the accumulated cost from the start and $h(n)$ is an admissible heuristic (typically Manhattan or Euclidean distance to the goal). In robotics, the grid encodes free space (0) and obstacles (1). A* expands far fewer cells than uniform-cost search because the heuristic biases expansion toward the goal, while admissibility guarantees the returned path is optimal.
+</div>
+
+<h3>5.1 Problem Formulation</h3>
+<p>Given: a <strong>grid</strong> (0 = free, 1 = obstacle), a <strong>start</strong> position, a <strong>goal</strong> position, and a <strong>cost</strong> function. The robot can move up, down, left, or right. Goal: find the minimum-cost sequence of actions from start to goal.</p>
+<pre><code class="language-python">grid = [[0, 0, 1, 0, 0, 0],
+        [0, 0, 1, 0, 0, 0],
+        [0, 0, 0, 0, 1, 0],
+        [0, 0, 1, 1, 1, 0],
+        [0, 0, 0, 0, 1, 0]]
+init = [0, 0]
+goal = [len(grid)-1, len(grid[0])-1]
+delta = [[-1,0], [0,-1], [1,0], [0,1]]  # up, left, down, right</code></pre>
+
+<h3>5.2 Breadth-First Search / Uniform-Cost Search</h3>
+<p>Maintain an <strong>open list</strong> of nodes to explore (sorted by $g$-value = cost from start) and a <strong>closed list</strong> of already-expanded nodes. Algorithm:</p>
+<ol>
+    <li>Put the start node on the open list with $g = 0$</li>
+    <li>Pop the node with the smallest $g$-value</li>
+    <li>If it's the goal, return the path</li>
+    <li>Otherwise, expand all valid neighbors: in-bounds, not an obstacle, not already closed. Set their $g$-value to current $g$ + step cost</li>
+    <li>If the open list is empty, return "fail" (no path exists)</li>
+</ol>
+<p>When all action costs are equal, this is BFS. When costs differ (e.g., left turn costs 10, right turn costs 1), use Uniform-Cost Search &mdash; always expanding the cheapest node first guarantees optimality.</p>
+
+<h3>5.3 A* Search</h3>
+<p>A* improves on UCS by using a <strong>heuristic</strong> $h(n)$ that estimates the remaining cost to the goal. Instead of expanding by $g(n)$ alone, expand by:</p>
+$$f(n) = g(n) + h(n)$$
+<p>A* expands far fewer nodes than UCS because the heuristic guides search toward the goal. For the heuristic to guarantee optimality, it must be <strong>admissible</strong> (never overestimate the true cost). Common choice: Manhattan distance or Euclidean distance to goal.</p>
+
+<h3>5.4 Policy / Path Extraction</h3>
+<p>To reconstruct the optimal <em>path</em>, store the <strong>action</strong> taken to reach each cell. After the search completes, backtrack from the goal to the start using inverse actions. This produces a <strong>policy</strong> &mdash; a grid showing the optimal direction ($\uparrow \downarrow \leftarrow \rightarrow$) to move from every cell.</p>
+
+<h3>5.5 A* Implementation</h3>
+<pre><code class="language-python">def search(grid, init, goal, cost, heuristic):
+    closed = [[0] * len(grid[0]) for _ in range(len(grid))]
+    closed[init[0]][init[1]] = 1
+    action = [[-1] * len(grid[0]) for _ in range(len(grid))]
+
+    x, y = init
+    g = 0
+    h = heuristic[x][y]
+    f = g + h
+    open_list = [[f, g, x, y]]
+
+    while len(open_list) > 0:
+        open_list.sort(reverse=True)
+        next_node = open_list.pop()
+        f, g, x, y = next_node
+
+        if [x, y] == goal:
+            return g  # optimal path cost
+
+        for i, (dx, dy) in enumerate(delta):
+            x2, y2 = x + dx, y + dy
+            if 0 <= x2 < len(grid) and 0 <= y2 < len(grid[0]):
+                if closed[x2][y2] == 0 and grid[x2][y2] == 0:
+                    g2 = g + cost
+                    h2 = heuristic[x2][y2]
+                    f2 = g2 + h2
+                    open_list.append([f2, g2, x2, y2])
+                    closed[x2][y2] = 1
+                    action[x2][y2] = i
+    return -1  # no path found
+</code></pre>
+<div class="card-note">
+<strong>Heuristic choice:</strong> For grid worlds, the Manhattan distance $h(n) = |x_n - x_g| + |y_n - y_g|$ is admissible (never overestimates) when the robot moves in 4 directions. This guarantees A* finds the optimal path while expanding far fewer nodes than UCS.
+</div>
+
+<h3>5.6 Dynamic Programming</h3>
+<p>Unlike A* which plans from a single start, dynamic programming computes the optimal value $V(s)$ for <strong>every</strong> state, creating a <strong>universal plan</strong>:</p>
+$$V(\text{goal}) = 0 \qquad V(s) = \min_{a} \left[ \text{cost}(s, a, s') + V(s') \right]$$
+<p>Work backward from the goal. The result is a value function over the entire grid and a policy that tells the robot the optimal action from <em>any</em> starting position.</p>
+
+<table>
+    <thead><tr><th></th><th>Continuous</th><th>Optimal</th><th>Universal</th><th>Local</th></tr></thead>
+    <tbody>
+        <tr><td><strong>BFS / A*</strong></td><td>No</td><td>Yes</td><td>No</td><td>No</td></tr>
+        <tr><td><strong>Dynamic Prog.</strong></td><td>No</td><td>Yes</td><td>Yes</td><td>No</td></tr>
+        <tr><td><strong>Smoothing</strong></td><td>Yes</td><td>No</td><td>No</td><td>Yes</td></tr>
+    </tbody>
+</table>
+
+<!-- ============================================================ -->
+<h2 id="t6">6. SLAM (Simultaneous Localization and Mapping)</h2>
+<p>In all previous topics, the robot was given a map. <strong>SLAM</strong> addresses the chicken-and-egg problem: the robot needs a map to localize, but needs to know its position to build a map. SLAM solves both simultaneously.</p>
+<div class="card-def">
+    <strong>SLAM (Simultaneous Localization and Mapping):</strong> The problem of jointly estimating a robot's trajectory and the positions of landmarks in an unknown environment from noisy motion and sensor data. Graph SLAM formulates this as a sparse linear system $\boldsymbol{\mu} = \Omega^{-1} \xi$, where the information matrix $\Omega$ and vector $\xi$ encode motion constraints (between consecutive poses) and measurement constraints (between poses and landmarks). Solving the system yields the maximum-likelihood estimate of all poses and landmark positions simultaneously.
+</div>
+<div class="card-concept">
+    <strong>The chicken-and-egg problem:</strong> Localization requires a map (to match sensor readings against known landmarks), but building an accurate map requires knowing the robot's position (to place observations correctly in a global frame). SLAM breaks this circular dependency by optimizing both quantities jointly. The key insight is that re-observing a previously seen landmark (loop closure) creates a constraint linking a current pose to an old landmark, propagating corrections backward through the entire trajectory and snapping the map into global consistency.
+</div>
+
+<h3>6.1 Why SLAM is Hard</h3>
+<p>When a robot drives through an unknown environment, its motion is uncertain. Each step accumulates drift error. A naive mapping approach (just recording sensor readings at estimated positions) produces a <strong>distorted map</strong> because the position estimates drift over time. SLAM corrects this by jointly optimizing all pose estimates and landmark positions.</p>
+
+<h3>6.2 Graph SLAM</h3>
+<p>Graph SLAM encodes the problem as a system of <strong>linear constraints</strong> using a matrix $\Omega$ (information matrix) and a vector $\xi$ (information vector). The system has entries for every robot pose $x_0, x_1, \ldots, x_t$ and every landmark $L_0, L_1, \ldots, L_k$.</p>
+
+<h3>6.3 Adding Constraints</h3>
+<p><strong>Motion constraint:</strong> If the robot moves from $x_0$ to $x_1$ with observed displacement $d$, the constraint $x_1 = x_0 + d$ (or equivalently $x_0 - x_1 = -d$) is encoded as:</p>
+$$\Omega: \quad \begin{pmatrix} x_0 & x_1 \\ +1 & -1 \\ -1 & +1 \end{pmatrix} \qquad \xi: \quad \begin{pmatrix} -d \\ +d \end{pmatrix}$$
+<p>These values are <em>added</em> to the existing $\Omega$ and $\xi$. Each constraint adds $+1$ on the diagonal and $-1$ on the off-diagonal for the two variables involved.</p>
+
+<p><strong>Measurement constraint:</strong> If from pose $x_t$ the robot observes landmark $L_j$ at relative position $z$, the constraint $L_j = x_t + z$ is encoded identically, but between the pose row/column and the landmark row/column.</p>
+
+<p><strong>Initial position constraint:</strong> Fix $x_0$ at the origin by adding a large value (e.g., $1$) at $\Omega[x_0, x_0]$ and setting $\xi[x_0]$ to the initial position.</p>
+
+<h3>6.4 Solving the System</h3>
+<p>After all constraints are accumulated:</p>
+$$\boldsymbol{\mu} = \Omega^{-1} \xi$$
+<p>The solution vector $\boldsymbol{\mu}$ contains the best estimates for all robot poses and all landmark positions simultaneously. This is a linear solve &mdash; matrix inversion gives the maximum likelihood estimate under Gaussian noise.</p>
+
+<h3>6.5 Confidence and Strength</h3>
+<p>Multiply each constraint by $1/\sigma^2$ to weight confident measurements more heavily. Precise sensors (small $\sigma$) produce strong constraints; noisy sensors produce weak ones.</p>
+
+<h3>6.6 Implementation Example</h3>
+<p>A simplified 1D Graph SLAM with 3 poses and 1 landmark:</p>
+<pre><code class="language-python">import numpy as np
+
+# 3 poses (x0, x1, x2) + 1 landmark (L0) = 4 variables
+dim = 4
+omega = np.zeros((dim, dim))  # information matrix
+xi = np.zeros(dim)            # information vector
+
+# Initial position: x0 = 0 (high confidence)
+omega[0][0] += 1.0
+xi[0] += 0.0
+
+# Motion: x0 -> x1, displacement = 5
+omega[0][0] += 1; omega[0][1] -= 1
+omega[1][0] -= 1; omega[1][1] += 1
+xi[0] += -5;      xi[1] += 5
+
+# Motion: x1 -> x2, displacement = 3
+omega[1][1] += 1; omega[1][2] -= 1
+omega[2][1] -= 1; omega[2][2] += 1
+xi[1] += -3;      xi[2] += 3
+
+# Measurement: from x1, see L0 at relative position 2
+omega[1][1] += 1; omega[1][3] -= 1
+omega[3][1] -= 1; omega[3][3] += 1
+xi[1] += -2;      xi[3] += 2
+
+# Solve: mu = omega^(-1) * xi
+mu = np.linalg.solve(omega, xi)
+print(f"x0={mu[0]:.1f}, x1={mu[1]:.1f}, x2={mu[2]:.1f}, L0={mu[3]:.1f}")
+# Output: x0=0.0, x1=5.0, x2=8.0, L0=7.0
+</code></pre>
+<div class="card-concept">
+<strong>SLAM intuition:</strong> Each constraint acts like a rubber band connecting two variables. The matrix solve finds the configuration that minimizes the total tension in all rubber bands simultaneously. When the robot re-observes a landmark (loop closure), it adds a new rubber band that pulls all intermediate poses into consistency.
+</div>
+
+<h3>6.7 Loop Closure</h3>
+<p>The most powerful aspect of SLAM: when the robot <strong>revisits a location</strong> and re-observes a previously seen landmark, it creates a constraint linking a late pose to an early landmark. This one constraint propagates through the entire system during the solve, <strong>correcting accumulated drift</strong> across all intermediate poses and snapping the map into global consistency.</p>
+
+<h3>6.8 Counting Constraints</h3>
+<p>For a trajectory with $T$ poses and $M$ landmark measurements:</p>
+<ul>
+    <li>1 initial location constraint</li>
+    <li>$T - 1$ relative motion constraints (between consecutive poses)</li>
+    <li>$M$ relative measurement constraints (pose to landmark)</li>
+    <li>Total: $1 + (T-1) + M = T + M$ constraints</li>
+</ul>
+
+<!-- ============================================================ -->
+<h2 id="t7">7. Kinematic Bicycle Model</h2>
+<p>The kinematic bicycle model is a simplified motion model that approximates a four-wheeled car as a two-wheeled vehicle. It is used throughout this course for simulating robot motion in PID control and SLAM.</p>
+<div class="card-concept">
+    <strong>Circular motion estimation with EKF:</strong> In the Runaway Robot project, a target robot drives in a circle with unknown but constant steering angle and distance per step. An Extended Kalman Filter (EKF) estimates the target's state (position, heading, turning radius) from noisy position-only observations. The non-linearity of circular motion (trigonometric state transitions) requires linearization via the Jacobian at each step. Once the EKF converges on the turning parameters, the chaser predicts future positions along the circular arc and plans an intercept course.
+</div>
+
+<h3>7.1 Model Setup</h3>
+<p>The robot has two controls:</p>
+<ul>
+    <li><strong>Steering angle</strong> $\alpha$ &mdash; angle between the front wheel and the vehicle's heading (positive = left turn)</li>
+    <li><strong>Forward distance</strong> $d$ &mdash; distance traveled by the rear axle</li>
+</ul>
+<p>The robot's state is its <strong>pose</strong> $(x, y, \theta)$ &mdash; position and heading angle. The rear axle is the reference point, and the wheelbase length is $L$ (distance between front and rear axles).</p>
+
+<h3>7.2 Straight-Line Motion ($\alpha = 0$)</h3>
+<p>When the steering angle is zero, the robot moves in a straight line along its heading:</p>
+$$x' = x + d \cos\theta \qquad y' = y + d \sin\theta \qquad \theta' = \theta$$
+
+<h3>7.3 Circular-Arc Motion ($\alpha \neq 0$)</h3>
+<p>When the steering angle is non-zero, the robot follows a circular arc. The derivation has four steps:</p>
+
+<p><strong>Step 1 &mdash; Turning radius:</strong> From the right triangle formed by the wheelbase and the center of the turning circle:</p>
+$$R = \frac{L}{\tan(\alpha)}$$
+<p>Increasing the steering angle $\alpha$ decreases $R$, producing a tighter turn.</p>
+
+<p><strong>Step 2 &mdash; Center of the turning circle:</strong> The center is perpendicular to the heading, at distance $R$:</p>
+$$c_x = x - \sin(\theta) \cdot R \qquad c_y = y + \cos(\theta) \cdot R$$
+
+<p><strong>Step 3 &mdash; Turning angle:</strong> The arc length equals $d$, so the central angle is:</p>
+$$\beta = \frac{d}{R}$$
+<p>A full revolution ($\beta = 2\pi$) requires traveling a distance of $2\pi R$.</p>
+
+<p><strong>Step 4 &mdash; New pose from center offset:</strong></p>
+$$x' = c_x + \sin(\theta + \beta) \cdot R$$
+$$y' = c_y - \cos(\theta + \beta) \cdot R$$
+$$\theta' = (\theta + \beta) \bmod 2\pi$$
+
+<h3>7.4 Implementation in Python</h3>
+<pre><code class="language-python">def move(self, steering, distance):
+    turn = tan(steering) * distance / self.length
+    if abs(turn) < tolerance:
+        # approximate by straight-line motion
+        self.x += distance * cos(self.orientation)
+        self.y += distance * sin(self.orientation)
+        self.orientation = (self.orientation + turn) % (2.0 * pi)
+    else:
+        # approximate bicycle model for motion
+        radius = distance / turn
+        cx = self.x - sin(self.orientation) * radius
+        cy = self.y + cos(self.orientation) * radius
+        self.orientation = (self.orientation + turn) % (2.0 * pi)
+        self.x = cx + sin(self.orientation) * radius
+        self.y = cy - cos(self.orientation) * radius</code></pre>
+
+<h3>7.5 Compound Motion Insight</h3>
+<p>When both steering angle and forward distance are applied, the rear wheel traces a smaller circle and the front wheel traces a larger circle with the same center. With a fixed non-zero steering angle, the robot drives in a circle. This is why the bicycle model produces smooth, continuous turning behavior used throughout the course.</p>
+
+<h3>7.6 Worked Example</h3>
+<p>Given: pose $(x, y, \theta) = (2, 2, \pi/3)$, steering angle $\alpha = 0.5$ rad, distance $d = 10$, wheelbase $L = 0.5$.</p>
+<pre><code class="language-python">from math import tan, sin, cos, pi
+
+x, y, theta = 2.0, 2.0, pi / 3
+alpha, d, L = 0.5, 10.0, 0.5
+
+# Step 1: turning radius
+R = L / tan(alpha)          # R = 0.5 / 0.5463 ≈ 0.9153
+
+# Step 2: center of circle
+cx = x - sin(theta) * R     # cx ≈ 2 - 0.866 * 0.915 ≈ 1.207
+cy = y + cos(theta) * R     # cy ≈ 2 + 0.5 * 0.915 ≈ 2.458
+
+# Step 3: turning angle
+beta = d / R                # beta ≈ 10.925 rad
+
+# Step 4: new pose
+theta_new = (theta + beta) % (2 * pi)
+x_new = cx + sin(theta_new) * R
+y_new = cy - cos(theta_new) * R
+
+print(f"New pose: ({x_new:.2f}, {y_new:.2f}, {theta_new:.2f})")
+</code></pre>
+
+<!-- ============================================================ -->
+<h2 id="summary">Summary: How It All Fits Together</h2>
+<p>A complete self-driving car system chains these modules together:</p>
+<div class="card-concept">
+<ol>
+    <li><strong>Localization</strong> (Histogram / Particle Filters) &mdash; determine where we are</li>
+    <li><strong>Tracking</strong> (Kalman Filters) &mdash; estimate where other vehicles are and predict where they'll be</li>
+    <li><strong>Planning</strong> (A* / Dynamic Programming) &mdash; find a path to the goal</li>
+    <li><strong>Smoothing</strong> &mdash; convert the discrete plan into a smooth, drivable trajectory</li>
+    <li><strong>Control</strong> (PID) &mdash; steer the car along the smooth path</li>
+    <li><strong>SLAM</strong> &mdash; build and refine the map while driving</li>
+</ol>
+<p>The <strong>kinematic bicycle model</strong> is the physics engine underlying steps 1&ndash;5, simulating how steering commands translate to vehicle motion.</p>
+</div>
+
+    </div>
+</article>
+
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+<script src="notes.js"></script>
+</body>
+</html>

@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ethan (Yuxuan) Xu &mdash; ML Researcher &amp; Data Scientist</title>
+    <meta name="description" content="Ethan (Yuxuan) Xu - Computer Science M.Sc. at Georgia Tech specializing in Machine Learning. Portfolio, projects, and course notes on AI, robotics, and game AI.">
+    <meta name="keywords" content="Ethan Xu, Yuxuan Xu, Georgia Tech, OMSCS, Machine Learning, Computer Vision, Game AI, Data Science, portfolio">
+    <meta name="author" content="Ethan (Yuxuan) Xu">
+    <meta property="og:title" content="Ethan (Yuxuan) Xu &mdash; ML Researcher &amp; Data Scientist">
+    <meta property="og:description" content="Computer Science M.Sc. at Georgia Tech. Portfolio featuring projects in ML, computer vision, and game AI.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://xyx-ethan.github.io/">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Ethan (Yuxuan) Xu &mdash; Portfolio">
+    <meta name="twitter:description" content="Computer Science M.Sc. at Georgia Tech. ML, Computer Vision, Game AI.">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%232a3a4a'/%3E%3Cstop offset='100%25' stop-color='%231a2636'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx='50' cy='50' r='50' fill='url(%23g)'/%3E%3Ctext x='50' y='56' text-anchor='middle' dominant-baseline='middle' font-family='Inter,sans-serif' font-size='34' font-weight='700' fill='%23d0d8e4'%3EXY%3C/text%3E%3C/svg%3E">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script>(function(){var t=localStorage.getItem('theme');if(t==='light')localStorage.removeItem('theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');})()</script>
+</head>
+<body>
+
+<!-- Mobile top bar -->
+<div class="mobile-bar" id="mobileBar">
+    <span class="mobile-name">Ethan Xu</span>
+    <div class="mobile-right">
+        <button class="mobile-theme-toggle" id="mobileThemeToggle" aria-label="Toggle theme">
+            <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+        <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu">
+            <span></span><span></span><span></span>
+        </button>
+    </div>
+</div>
+
+<!-- Sidebar -->
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-inner">
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme" title="Toggle theme">
+            <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+
+        <div class="profile">
+            <div class="avatar">XY</div>
+            <h1>Ethan (Yuxuan) Xu</h1>
+            <p class="tagline">M.Sc. Computer Science</p>
+            <p class="tagline-sub">Georgia Institute of Technology</p>
+        </div>
+
+        <nav>
+            <a href="#about" class="active">
+                About
+            </a>
+            <a href="#education">
+                Education
+            </a>
+            <a href="#skills">
+                Skills
+            </a>
+            <a href="#experience">
+                Experience
+            </a>
+            <a href="#projects">
+                Benchmarks
+            </a>
+            <a href="#notes">
+                Coursework
+            </a>
+        </nav>
+
+        <div class="contact-info">
+            <a href="mailto:yxu923@gatech.edu" class="contact-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                yxu923@gatech.edu
+            </a>
+            <div class="contact-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                647-335-8666
+            </div>
+            <div class="contact-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                Thornhill, ON
+            </div>
+            <a href="https://github.com/xyx-ethan" class="contact-item" target="_blank" rel="noopener">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>
+                GitHub
+            </a>
+            <a href="https://www.linkedin.com/in/yuxuan-xu-9a3699403/" class="contact-item" target="_blank" rel="noopener">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+                LinkedIn
+            </a>
+            <a href="CV.pdf" download class="cv-button">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Download CV
+            </a>
+        </div>
+    </div>
+</aside>
+
+<!-- Overlay for mobile menu -->
+<div class="overlay" id="overlay"></div>
+
+<!-- Scroll to top button -->
+<button class="scroll-top" id="scrollTop" aria-label="Scroll to top" title="Back to top">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"/></svg>
+</button>
+
+<!-- Main Content -->
+<main>
+
+    <!-- About -->
+    <section id="about">
+        <h2>About</h2>
+        <p class="about-text">
+            Computer Science graduate student at <strong>Georgia Tech</strong> specializing in Artificial Intelligence.
+            Background in mathematics and philosophy from the <strong>University of Toronto</strong>, with professional
+            experience in data science, analytics, and education. Interested in applied ML,
+            computational neuroscience, and cognitive science.
+        </p>
+    </section>
+
+    <!-- Education -->
+    <section id="education">
+        <h2>Education</h2>
+
+        <div class="education-list">
+            <div class="card">
+                <div class="card-header">
+                    <div>
+                        <h3>Georgia Institute of Technology</h3>
+                        <p class="subtitle">College of Computing &middot; Atlanta, GA</p>
+                    </div>
+                    <span class="date-badge">Sep 2025 &ndash; Jun 2027</span>
+                </div>
+                <div class="card-body">
+                    <p class="degree">M.Sc. in Computer Science &middot; Artificial Intelligence Specialization</p>
+                    <span class="gpa-badge">GPA: 4.0</span>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div>
+                        <h3>University of Colorado Boulder</h3>
+                        <p class="subtitle">College of Engineering &amp; Applied Science &middot; Boulder, CO</p>
+                    </div>
+                    <span class="date-badge">Jun 2024 &ndash; Aug 2024</span>
+                </div>
+                <div class="card-body">
+                    <p class="degree">Graduate-Level Coursework (Non-Degree)</p>
+                    <p class="detail">Algorithms, Linear Programming, Advanced Data Structure, Quantum Computing</p>
+                    <span class="gpa-badge">GPA: 4.0</span>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div>
+                        <h3>University of Toronto</h3>
+                        <p class="subtitle">St. George Campus &middot; New College &middot; Faculty of Arts and Science</p>
+                    </div>
+                    <span class="date-badge">Sep 2019 &ndash; Jun 2023</span>
+                </div>
+                <div class="card-body">
+                    <p class="degree">H.B.A &middot; Philosophical Logic and Foundations of Mathematics</p>
+                    <p class="detail">Philosophy Specialist | Mathematics Major</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Skills -->
+    <section id="skills">
+        <h2>Skills</h2>
+
+        <div class="skills-grid">
+            <div class="card skill-card">
+                <h3>Programming Languages</h3>
+                <div class="tags">
+                    <span class="tag primary" data-level="expert">Python</span>
+                    <span class="tag" data-level="proficient">R</span>
+                    <span class="tag" data-level="proficient">MATLAB</span>
+                    <span class="tag" data-level="proficient">SQL</span>
+                    <span class="tag" data-level="proficient">C</span>
+                    <span class="tag" data-level="proficient">JavaScript</span>
+                    <span class="tag" data-level="proficient">HTML5</span>
+                    <span class="tag" data-level="proficient">CSS3</span>
+                    <span class="tag" data-level="proficient">LaTeX</span>
+                    <span class="tag" data-level="familiar">Java</span>
+                    <span class="tag" data-level="familiar">TypeScript</span>
+                    <span class="tag" data-level="familiar">Bash</span>
+                </div>
+            </div>
+
+            <div class="card skill-card">
+                <h3>ML / Data Science</h3>
+                <div class="tags">
+                    <span class="tag primary" data-level="expert">PyTorch</span>
+                    <span class="tag primary" data-level="expert">TensorFlow / Keras</span>
+                    <span class="tag primary" data-level="expert">Scikit-learn</span>
+                    <span class="tag" data-level="expert">NumPy</span>
+                    <span class="tag" data-level="expert">Pandas</span>
+                    <span class="tag" data-level="proficient">SciPy</span>
+                    <span class="tag" data-level="proficient">Matplotlib</span>
+                </div>
+            </div>
+
+            <div class="card skill-card">
+                <h3>Engineering &amp; Tools</h3>
+                <div class="tags">
+                    <span class="tag" data-level="expert">Git</span>
+                    <span class="tag" data-level="expert">GitHub</span>
+                    <span class="tag" data-level="expert">Jupyter Notebook</span>
+                    <span class="tag" data-level="proficient">Linux</span>
+                    <span class="tag" data-level="proficient">VS Code</span>
+                    <span class="tag" data-level="proficient">Excel</span>
+                    <span class="tag" data-level="familiar">Docker</span>
+                </div>
+            </div>
+
+            <div class="card skill-card">
+                <h3>Research</h3>
+                <div class="tags">
+                    <span class="tag primary" data-level="expert">Overleaf</span>
+                    <span class="tag primary" data-level="expert">Zotero</span>
+                    <span class="tag" data-level="expert">Google Scholar</span>
+                    <span class="tag" data-level="proficient">arXiv</span>
+                    <span class="tag" data-level="proficient">Notion</span>
+                    <span class="tag" data-level="proficient">Obsidian</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="skill-legend">
+            <span class="legend-item"><span class="legend-dot expert"></span>Expert</span>
+            <span class="legend-item"><span class="legend-dot proficient"></span>Proficient</span>
+            <span class="legend-item"><span class="legend-dot familiar"></span>Familiar</span>
+        </div>
+
+        <div class="card" style="margin-top: 14px;">
+            <h3>Certifications</h3>
+            <div class="cert-list">
+                <a href="https://www.coursera.org/account/accomplishments/specialization/certificate/BX9KXUVFARVV" class="cert" target="_blank" rel="noopener">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>
+                    Google Advanced Data Analytics
+                    <span class="cert-arrow">&rarr;</span>
+                </a>
+                <a href="https://www.coursera.org/account/accomplishments/specialization/certificate/GPXDC9UJGOXV" class="cert" target="_blank" rel="noopener">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>
+                    DeepLearning.AI TensorFlow Developer
+                    <span class="cert-arrow">&rarr;</span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Experience -->
+    <section id="experience">
+        <h2>Experience</h2>
+
+        <div class="timeline">
+
+            <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <h3>Vineridge Academy</h3>
+                            <p class="subtitle">High School Teacher &middot; Niagara-on-the-Lake, ON</p>
+                        </div>
+                        <span class="date-badge">Jul 2024 &ndash; Aug 2025</span>
+                    </div>
+                    <ul>
+                        <li>Taught Grade 11&ndash;12 Mathematics Courses.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <h3>LinkedKey <span class="label">Contract</span></h3>
+                            <p class="subtitle">Data Analyst &middot; Toronto, ON</p>
+                        </div>
+                        <span class="date-badge">May 2024 &ndash; Jun 2024</span>
+                    </div>
+                    <ul>
+                        <li>Built a analytics tool in Python to evaluate Waterloo contest questions, enabling data-driven teaching strategies.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <h3>Hanson Academy</h3>
+                            <p class="subtitle">High School Teacher &middot; Toronto, ON</p>
+                        </div>
+                        <span class="date-badge">Mar 2024 &ndash; Jun 2024</span>
+                    </div>
+                    <ul>
+                        <li>Taught Grade 10&ndash;12 Mathematics Courses.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <h3>Taacam</h3>
+                            <p class="subtitle">Junior Data Scientist &middot; Mississauga, ON</p>
+                        </div>
+                        <span class="date-badge">Sep 2023 &ndash; Feb 2024</span>
+                    </div>
+                    <ul>
+                        <li>Engineered a web interface for generating 3D avatars for VR meetings based on user-uploaded photos.</li>
+                        <li>Applied advanced geometry algorithms to manipulate 3D animation clips and optimize avatar motion.</li>
+                        <li>Developed a custom OBJ loader to process 3D models and output attribute-structured data.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <h3>Hohai University</h3>
+                            <p class="subtitle">Research Assistant &middot; Nanjing, Jiangsu, China</p>
+                        </div>
+                        <span class="date-badge">May 2023 &ndash; Aug 2023</span>
+                    </div>
+                    <ul>
+                        <li>Conducted quantitative streamflow forecasting using Python; visualized results and improved model accuracy.</li>
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Research / Projects -->
+    <section id="projects">
+        <h2>Benchmarks</h2>
+
+        <div class="card project-card">
+            <div class="card-header">
+                <div>
+                    <h3>PhysioNet Challenge 2026 <a href="https://moody-challenge.physionet.org/2026/leaderboard/" target="_blank" rel="noopener" class="title-link" aria-label="Leaderboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a></h3>
+                    <p class="subtitle">PhysioNet &middot; Organized by <a href="https://research.gatech.edu/people/gari-clifford" target="_blank" rel="noopener" class="inline-link">Gari Clifford</a> (Emory / Georgia Tech)</p>
+                </div>
+                <span class="date-badge">Feb &ndash; Aug 2026</span>
+            </div>
+            <div class="card-body">
+                <p class="project-desc">Participating as <strong>GT NeuroSignals Lab</strong> (Georgia Institute of Technology) on multi-modal physiological signal analysis for the PhysioNet/Computing in Cardiology Challenge 2026. Developing deep learning models for clinical time-series data classification and prediction.</p>
+                <div class="tags" style="margin-top:12px">
+                    <span class="tag primary">Python</span>
+                    <span class="tag primary">PyTorch</span>
+                    <span class="tag">Signal Processing</span>
+                    <span class="tag">Computational Neuroscience</span>
+                    <span class="tag">Clinical ML</span>
+                </div>
+                <div class="project-link-row">
+                    <span class="rank-badge">Unofficial Phase &middot; Rank 12/244 &middot; AUROC 0.693</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card project-card">
+            <div class="card-header">
+                <div>
+                    <h3>BCI Motor Imagery Challenge &mdash; ISLA 2026 <a href="https://www.codabench.org/competitions/15044/#/results-tab" target="_blank" rel="noopener" class="title-link" aria-label="Leaderboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a></h3>
+                    <p class="subtitle">CodaBench &middot; Organized by <a href="https://plcrodrigues.github.io/" target="_blank" rel="noopener" class="inline-link">Pedro L. C. Rodrigues</a> (Inria)</p>
+                </div>
+                <span class="date-badge">Apr &ndash; May 2026</span>
+            </div>
+            <div class="card-body">
+                <p class="project-desc">Built a classification pipeline to decode left-hand vs. right-hand motor imagery from multi-subject EEG signals. Applied Common Spatial Patterns (CSP), Riemannian geometry on covariance matrices, and per-subject regularized models to handle inter-subject variability.</p>
+                <div class="tags" style="margin-top:12px">
+                    <span class="tag primary">Python</span>
+                    <span class="tag primary">EEG / BCI</span>
+                    <span class="tag">Riemannian Geometry</span>
+                    <span class="tag">CSP</span>
+                    <span class="tag">MOABB</span>
+                </div>
+                <div class="project-link-row">
+                    <span class="rank-badge">Rank 1/158 &middot; 0.92 Test Accuracy</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card project-card">
+            <div class="card-header">
+                <div>
+                    <h3>Diabetic Retinopathy Detection Challenge <a href="https://www.codabench.org/competitions/14569/#/results-tab" target="_blank" rel="noopener" class="title-link" aria-label="Leaderboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a></h3>
+                    <p class="subtitle">CodaBench &middot; Organized by <a href="https://github.com/maxencedbe" target="_blank" rel="noopener" class="inline-link">Maxence Debes</a> (&Eacute;cole Polytechnique)</p>
+                </div>
+                <span class="date-badge">Mar &ndash; May 2026</span>
+            </div>
+            <div class="card-body">
+                <p class="project-desc">Classified retinal fundus images from the IDRiD dataset into 5 diabetic retinopathy severity levels. Developed a deep learning model using transfer learning and data augmentation to handle limited training data (407 images) and imbalanced severity classes.</p>
+                <div class="tags" style="margin-top:12px">
+                    <span class="tag primary">Python</span>
+                    <span class="tag primary">PyTorch</span>
+                    <span class="tag">Medical Imaging</span>
+                    <span class="tag">Transfer Learning</span>
+                    <span class="tag">CNN</span>
+                </div>
+                <div class="project-link-row">
+                    <span class="rank-badge">Rank 1/22 &middot; F1 Macro 0.27</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Notes -->
+    <section id="notes">
+        <h2>Coursework</h2>
+        <p class="section-desc">Graduate-level coursework with detailed notes and summaries. Click any completed course to view notes.</p>
+
+        <div class="notes-grid">
+            <a href="notes/artificial-intelligence.html" class="note-card active-course">
+                <h3>Artificial Intelligence</h3>
+                <p class="note-meta">Georgia Tech &middot; CS 6601</p>
+                <span class="note-status done">Completed &middot; Grade A</span>
+            </a>
+
+            <a href="notes/kbai.html" class="note-card active-course">
+                <h3>Knowledge-Based AI</h3>
+                <p class="note-meta">Georgia Tech &middot; CS 7637</p>
+                <span class="note-status done">Completed &middot; Grade A</span>
+            </a>
+
+            <a href="notes/rait.html" class="note-card active-course">
+                <h3>Robotics: AI Techniques</h3>
+                <p class="note-meta">Georgia Tech &middot; CS 7638</p>
+                <span class="note-status done">Completed &middot; Grade A</span>
+            </a>
+
+            <a href="notes/game-ai.html" class="note-card active-course">
+                <h3>Game AI</h3>
+                <p class="note-meta">Georgia Tech &middot; CS 7632</p>
+                <span class="note-status done">Completed &middot; Grade A</span>
+            </a>
+
+            <a href="notes/machine-learning.html" class="note-card">
+                <h3>Machine Learning</h3>
+                <p class="note-meta">Georgia Tech &middot; CS 7641</p>
+                <span class="note-status wip">Coming Soon</span>
+            </a>
+
+            <a href="notes/deep-learning.html" class="note-card">
+                <h3>Deep Learning</h3>
+                <p class="note-meta">Georgia Tech &middot; CS 7643</p>
+                <span class="note-status wip">Coming Soon</span>
+            </a>
+
+            <a href="notes/reinforcement-learning.html" class="note-card">
+                <h3>Reinforcement Learning</h3>
+                <p class="note-meta">Georgia Tech &middot; CS 7642</p>
+                <span class="note-status wip">Coming Soon</span>
+            </a>
+
+            <a href="notes/nlp.html" class="note-card">
+                <h3>Natural Language Processing</h3>
+                <p class="note-meta">Georgia Tech &middot; CS 7650</p>
+                <span class="note-status wip">Coming Soon</span>
+            </a>
+
+            <a href="notes/sdp.html" class="note-card">
+                <h3>Software Development Process</h3>
+                <p class="note-meta">Georgia Tech &middot; CS 6300</p>
+                <span class="note-status wip">Coming Soon</span>
+            </a>
+
+            <a href="notes/network-science.html" class="note-card">
+                <h3>Network Science</h3>
+                <p class="note-meta">Georgia Tech &middot; CS 7280</p>
+                <span class="note-status wip">Coming Soon</span>
+            </a>
+        </div>
+    </section>
+
+    <footer>
+        <div class="footer-content">
+            <p>&copy; 2025 Ethan (Yuxuan) Xu. All rights reserved.</p>
+            <p class="footer-meta">Last updated April 2026 &middot; Built with HTML, CSS &amp; vanilla JS</p>
+        </div>
+    </footer>
+
+</main>
+
+<script>
+// Theme toggle
+function toggleTheme() {
+    const html = document.documentElement;
+    const current = html.getAttribute('data-theme');
+    const next = current === 'dark' ? 'light' : 'dark';
+    if (next === 'light') {
+        html.removeAttribute('data-theme');
+    } else {
+        html.setAttribute('data-theme', 'dark');
+    }
+    localStorage.setItem('theme', next);
+}
+document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+document.getElementById('mobileThemeToggle').addEventListener('click', toggleTheme);
+
+// Mobile menu
+const toggle = document.getElementById('menuToggle');
+const sidebar = document.getElementById('sidebar');
+const overlay = document.getElementById('overlay');
+toggle.addEventListener('click', () => {
+    sidebar.classList.toggle('open');
+    overlay.classList.toggle('open');
+    toggle.classList.toggle('active');
+});
+overlay.addEventListener('click', () => {
+    sidebar.classList.remove('open');
+    overlay.classList.remove('open');
+    toggle.classList.remove('active');
+});
+document.querySelectorAll('.sidebar nav a').forEach(link => {
+    link.addEventListener('click', () => {
+        sidebar.classList.remove('open');
+        overlay.classList.remove('open');
+        toggle.classList.remove('active');
+    });
+});
+
+// Scroll spy for active nav
+const sections = document.querySelectorAll('main section[id]');
+const navLinks = document.querySelectorAll('.sidebar nav a');
+function updateActive() {
+    if (window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 20) {
+        navLinks.forEach(link => link.classList.remove('active'));
+        navLinks[navLinks.length - 1].classList.add('active');
+        return;
+    }
+    let current = '';
+    sections.forEach(section => {
+        const top = section.offsetTop - 100;
+        if (window.scrollY >= top) current = section.getAttribute('id');
+    });
+    navLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === '#' + current) link.classList.add('active');
+    });
+}
+window.addEventListener('scroll', updateActive, { passive: true });
+
+// Scroll to top
+const scrollBtn = document.getElementById('scrollTop');
+window.addEventListener('scroll', () => {
+    if (window.scrollY > 400) {
+        scrollBtn.classList.add('visible');
+    } else {
+        scrollBtn.classList.remove('visible');
+    }
+}, { passive: true });
+scrollBtn.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+// Fade-in on scroll
+const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            observer.unobserve(entry.target);
+        }
+    });
+}, { threshold: 0.08 });
+// Individual fade-in for standalone elements
+document.querySelectorAll('.about-text, .skill-legend').forEach(el => {
+    el.classList.add('fade-in');
+    observer.observe(el);
+});
+// Staggered children animations for all sections
+const staggerObserver = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            Array.from(entry.target.children).forEach((child, i) => {
+                setTimeout(() => {
+                    child.style.opacity = '1';
+                    child.style.transform = 'translateY(0)';
+                }, i * 100);
+            });
+            staggerObserver.unobserve(entry.target);
+        }
+    });
+}, { threshold: 0.05 });
+
+document.querySelectorAll('.research-tags, .education-list, .skills-grid, .timeline, .notes-grid, #projects > .card').forEach(container => {
+    Array.from(container.children).forEach(child => {
+        child.style.opacity = '0';
+        child.style.transform = 'translateY(14px)';
+        child.style.transition = 'opacity 0.5s cubic-bezier(0.4,0,0.2,1), transform 0.5s cubic-bezier(0.4,0,0.2,1)';
+    });
+    staggerObserver.observe(container);
+});
+
+
+// Card pointer glow spotlight
+(function() {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (window.matchMedia('(pointer: coarse)').matches) return;
+
+    document.querySelectorAll('.card, .note-card').forEach(card => {
+        card.addEventListener('mousemove', e => {
+            const rect = card.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            card.style.setProperty('--glow-x', x + 'px');
+            card.style.setProperty('--glow-y', y + 'px');
+        });
+    });
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1977 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CS 7632 Game AI - Ethan Xu</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="notes.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap">
+    <script>
+    MathJax = { tex: { inlineMath: [['$','$']], displayMath: [['$$','$$']] }, svg: { fontCache: 'global' } };
+    </script>
+    <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+    <script>(function(){var t=localStorage.getItem('theme');if(t==='light')localStorage.removeItem('theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');})()</script>
+</head>
+<body class="note-page">
+
+<nav class="note-nav">
+    <a href="../index.html#notes" class="back-link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+        Back to Home
+    </a>
+    <div class="note-nav-right">
+        <span class="note-progress-label">Completed</span>
+        <button class="note-download" id="noteDownload" aria-label="Download as PDF" title="Download as PDF">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        </button>
+        <button class="note-theme-toggle" id="noteThemeToggle" aria-label="Toggle theme">
+            <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+    </div>
+</nav>
+
+<aside class="note-sidebar">
+    <div class="note-sidebar-inner">
+        <div class="note-sidebar-header">
+            <span class="note-badge">CS 7632</span>
+            <h2>Game AI</h2>
+            <p>15 topics &middot; Georgia Tech</p>
+        </div>
+        <div class="toc-title">Contents</div>
+        <ol class="toc-list"></ol>
+    </div>
+</aside>
+
+<article class="note-content">
+    <header class="note-header">
+        <span class="note-badge">Georgia Tech &middot; CS 7632</span>
+        <h1>Game AI</h1>
+        <p class="note-intro">Comprehensive course notes on artificial intelligence techniques for video games. Covers agent movement and steering, path planning, computational geometry, ballistic targeting, coordinated movement and flocking, perception systems, decision making architectures (FSMs, behavior trees, fuzzy logic), machine learning (ID3, Q-learning, Naive Bayes), advanced procedural content generation, camera control, and adversarial search (minimax, MCTS).</p>
+    </header>
+
+    <div class="toc">
+        <h2>Topics</h2>
+        <ol>
+            <li><a href="#t1">Game AI Introduction</a></li>
+            <li><a href="#t2">Basic Agent Movement</a></li>
+            <li><a href="#t3">Computational Geometry</a></li>
+            <li><a href="#t4">Path Planning</a></li>
+            <li><a href="#t5">Steering Behaviors</a></li>
+            <li><a href="#t6">Ballistic Projectile Targeting</a></li>
+            <li><a href="#t7">Procedural Content Generation (Terrain)</a></li>
+            <li><a href="#t8">Assignment Overviews</a></li>
+            <li><a href="#t9">Coordinated Movement</a></li>
+            <li><a href="#t10">Perception &amp; Fairness</a></li>
+            <li><a href="#t11">Decision Making</a></li>
+            <li><a href="#t12">Learning</a></li>
+            <li><a href="#t13">Advanced Procedural Content Generation</a></li>
+            <li><a href="#t14">Camera Control</a></li>
+            <li><a href="#t15">Minimax &amp; Monte Carlo Tree Search</a></li>
+        </ol>
+    </div>
+
+    <div class="note-body">
+
+<!-- ============================================================ -->
+<h2 id="t1">1. Game AI Introduction</h2>
+<p>Game AI is fundamentally different from academic AI. The goal is <em>not</em> optimal play &mdash; it is creating <strong>fun, engaging player experiences</strong>. An unbeatable chess engine makes a terrible opponent in a casual game. Game AI must entertain, challenge appropriately, and sometimes intentionally lose.</p>
+
+<div class="card-def">
+<strong>Game AI vs. Academic AI:</strong> Academic AI seeks optimal solutions to well-defined problems (e.g., minimizing loss, maximizing reward). Game AI prioritizes <em>perceived</em> intelligence and player enjoyment over actual optimality. A perfectly rational agent is often a poor game opponent because it removes challenge calibration, surprise, and the illusion of a believable character.
+</div>
+
+<h3>1.1 Roles of AI in Games</h3>
+<p>AI performs a wide range of functions beyond controlling enemies:</p>
+<ul>
+    <li><strong>Opponent control</strong> &mdash; the most obvious role: enemies, rival teams, boss encounters</li>
+    <li><strong>Player replacement</strong> &mdash; substituting for missing human players in multiplayer sessions</li>
+    <li><strong>Player aids</strong> &mdash; camera control, auto-aim assist, smart targeting</li>
+    <li><strong>Procedural content generation</strong> &mdash; creating levels, terrain, quests, and narrative dynamically</li>
+</ul>
+
+<h3>1.2 Genre-Specific AI</h3>
+<p>Different game genres demand radically different AI techniques:</p>
+<ul>
+    <li><strong>Turn-based games</strong> &mdash; minimax search, alpha-beta pruning, Monte Carlo tree search (MCTS). Classic AI territory where look-ahead planning dominates</li>
+    <li><strong>Projectile games</strong> &mdash; physics simulation combined with error distributions to create believable, not perfect, aiming</li>
+    <li><strong>Platformers</strong> &mdash; simple fodder enemies with basic patrol and chase behaviors. Complexity lives in level design, not AI</li>
+    <li><strong>Fighting games</strong> &mdash; adaptation to player patterns, keystroke analysis, case-based reasoning to counter repeated strategies</li>
+    <li><strong>FPS (first-person shooters)</strong> &mdash; bots need perceptual models (can they see/hear the player?), aim error distributions, tactical reasoning about cover and flanking</li>
+    <li><strong>RTS (real-time strategy)</strong> &mdash; pathfinding at scale, formation movement, resource management, strategic planning across multiple fronts</li>
+    <li><strong>RPGs</strong> &mdash; interactive narrative systems, procedural quest generation, companion AI that assists without stealing the spotlight</li>
+    <li><strong>Racing</strong> &mdash; rubber-banding (Mario Kart: slowing leaders, boosting trailers) vs. realistic simulation (Gran Turismo: modeling tire grip, racing lines)</li>
+    <li><strong>Sports</strong> &mdash; team coordination, realistic athlete behavior, adapting difficulty to player skill</li>
+    <li><strong>God games</strong> &mdash; indirect control where the player sets goals but AI agents decide how to achieve them (The Sims, Black &amp; White)</li>
+</ul>
+
+<h3>1.3 How Good Should AI Be?</h3>
+<p>A crucial design question is how intelligent game AI should appear:</p>
+<ul>
+    <li><strong>Learning is not always desired</strong> &mdash; in platformers, enemies should behave consistently so players can learn patterns</li>
+    <li><strong>Intentional dumbing down</strong> &mdash; AI that could play perfectly is deliberately weakened to give players a chance</li>
+    <li><strong>Cheating is acceptable</strong> &mdash; AI often has access to information a human player would not, as long as the player never notices</li>
+    <li><strong>Distribute intelligence</strong> &mdash; split cleverness between the agent code and the environment. Pre-placed cover spots as tagged waypoints, boss arenas designed to create interesting encounters, and scripted triggers all reduce the burden on real-time AI</li>
+</ul>
+
+<h3>1.4 Key Techniques Overview</h3>
+<div class="card-note">
+<ul>
+    <li><strong>Steering behaviors</strong> &mdash; low-level movement (seek, flee, arrive, pursue, evade, wander)</li>
+    <li><strong>Path planning</strong> &mdash; finding routes through environments (A*, nav meshes, waypoint graphs)</li>
+    <li><strong>Decision making</strong> &mdash; choosing what to do (finite state machines, behavior trees, rule-based systems)</li>
+    <li><strong>Goal-oriented action planning (GOAP)</strong> &mdash; planning sequences of actions to satisfy goals</li>
+    <li><strong>Procedural content generation</strong> &mdash; algorithmically creating game content (terrain, levels, quests)</li>
+    <li><strong>Fuzzy logic</strong> &mdash; reasoning with imprecise categories (health is "low" rather than "below 25")</li>
+    <li><strong>Case-based reasoning</strong> &mdash; solving new problems by adapting solutions from similar past situations</li>
+</ul>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="t2">2. Basic Agent Movement</h2>
+<p>Agent movement is the foundation of all game AI. Before an agent can plan or decide, it must be able to move through the world smoothly and believably. This section covers the simplest kinematic movement algorithms.</p>
+
+<div class="card-def">
+<strong>Steering:</strong> In game AI, steering refers to velocity-based movement where an algorithm computes a desired velocity (or acceleration) each frame to guide an agent toward a goal. Unlike direct positional teleporting, steering produces smooth trajectories because the agent's position changes continuously as a function of its velocity and the elapsed time step.
+</div>
+
+<h3>2.1 Discrete vs. Continuous Movement</h3>
+<p><strong>Discrete movement</strong> operates on a grid: agents occupy cells and move one cell at a time (chess, turn-based tactics). <strong>Continuous movement</strong> uses floating-point positions with high frame-rate animation, producing smooth motion (action games, simulations). Most modern games use continuous movement.</p>
+
+<h3>2.2 The Simulation Loop</h3>
+<p>Every game frame follows the same cycle:</p>
+<ol>
+    <li><strong>Input</strong> &mdash; read player controls and sensor data</li>
+    <li><strong>Update</strong> &mdash; agents calculate movement, physics step, game logic</li>
+    <li><strong>Render</strong> &mdash; draw the scene</li>
+    <li><strong>Sync/Sleep</strong> &mdash; wait to maintain target frame rate</li>
+</ol>
+<p>AI movement calculations happen during the <strong>update phase</strong>. In 3D games, movement typically occurs in the XZ plane (horizontal ground plane) with Y representing the vertical axis.</p>
+
+<h3>2.3 Seek Behavior</h3>
+<p>The most fundamental movement: steer directly toward a target. Given agent position $\mathbf{B}$ and target position $\mathbf{A}$:</p>
+<ol>
+    <li>Calculate the relative vector: $\mathbf{BA} = \mathbf{A} - \mathbf{B}$</li>
+    <li>Normalize to a unit vector: $\hat{\mathbf{BA}} = \mathbf{BA} / |\mathbf{BA}|$</li>
+    <li>Multiply by speed: $\mathbf{v}_{\text{agent}} = \text{speed} \cdot \hat{\mathbf{BA}}$</li>
+</ol>
+$$\mathbf{v}_{\text{agent}} = \text{speed} \cdot \hat{\mathbf{BA}}$$
+
+<h3>2.4 Frame-Rate Independent Movement</h3>
+<p>Never use a fixed frame time. Frame rates vary across machines and even frame-to-frame. Always measure elapsed time and scale movement accordingly:</p>
+$$\mathbf{B'} = \mathbf{B} + \mathbf{v}_{\text{agent}} \cdot \Delta t$$
+<p>In Unity, use <code>Time.deltaTime</code>. In a custom engine, measure wall-clock time between frames. Without delta-time scaling, agents move faster on faster machines &mdash; a classic bug.</p>
+
+<pre><code class="language-python"># Frame-rate independent movement
+def update(agent, target, speed, dt):
+    direction = target.position - agent.position
+    distance = direction.magnitude()
+    if distance > 0:
+        direction = direction / distance  # normalize
+    agent.velocity = direction * speed
+    agent.position += agent.velocity * dt</code></pre>
+
+<h3>2.5 Orientation</h3>
+<p>Agents should face the direction they are moving. Convert a velocity vector to an angle using <code>atan2</code>:</p>
+$$\theta = \text{atan2}(v_y, v_x)$$
+<p>The <code>atan2</code> function handles all four quadrants correctly, unlike <code>atan</code> which only covers two.</p>
+
+<h3>2.6 Kinematic Algorithms</h3>
+<p>Kinematic algorithms set velocity directly (no acceleration). They are simple but produce instant direction changes:</p>
+<ul>
+    <li><strong>Seek</strong> &mdash; move toward target at full speed</li>
+    <li><strong>Flee</strong> &mdash; reverse the seek direction to move away from target</li>
+    <li><strong>Arrive</strong> &mdash; like seek but with a <strong>slowdown radius</strong> and <strong>capture radius</strong>. Inside the slowdown radius, target speed decreases linearly. A time-to-target constant (~0.25s) controls deceleration smoothness</li>
+    <li><strong>Wander</strong> &mdash; random angular offset applied to current heading, biased toward zero for gentle curves rather than jittery zigzags</li>
+    <li><strong>Path Following</strong> &mdash; visit a sequence of waypoints using seek with a capture radius to trigger advancing to the next waypoint</li>
+</ul>
+
+<pre><code class="language-python">def kinematic_arrive(agent, target, max_speed, slow_radius, capture_radius):
+    direction = target - agent.position
+    distance = direction.magnitude()
+
+    if distance < capture_radius:
+        agent.velocity = Vector2(0, 0)
+        return
+
+    if distance < slow_radius:
+        # Linear interpolation: slow down as we approach
+        target_speed = max_speed * (distance / slow_radius)
+    else:
+        target_speed = max_speed
+
+    # Set velocity toward target at computed speed
+    agent.velocity = direction.normalized() * target_speed
+    agent.orientation = atan2(agent.velocity.y, agent.velocity.x)</code></pre>
+
+<h3>2.7 Statics vs. Kinematics</h3>
+<div class="card-def">
+<strong>Statics vs. kinematics:</strong> Position and orientation are <strong>statics</strong> &mdash; they describe where an agent is. Velocity and acceleration are <strong>kinematics</strong> &mdash; they describe how an agent moves. Kinematic algorithms directly set velocity; dynamic (steering) algorithms set acceleration and let velocity evolve.
+</div>
+
+<!-- ============================================================ -->
+<h2 id="t3">3. Computational Geometry</h2>
+<p>Robust geometry computations are essential for game AI &mdash; from collision detection to path planning to nav mesh construction. Floating-point arithmetic introduces subtle errors that can break algorithms. This section covers the mathematical foundations and practical techniques for handling them.</p>
+
+<h3>3.1 Floating-Point Problems</h3>
+<p>IEEE 754 32-bit floats have limited precision (~7 decimal digits). Problems include:</p>
+<ul>
+    <li><strong>Rounding errors</strong> &mdash; not all decimal values are exactly representable in binary</li>
+    <li><strong>Varying precision</strong> &mdash; the gap between representable values grows as the exponent increases. Near 1.0 the gap is ~$10^{-7}$; near 1000.0 the gap is ~$10^{-4}$</li>
+    <li><strong>Catastrophic cancellation</strong> &mdash; subtracting nearly equal numbers loses significant digits</li>
+</ul>
+
+<h3>3.2 Epsilon Testing</h3>
+<p>Never compare floats with <code>==</code>. Use an epsilon tolerance:</p>
+<pre><code class="language-python"># Bad: fails due to floating-point rounding
+if v == target:
+    print("arrived")
+
+# Good: epsilon comparison
+epsilon = 1e-6
+if abs(v - target) < epsilon:
+    print("arrived")</code></pre>
+
+<h3>3.3 Integer Representation</h3>
+<p>For critical geometry operations (intersection tests, winding number computations), convert to integers by multiplying by a scale factor:</p>
+<pre><code class="language-python"># Convert float coordinates to integer representation
+SCALE = 1000
+ix = int(x * SCALE)
+iy = int(y * SCALE)
+# Integer arithmetic is exact (no rounding errors)</code></pre>
+<p>Watch for <strong>overflow</strong> &mdash; intermediate products of large integers can exceed the representable range. Reorder equation terms to minimize intermediate values. Perform conversion during <strong>baking/preprocessing</strong>, not at runtime, to avoid the performance cost.</p>
+
+<h3>3.4 Twice-Area and the Left Predicate</h3>
+<p>The signed twice-area of triangle $ABC$ is a fundamental building block for many geometry tests:</p>
+$$\text{Area2}(A, B, C) = (b_x - a_x)(c_y - a_y) - (c_x - a_x)(b_y - a_y)$$
+<p>This value encodes the orientation of the triangle:</p>
+<ul>
+    <li><strong>Left predicate:</strong> $\text{Area2} > 0$ means $C$ is to the <em>left</em> of the directed line from $A$ to $B$</li>
+    <li><strong>Left-on:</strong> $\text{Area2} \geq 0$ (includes collinear points)</li>
+    <li><strong>Collinear:</strong> $\text{Area2} = 0$ means $A$, $B$, $C$ lie on the same line</li>
+</ul>
+
+<pre><code class="language-python">def area2(a, b, c):
+    """Signed twice-area of triangle ABC."""
+    return (b[0] - a[0]) * (c[1] - a[1]) - (c[0] - a[0]) * (b[1] - a[1])
+
+def left(a, b, c):
+    """True if C is strictly left of directed line AB."""
+    return area2(a, b, c) > 0
+
+def left_on(a, b, c):
+    """True if C is left of or on directed line AB."""
+    return area2(a, b, c) >= 0
+
+def collinear(a, b, c):
+    """True if A, B, C are collinear."""
+    return area2(a, b, c) == 0</code></pre>
+
+<h3>3.5 Line Segment Intersection</h3>
+<p>Two segments $\overline{AB}$ and $\overline{CD}$ intersect if and only if:</p>
+<ul>
+    <li>$C$ and $D$ are on <em>opposite sides</em> of line $AB$ (one left, one right), <strong>and</strong></li>
+    <li>$A$ and $B$ are on <em>opposite sides</em> of line $CD$</li>
+</ul>
+<p>This is tested using the left predicate with the triangle area sign test.</p>
+<p><strong>Proper intersection</strong> means the segments cross at interior points (neither endpoint touches the other segment). <strong>Improper intersection</strong> means an endpoint lies on the other segment.</p>
+
+<h3>3.6 Point-to-Line-Segment Distance</h3>
+<p>To find the closest point on segment $\overline{AB}$ to point $P$:</p>
+<ol>
+    <li>Project $P$ onto the infinite line through $A$ and $B$ using the normalized parameter $t$</li>
+    <li>If $t \leq 0$, the closest point is $A$; if $t \geq 1$, the closest point is $B$; otherwise it is $A + t \cdot (B - A)$</li>
+    <li>Avoid square roots by working with <strong>squared distances</strong> whenever possible</li>
+</ol>
+
+<pre><code class="language-python">def point_segment_distance_sq(p, a, b):
+    """Squared distance from point P to segment AB."""
+    ab = (b[0] - a[0], b[1] - a[1])
+    ap = (p[0] - a[0], p[1] - a[1])
+    ab_sq = ab[0]**2 + ab[1]**2
+
+    if ab_sq == 0:
+        return ap[0]**2 + ap[1]**2  # A == B
+
+    t = (ap[0] * ab[0] + ap[1] * ab[1]) / ab_sq
+    t = max(0.0, min(1.0, t))  # clamp to segment
+
+    closest = (a[0] + t * ab[0], a[1] + t * ab[1])
+    dx = p[0] - closest[0]
+    dy = p[1] - closest[1]
+    return dx * dx + dy * dy</code></pre>
+
+<div class="card-note">
+<strong>Performance tip:</strong> Square root is expensive. For comparisons (is point closer to A or B?), compare squared distances. Only take the square root when you need the actual distance value for display or physics calculations.
+</div>
+
+<div class="card-def">
+<strong>Convex Hull:</strong> The convex hull of a point set is the smallest convex polygon that contains all the points, analogous to stretching a rubber band around pins on a board. It is a foundational primitive in computational geometry, used for bounding-volume collision tests, nav mesh construction, and shape simplification. Common algorithms include Graham scan ($O(n \log n)$) and gift wrapping ($O(nh)$).
+</div>
+
+<div class="card-concept">
+<strong>GJK Algorithm:</strong> The Gilbert-Johnson-Keerthi algorithm determines whether two convex shapes overlap by searching for the origin within their Minkowski difference. Instead of computing the full Minkowski difference, GJK iteratively builds a simplex (line, triangle, tetrahedron) using support functions, making it both efficient and general-purpose. It is the standard narrow-phase collision detection method in physics engines such as Box2D and Bullet.
+</div>
+
+<!-- ============================================================ -->
+<h2 id="t4">4. Path Planning</h2>
+<p>Path planning solves the problem that simple seek behavior cannot: finding a route around obstacles. Seek drives directly toward the target and gets stuck in local minima when obstacles block the direct path. Planning considers multiple possible routes and selects the best one.</p>
+
+<h3>4.1 Discretization</h3>
+<p>The continuous game world must be converted into a discrete graph (nodes + edges) that search algorithms can operate on. Common approaches:</p>
+<ul>
+    <li><strong>Grid lattice</strong> &mdash; regular grid overlaid on the world</li>
+    <li><strong>Waypoints</strong> &mdash; hand-placed or algorithmically generated nodes</li>
+    <li><strong>Navigation mesh (nav mesh)</strong> &mdash; convex polygons covering walkable areas</li>
+    <li><strong>Voxels</strong> &mdash; 3D grid cells for flying or swimming agents</li>
+</ul>
+
+<h3>4.2 Planning as Search</h3>
+<p>Planning means considering possibilities without committing. A search problem is defined by:</p>
+<ul>
+    <li><strong>States</strong> &mdash; configurations the agent can be in (positions, grid cells, polygon regions)</li>
+    <li><strong>Operators</strong> &mdash; actions that transition between states (move north, traverse edge)</li>
+    <li><strong>Start state</strong> and <strong>goal state</strong></li>
+</ul>
+
+<h3>4.3 Search Algorithms</h3>
+
+<p><strong>Breadth-First Search (BFS)</strong> &mdash; expand nodes level by level using a FIFO queue. Complete and optimal for equal-weight edges. Time and space complexity: $O(b^d)$ where $b$ is the branching factor and $d$ is the depth.</p>
+
+<p><strong>Depth-First Search (DFS)</strong> &mdash; expand the deepest node first using a LIFO stack. Not optimal, but useful for maze generation when combined with random neighbor shuffling.</p>
+
+<p><strong>Dijkstra / Uniform-Cost Search (UCS)</strong> &mdash; like BFS but expands the node with the lowest cost-so-far. Uses a priority queue. Optimal for positive edge weights.</p>
+
+<p><strong>Greedy Best-First Search</strong> &mdash; expands the node closest to the goal according to a heuristic $h(n)$. Fast but not optimal &mdash; can get stuck behind obstacles.</p>
+
+<p><strong>A*</strong> &mdash; the gold standard for game pathfinding. Combines cost-so-far with a heuristic estimate:</p>
+$$f(n) = g(n) + h(n)$$
+<p>where $g(n)$ is the cost from start to $n$, and $h(n)$ is the estimated cost from $n$ to the goal. A* is optimal if $h$ is <strong>admissible</strong> (never overestimates the true cost). Uses a priority queue &mdash; a binary heap gives $O(\log n)$ insert and extract-min.</p>
+
+<div class="card-def">
+<strong>A* Algorithm:</strong> A* is a best-first graph search that expands the node minimizing $f(n) = g(n) + h(n)$, where $g(n)$ is the actual cost from the start and $h(n)$ is a heuristic estimate to the goal. It is guaranteed to find the shortest path when the heuristic is admissible (never overestimates) and consistent (satisfies the triangle inequality). A* is the most widely used pathfinding algorithm in games due to this optimality guarantee combined with efficient heuristic-guided pruning.
+</div>
+
+<pre><code class="language-python">def a_star(start, goal, graph, heuristic):
+    open_set = PriorityQueue()
+    open_set.put((0, start))
+    came_from = {start: None}
+    cost_so_far = {start: 0}
+
+    while not open_set.empty():
+        _, current = open_set.get()
+
+        if current == goal:
+            return reconstruct_path(came_from, goal)
+
+        for neighbor, edge_cost in graph.neighbors(current):
+            new_cost = cost_so_far[current] + edge_cost
+
+            if neighbor not in cost_so_far or new_cost < cost_so_far[neighbor]:
+                cost_so_far[neighbor] = new_cost
+                priority = new_cost + heuristic(neighbor, goal)
+                open_set.put((priority, neighbor))
+                came_from[neighbor] = current
+
+    return None  # no path found
+
+def reconstruct_path(came_from, goal):
+    path = []
+    current = goal
+    while current is not None:
+        path.append(current)
+        current = came_from[current]
+    path.reverse()
+    return path</code></pre>
+
+<h3>4.4 Admissible Heuristics</h3>
+<ul>
+    <li><strong>Euclidean distance</strong> &mdash; always admissible (straight-line is always the shortest), best for 8-way movement or any-angle movement</li>
+    <li><strong>Manhattan distance</strong> &mdash; admissible for 4-way grid movement: $h = |x_1 - x_2| + |y_1 - y_2|$</li>
+    <li><strong>Cluster heuristic</strong> &mdash; precompute distances between room centers for environments with rooms and corridors</li>
+</ul>
+
+<h3>4.5 Node Records</h3>
+<p>Each node in the search maintains a record containing:</p>
+<ul>
+    <li><strong>From-node</strong> &mdash; which node we came from (for path reconstruction)</li>
+    <li><strong>Cost-so-far</strong> $g(n)$ &mdash; total cost from start to this node</li>
+    <li><strong>Heuristic estimate</strong> $h(n)$ &mdash; estimated cost to goal</li>
+</ul>
+<p>An <strong>open set</strong> holds nodes to be explored; a <strong>closed set</strong> holds already-explored nodes.</p>
+
+<h3>4.6 Grid Lattice</h3>
+<p>A regular grid overlaid on the game world. Each cell is either traversable or blocked. Advantages: easy to implement, natural for tile-based games. Disadvantages: dense representation wastes memory in open areas, paths follow grid lines producing unnatural zigzag motion (needs <strong>string pulling</strong> to smooth).</p>
+
+<h3>4.7 Path Network (Waypoint Graph)</h3>
+<p>A sparse set of nodes placed at strategic locations (corners, doorways, intersections) connected by edges. Much smaller than a grid, but requires <strong>robust local movement</strong> between waypoints. Nodes can be placed at points of visibility or generated dynamically (breadcrumb approach &mdash; like the Reaper bot for Quake, which drops waypoints as it explores).</p>
+
+<h3>4.8 Navigation Mesh</h3>
+<p>A nav mesh covers the walkable area with <strong>convex polygons</strong>. Polygon adjacency defines graph edges. Key benefits:</p>
+<ul>
+    <li><strong>Efficient representation</strong> &mdash; a few polygons replace thousands of grid cells</li>
+    <li><strong>Simplified movement</strong> &mdash; any point inside a convex polygon has line-of-sight to any other point in the same polygon</li>
+    <li><strong>Supports string pulling</strong> &mdash; the Simple Stupid Funnel Algorithm tightens paths through the polygon channel</li>
+</ul>
+
+<div class="card-def">
+<strong>Navigation Mesh (Nav Mesh):</strong> A navigation mesh is a spatial representation of walkable area composed of convex polygons whose adjacency graph defines traversable connections. Because any two points inside a single convex polygon have unobstructed line-of-sight, agents can move freely within each polygon without additional collision checks. Nav meshes are the industry-standard world representation in engines like Unity and Unreal, replacing dense grids with a compact polygon set.
+</div>
+
+<h3>4.9 Nav Mesh Generation</h3>
+<p>Several approaches exist for generating navigation meshes:</p>
+<ul>
+    <li><strong>Greedy triangulation</strong> &mdash; $O(n^4)$ brute force: try all possible diagonals, keep those that don't intersect existing edges</li>
+    <li><strong>Delaunay triangulation</strong> &mdash; maximizes minimum angles, avoids thin triangles</li>
+    <li><strong>Recast</strong> &mdash; voxel-based approach used in industry (Unity, Unreal): voxelize geometry, identify walkable surfaces, build polygons</li>
+</ul>
+<p>Post-processing steps include <strong>triangle merging</strong> (combine adjacent coplanar triangles into larger convex polygons), <strong>adjacency detection</strong> via hash tables (shared edges between polygons), and <strong>expanded geometry</strong> (offset obstacles by the agent's radius so the point-agent doesn't clip through walls).</p>
+
+<h3>4.10 String Pulling and Path Refinement</h3>
+<p>Raw paths from graph search follow edges between polygon centers, producing zigzag routes. String pulling tightens the path by cutting corners through the polygon channel. The <strong>funnel algorithm</strong> maintains a funnel (two boundary edges) as it walks the channel, narrowing it at each portal (shared edge between polygons).</p>
+
+<h3>4.11 Quad Trees</h3>
+<p>A variable-resolution spatial subdivision. Large empty areas use a single node; cluttered areas subdivide recursively. Advantages over grids: memory-efficient for sparse environments, fast edits for dynamic obstacles (only rebuild affected quadrants). Commonly used for RTS games with large open maps.</p>
+
+<div class="card-note">
+<ul>
+    <li><strong>Grid</strong> &mdash; simple, dense, good for tile games, needs string pulling</li>
+    <li><strong>Path network</strong> &mdash; sparse, hand-placed or auto-generated, needs local navigation</li>
+    <li><strong>Nav mesh</strong> &mdash; industry standard, efficient, supports smooth paths natively</li>
+    <li><strong>Quad tree</strong> &mdash; variable resolution, good for dynamic environments</li>
+    <li><strong>A*</strong> &mdash; optimal with admissible heuristic, priority queue is essential for performance</li>
+</ul>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="t5">5. Steering Behaviors</h2>
+<p>Steering behaviors extend kinematic movement by using <strong>acceleration</strong> instead of directly setting velocity. This produces smooth, natural-looking motion with gradual turns and speed changes, unlike kinematic algorithms that produce instant direction snaps.</p>
+
+<h3>5.1 Acceleration-Based Movement</h3>
+<p>The update equations for dynamic (steering) movement:</p>
+$$\mathbf{p'} = \mathbf{p} + \mathbf{v} \cdot \Delta t$$
+$$\mathbf{v'} = \mathbf{v} + \mathbf{a} \cdot \Delta t$$
+<p>After updating velocity, clamp speed to the agent's maximum: if $|\mathbf{v'}| > v_{\max}$, then $\mathbf{v'} = v_{\max} \cdot \hat{\mathbf{v'}}$.</p>
+
+<pre><code class="language-python">def steering_update(agent, acceleration, dt, max_speed):
+    # Update position
+    agent.position += agent.velocity * dt
+    # Update velocity
+    agent.velocity += acceleration * dt
+    # Clamp to max speed
+    speed = agent.velocity.magnitude()
+    if speed > max_speed:
+        agent.velocity = agent.velocity.normalized() * max_speed</code></pre>
+
+<h3>5.2 Fundamental Steering Behaviors</h3>
+<ul>
+    <li><strong>Seek</strong> &mdash; compute desired velocity toward target, output acceleration = desired - current velocity</li>
+    <li><strong>Flee</strong> &mdash; reverse of seek: accelerate away from the target</li>
+    <li><strong>Arrive</strong> &mdash; like seek, but with a slowdown radius. Inside the radius, desired speed decreases via linear interpolation. Outside, use maximum speed</li>
+    <li><strong>Align</strong> &mdash; match a target orientation using angular acceleration, with a slowdown region for smooth stopping</li>
+</ul>
+
+<h3>5.3 Minimum Turning Radius</h3>
+<p>An agent with maximum speed $v_{\max}$ and maximum acceleration $a_{\max}$ has a minimum turning radius:</p>
+$$R = \frac{v_{\max}^2}{a_{\max}}$$
+<p>If a target is inside this radius, the agent cannot turn sharply enough and will <strong>orbit</strong> the target instead of reaching it. This is a key limitation of pure steering &mdash; arrive behavior solves it by slowing down within the slowdown radius.</p>
+
+<h3>5.4 Turn-First Steering</h3>
+<p>An alternative approach that solves the orbiting problem:</p>
+<ol>
+    <li>Lock orientation to face the velocity direction</li>
+    <li>When turning, project the previous velocity onto the new facing direction &mdash; this naturally decelerates the agent during sharp turns</li>
+    <li>Use variable forward acceleration based on the angle to the target: full acceleration when facing it, reduced when turning</li>
+</ol>
+
+<h3>5.5 Delegated Behaviors</h3>
+<p>Higher-level behaviors that compute a target and then delegate to a fundamental behavior:</p>
+<ul>
+    <li><strong>Pursue</strong> &mdash; predict the target's future position using $t_{\text{est}} = \text{distance} / \text{speed}$, then seek that predicted position. Assumes constant target velocity</li>
+    <li><strong>Evade</strong> &mdash; predict the pursuer's future position, then flee from it</li>
+    <li><strong>Wander</strong> &mdash; place a circle in front of the agent with a rotating target point on its circumference. Produces smooth, organic-looking random movement</li>
+    <li><strong>Path Following</strong> &mdash; find the nearest point on the path, then seek a point ahead of that position on the path</li>
+    <li><strong>Separation</strong> &mdash; force field that pushes agents apart. Can use linear or inverse-square falloff depending on desired behavior</li>
+    <li><strong>Collision Avoidance</strong> &mdash; cone test (will our velocity cones overlap?) or closest-approach calculation between agent trajectories</li>
+    <li><strong>Obstacle Avoidance</strong> &mdash; cast a ray ahead along the velocity direction. If it hits an obstacle, steer away. Use <strong>whisker rays</strong> at angles for wider detection. Corner traps (concave environments where whiskers detect obstacles on both sides) can be solved with an adaptive fan angle</li>
+</ul>
+
+<pre><code class="language-python">def pursue(agent, target, max_speed):
+    """Predict target's future position and seek it."""
+    displacement = target.position - agent.position
+    distance = displacement.magnitude()
+
+    # Estimate time to intercept
+    speed = agent.velocity.magnitude()
+    if speed <= 0:
+        t_predict = 1.0
+    else:
+        t_predict = distance / speed
+
+    # Predict future position assuming constant velocity
+    future_pos = target.position + target.velocity * t_predict
+
+    # Delegate to seek
+    return seek(agent, future_pos, max_speed)</code></pre>
+
+<h3>5.6 Blended Steering</h3>
+<p>Combine multiple behaviors by <strong>weighted summation</strong> of their output accelerations:</p>
+$$\mathbf{a}_{\text{total}} = w_1 \mathbf{a}_{\text{seek}} + w_2 \mathbf{a}_{\text{avoid}} + w_3 \mathbf{a}_{\text{separate}} + \cdots$$
+<p><strong>Priority blending</strong> evaluates behavior sets in priority order and uses the first set that produces an acceleration above a threshold. This prevents low-priority behaviors (wandering) from interfering with high-priority ones (obstacle avoidance).</p>
+
+<div class="card-concept">
+<strong>Weighted-Sum Steering Combination:</strong> Multiple steering behaviors are combined by computing a weighted sum of their individual acceleration outputs: $\mathbf{a}_{\text{total}} = \sum_i w_i \mathbf{a}_i$. The weights encode behavioral priorities (e.g., obstacle avoidance weighted heavily, wander weighted lightly). This linear blending is simple and efficient but can produce degenerate equilibria when opposing forces cancel out, which is why priority-based blending is often layered on top.
+</div>
+
+<div class="card-caution">
+<strong>Equilibrium problems:</strong> Blended steering can produce pathological cases. <em>Unstable equilibria</em> occur when forces balance perfectly (e.g., fleeing exactly between two threats), sending the agent in a random direction. <em>Stable equilibria</em> trap the agent (e.g., equal-weight seek and obstacle avoidance cancelling out near a wall). Priority blending mitigates but doesn't eliminate these issues.
+</div>
+
+<h3>5.7 Performance Envelope</h3>
+<p>In animation-driven games, the agent's <strong>animations define its movement capabilities</strong>. The performance envelope is the set of (speed, turn rate) pairs that the animation system can produce:</p>
+<ul>
+    <li><strong>Root motion</strong> drives translation and rotation from animation data</li>
+    <li><strong>Lookup tables</strong> map desired movement parameters to animation blend weights</li>
+    <li>Different agents with different animation sets have different performance envelopes, creating <strong>unique movement personalities</strong></li>
+</ul>
+
+<h3>5.8 Creating Unique Agents</h3>
+<div class="card-note">
+<ul>
+    <li>Vary <strong>weights</strong> on blended behaviors (more aggressive = higher seek weight, more cautious = higher separation weight)</li>
+    <li>Adjust <strong>parameters</strong> (slowdown radius, maximum speed, acceleration limits)</li>
+    <li>Change <strong>priorities</strong> in priority blending (which behaviors dominate)</li>
+    <li>Assign different <strong>performance envelopes</strong> (animation-driven movement constraints)</li>
+</ul>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="t6">6. Ballistic Projectile Targeting</h2>
+<p>Ballistic targeting is the problem of computing the initial velocity for a projectile (a thrown grenade, kicked ball, or fired arrow) so that it hits a target. The key constraint is that the projectile is <strong>ballistic</strong> &mdash; once launched, no mid-flight corrections are possible. The AI gets one chance to set the velocity correctly.</p>
+
+<div class="card-def">
+<strong>Ballistic Projectile:</strong> A ballistic projectile is an object that, once launched, follows a parabolic trajectory determined solely by its initial velocity and gravitational acceleration, with no in-flight steering or thrust. Its position at time $t$ is given by $\mathbf{p}(t) = \mathbf{p}_0 + \mathbf{v}_0 t + \frac{1}{2}\mathbf{g}t^2$. Computing the required launch velocity to hit a target reduces to solving a quartic (or equivalent quadratic in $t^2$) equation, yielding zero, one, or two valid trajectories.
+</div>
+
+<h3>6.1 Static Target, No Gravity</h3>
+<p>The trivial case: compute the direction to the target, normalize, and multiply by projectile speed. This is just the seek calculation applied to a projectile.</p>
+
+<h3>6.2 Static 3D Target with Gravity</h3>
+<p>The projectile follows a parabolic arc under gravity. Its position at time $t$ is:</p>
+$$\mathbf{p}(t) = \mathbf{p}_0 + \mathbf{v} t + \frac{1}{2}\mathbf{g} t^2$$
+<p>where $\mathbf{g} = (0, -9.8, 0)$ m/s$^2$. We want to find a unit direction $\hat{\mathbf{u}}$ such that $\mathbf{v} = s \cdot \hat{\mathbf{u}}$ hits the target at time $t_c$.</p>
+
+<p>Substituting into the constraint $|\hat{\mathbf{u}}| = 1$ produces a <strong>quartic equation</strong> in $t_c^2$. Using the substitution $x = t_c^2$, this reduces to a quadratic:</p>
+<ol>
+    <li>Check the radicand (discriminant) &mdash; if negative, no solution exists (target is out of range)</li>
+    <li>Solve for $x = t_c^2$, discard negative values</li>
+    <li>Take $t_c = \sqrt{x}$, pick the smallest valid $t_c$ (quickest arrival)</li>
+    <li>Back-substitute to find $\hat{\mathbf{u}}$</li>
+</ol>
+
+<pre><code class="language-python">def solve_ballistic_static(p0, target, speed, gravity=-9.8):
+    """Solve for launch velocity to hit a static target under gravity."""
+    delta = target - p0
+    dx, dy, dz = delta.x, delta.y, delta.z
+
+    # Horizontal distance squared
+    h_dist_sq = dx**2 + dz**2
+
+    s2 = speed * speed
+    s4 = s2 * s2
+    g = abs(gravity)
+
+    # Quadratic in t^2: coefficients
+    a = g * g / 4.0
+    b = -(s2 + g * dy)
+    c = h_dist_sq + dy * dy
+
+    discriminant = b * b - 4 * a * c
+    if discriminant < 0:
+        return None  # target out of range
+
+    sqrt_disc = math.sqrt(discriminant)
+    t_sq_1 = (-b + sqrt_disc) / (2 * a)
+    t_sq_2 = (-b - sqrt_disc) / (2 * a)
+
+    # Pick smallest positive t
+    t_sq = None
+    for candidate in [t_sq_2, t_sq_1]:
+        if candidate > 0:
+            t_sq = candidate
+            break
+    if t_sq is None:
+        return None
+
+    tc = math.sqrt(t_sq)
+
+    # Compute launch velocity components
+    vx = dx / tc
+    vy = dy / tc - 0.5 * gravity * tc
+    vz = dz / tc
+
+    return Vector3(vx, vy, vz)</code></pre>
+
+<h3>6.3 Moving Target (Law of Cosines Approach)</h3>
+<p>For a moving target in 2D, set up a triangle with three edges:</p>
+<ul>
+    <li>$a$ = distance from agent to target's current position</li>
+    <li>$b$ = target speed $\times$ $t$ (how far the target moves)</li>
+    <li>$c$ = projectile speed $\times$ $t$ (how far the projectile travels)</li>
+</ul>
+<p>Apply the law of cosines and the dot product to find the angle between the target's velocity and the line connecting target to agent. This yields a quadratic in $t$. Solve for the smallest positive root, then compute the required launch velocity.</p>
+<p>For 3D, project the problem to the XZ plane. The Y component may require a <strong>holdback</strong> trick: reserve some of the projectile's speed budget for the vertical component, reducing the horizontal speed used in the 2D solve.</p>
+
+<h3>6.4 Iterative Approach</h3>
+<p>A simpler alternative that works well in practice:</p>
+<ol>
+    <li>Solve for a static target at the target's <em>current</em> position &rarr; get time $t_1$</li>
+    <li>Use $t_1$ to predict where the target <em>will be</em> at that time (kinematic equation)</li>
+    <li>Solve for the static target at that <em>predicted</em> position &rarr; get time $t_2$</li>
+    <li>Repeat 3&ndash;6 iterations until $t$ converges</li>
+</ol>
+<p>This is easy to implement and converges quickly for most game scenarios.</p>
+
+<h3>6.5 Practical Considerations</h3>
+<div class="card-note">
+<strong>Practical heuristics:</strong> Throwing characters have an animation wind-up delay (~0.25 seconds) that must be accounted for in timing. Good heuristics for <em>when</em> to throw: target is at maximum speed (predictable trajectory), target is not turning (constant velocity assumption holds), and a raycast along the parabolic arc doesn't hit obstacles. Approximate the parabolic arc with a 2-segment raycast for a cheap obstacle check.
+</div>
+
+<!-- ============================================================ -->
+<h2 id="t7">7. Procedural Content Generation (Terrain)</h2>
+<p>Procedural content generation (PCG) creates game content algorithmically rather than by hand. For terrain, the goal is to produce natural-looking landscapes &mdash; mountains, valleys, craters, coastlines &mdash; that are varied, controllable, and efficiently generated.</p>
+
+<h3>7.1 Perlin Noise</h3>
+<p>Perlin noise is a <strong>gradient noise</strong> function that produces smooth, continuous random values. Unlike white noise (completely random per pixel), Perlin noise has spatial coherence &mdash; nearby points have similar values, producing natural-looking bumps and hills.</p>
+<p>Two key parameters control the output:</p>
+<ul>
+    <li><strong>Frequency</strong> (scaler) &mdash; how rapidly the noise varies across space. High frequency = small, detailed features. Low frequency = large, sweeping features</li>
+    <li><strong>Amplitude</strong> (maximum value) &mdash; the height range of the noise output</li>
+</ul>
+
+<div class="card-def">
+<strong>Perlin Noise:</strong> Perlin noise is a gradient noise function that assigns random gradient vectors to integer lattice points and interpolates smoothly between them, producing spatially coherent pseudo-random values. Unlike white noise, neighboring sample points yield similar values, creating natural-looking continuous variation. It is the foundational building block for procedural terrain, cloud textures, and organic surface detail in games and film.
+</div>
+
+<h3>7.2 Layered Noise (Octaves)</h3>
+<p>A single layer of Perlin noise produces boring, uniform bumps. Interesting terrain requires detail at <strong>multiple scales</strong>. Layered noise combines octaves with diminishing amplitude:</p>
+
+<pre><code class="language-python">def layered_noise(x, y, octaves=6, persistence=0.5):
+    """Generate layered Perlin noise with multiple octaves."""
+    total = 0.0
+    frequency = 1.0
+    amplitude = 1.0
+    max_value = 0.0
+
+    for i in range(octaves):
+        total += perlin_noise(x * frequency, y * frequency) * amplitude
+        max_value += amplitude
+        amplitude *= persistence  # each octave has less influence
+        frequency *= 2.0          # each octave is higher frequency
+
+    return total / max_value  # normalize to [0, 1]</code></pre>
+<p>The first octave provides the broad terrain shape (continents, mountain ranges). Each subsequent octave adds finer detail (ridges, erosion patterns, pebbles) with decreasing influence.</p>
+
+<div class="card-concept">
+<strong>Octave Layering (Fractal Brownian Motion):</strong> A single Perlin noise pass produces uniform, featureless bumps. Octave layering sums multiple noise samples at increasing frequency and decreasing amplitude, mimicking how natural terrain exhibits self-similar detail at many scales. Each octave doubles the frequency (lacunarity) and halves the amplitude (persistence), so the first octave sets the broad landscape while later octaves add ridges, rocks, and erosion detail without overpowering the large-scale shape.
+</div>
+
+<h3>7.3 Hierarchical Rules</h3>
+<p>Complex terrain is built from a tree of noise generators, each contributing a different terrain feature. The process for each node:</p>
+<ol>
+    <li><strong>Generate own noise</strong> &mdash; produce a height map from Perlin noise with this node's parameters</li>
+    <li><strong>Process children</strong> &mdash; recursively evaluate child nodes</li>
+    <li><strong>Combine with parent</strong> &mdash; merge child output with parent using a combiner operation</li>
+</ol>
+<p>Available combiner operations:</p>
+<ul>
+    <li><strong>Add</strong> &mdash; layer features on top of the base terrain</li>
+    <li><strong>Subtract</strong> &mdash; carve out valleys, craters, riverbeds</li>
+    <li><strong>Multiply</strong> &mdash; modulate one terrain by another (e.g., mask mountains to only appear in certain regions)</li>
+    <li><strong>Min / Max</strong> &mdash; take the lower or higher of two terrain values</li>
+    <li><strong>Normalize</strong> &mdash; rescale values to a target range</li>
+    <li><strong>Replace</strong> &mdash; completely override parent values</li>
+</ul>
+
+<h3>7.4 Mapping Functions</h3>
+<p>Mapping functions transform raw noise values into useful terrain features by reshaping the distribution:</p>
+
+<p><strong>Trapezoid function</strong> &mdash; fast, defined by 4 parameters that control ramp-up, plateau, and ramp-down regions. Use to isolate specific height ranges (e.g., only values between 0.6 and 0.8 become mountain peaks):</p>
+<pre><code class="language-python">def trapezoid(value, a, b, c, d):
+    """Trapezoid mapping: ramp up [a,b], plateau [b,c], ramp down [c,d]."""
+    if value <= a or value >= d:
+        return 0.0
+    elif value < b:
+        return (value - a) / (b - a)  # ramp up
+    elif value <= c:
+        return 1.0                     # plateau
+    else:
+        return (d - value) / (d - c)   # ramp down</code></pre>
+
+<p><strong>Curve editor</strong> &mdash; smooth spline-based mapping with arbitrary control points. More expressive than trapezoid but slower to evaluate. Use when trapezoid approximation is too coarse.</p>
+
+<h3>7.5 Practical Workflow</h3>
+<div class="card-note">
+<ol>
+    <li>Start with base terrain using low-frequency Perlin noise for overall shape</li>
+    <li>Add child nodes for biomes: mountains, plains, ocean floor, each with appropriate frequency/amplitude</li>
+    <li>Apply <strong>trapezoid functions</strong> to isolate features (mountain peaks above a threshold, craters below another)</li>
+    <li>Use combiners to merge: add mountains onto base, subtract craters, multiply with moisture maps for biome selection</li>
+    <li>Refine with <strong>curve editors</strong> where trapezoid approximation is too coarse</li>
+    <li>Layer high-frequency octaves for fine detail (erosion, rocks, vegetation placement)</li>
+</ol>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="t8">8. Assignment Overviews</h2>
+<p>The course assignments progressively build a game AI system, starting with world discretization and ending with procedural terrain generation.</p>
+
+<h3>8.1 Grid Navigation</h3>
+<p>Discretize the continuous game world using a grid lattice. For each cell, perform an <strong>intersection test</strong> against all obstacles to determine whether the cell is traversable or blocked. The agent then uses A* on this grid to find paths.</p>
+<pre><code class="language-python">def create_grid(world_bounds, cell_size, obstacles):
+    """Build a traversability grid for the game world."""
+    cols = int(world_bounds.width / cell_size)
+    rows = int(world_bounds.height / cell_size)
+    grid = [[True] * cols for _ in range(rows)]
+
+    for r in range(rows):
+        for c in range(cols):
+            cell_rect = get_cell_bounds(r, c, cell_size)
+            for obstacle in obstacles:
+                if intersects(cell_rect, obstacle):
+                    grid[r][c] = False
+                    break
+    return grid</code></pre>
+
+<h3>8.2 Path Network</h3>
+<p>Connect hand-placed nodes with edges to form a path network. An edge is valid only if a <strong>corridor</strong> of width equal to twice the agent radius is clear of obstacles along its entire length. This ensures the agent can traverse the edge without clipping through geometry.</p>
+<pre><code class="language-python">def is_valid_edge(node_a, node_b, agent_radius, obstacles):
+    """Check if the corridor between two nodes is obstacle-free."""
+    direction = (node_b - node_a).normalized()
+    # Perpendicular offset for corridor width
+    perp = Vector2(-direction.y, direction.x) * agent_radius
+
+    # Check four corridor boundary segments
+    corners = [
+        node_a + perp, node_a - perp,
+        node_b + perp, node_b - perp
+    ]
+    for obstacle in obstacles:
+        if obstacle_intersects_corridor(corners, obstacle):
+            return False
+    return True</code></pre>
+
+<h3>8.3 Nav Mesh</h3>
+<p>Build a navigation mesh using greedy triangulation:</p>
+<ul>
+    <li><strong>Expanded geometry</strong> &mdash; offset all obstacle boundaries outward by the agent radius</li>
+    <li><strong>Greedy triangulation</strong> &mdash; iteratively add diagonals that don't intersect existing edges, with an adjacency-blocking check to prevent non-navigable triangulations</li>
+    <li><strong>Triangle merging</strong> &mdash; combine adjacent triangles into larger convex polygons where possible</li>
+    <li><strong>Adjacency detection</strong> &mdash; use hash tables on shared vertex pairs to efficiently find which polygons are neighbors</li>
+</ul>
+
+<h3>8.4 PCG Terrain</h3>
+<p>Generate terrain using a declarative rule hierarchy:</p>
+<ul>
+    <li>Define a tree of Perlin noise generators with frequency, amplitude, and octave parameters</li>
+    <li>Apply mapping functions (trapezoid or curve) to shape raw noise into terrain features</li>
+    <li>Combine nodes using add, subtract, multiply, min, max, normalize, or replace operations</li>
+    <li>The system evaluates the tree for each terrain sample point, producing a final height value</li>
+</ul>
+
+<div class="card-concept">
+<strong>Design philosophy:</strong> Each assignment adds a layer of sophistication. Grid navigation is the simplest discretization; path networks are sparser but require careful edge validation; nav meshes are the most efficient but complex to generate. PCG terrain shifts from consuming worlds to <em>creating</em> them, tying together geometry and noise theory.
+</div>
+
+<!-- ==================== Topic 9: Coordinated Movement ==================== -->
+<h2 id="t9">9. Coordinated Movement</h2>
+
+<h3>9.1 Flocking &mdash; Boids Model</h3>
+<p>Craig Reynolds' <strong>Boids</strong> (1987) simulates flocking with three simple steering rules applied independently to each agent:</p>
+<ul>
+    <li><strong>Separation</strong> &mdash; steer away from neighbors that are too close. Compute a repulsion vector as the sum of displacement vectors from each nearby neighbor, weighted inversely by distance: $\mathbf{f}_{\text{sep}} = \sum_{i} \frac{\mathbf{p} - \mathbf{p}_i}{\|\mathbf{p} - \mathbf{p}_i\|^2}$</li>
+    <li><strong>Cohesion</strong> &mdash; steer toward the centroid of the local neighborhood: $\mathbf{f}_{\text{coh}} = \frac{1}{N}\sum_{i}\mathbf{p}_i - \mathbf{p}$</li>
+    <li><strong>Alignment</strong> &mdash; match the average heading/velocity of neighbors: $\mathbf{f}_{\text{ali}} = \frac{1}{N}\sum_{i}\mathbf{v}_i - \mathbf{v}$</li>
+</ul>
+<p>Each force is weighted and summed to produce a final steering vector. Tuning these weights dramatically changes emergent behavior &mdash; high separation creates loose swarms, high cohesion creates tight clusters, high alignment creates orderly flocks.</p>
+
+<div class="card-def">
+<strong>Boids Model:</strong> The Boids model (Reynolds, 1987) is an agent-based flocking simulation in which each agent independently applies three local steering rules: <em>separation</em> (avoid crowding nearby neighbors), <em>cohesion</em> (steer toward the average position of neighbors), and <em>alignment</em> (match the average heading of neighbors). Despite having no global controller or leader, these three simple rules produce complex, lifelike emergent group behaviors such as flocking birds, schooling fish, and herding animals.
+</div>
+
+<div class="card-note">
+<strong>Neighborhood definition:</strong> Each boid considers only neighbors within a fixed radius <em>and</em> within a forward-facing vision cone (typically 270&deg;). This prevents agents from reacting to entities directly behind them, producing more natural movement.
+</div>
+
+<h3>9.2 Spatial Partitioning &mdash; Bin Lattice</h3>
+<p>Naive neighbor queries are $O(n^2)$. A <strong>bin lattice</strong> (uniform spatial grid) reduces this to $O(n)$ expected time:</p>
+<ul>
+    <li>Divide the world into a grid of cells, each at least as wide as the neighbor-detection radius</li>
+    <li>Each frame, assign every agent to its cell in $O(1)$</li>
+    <li>For neighbor queries, check only the agent's cell and the 8 surrounding cells (2D) or 26 surrounding cells (3D)</li>
+    <li>Works best when agents are roughly uniformly distributed; degenerates if all agents cluster in one cell</li>
+</ul>
+
+<pre><code class="language-python"># Bin lattice spatial partitioning
+class BinLattice:
+    def __init__(self, world_size, cell_size):
+        self.cell_size = cell_size
+        self.cols = int(world_size[0] / cell_size) + 1
+        self.rows = int(world_size[1] / cell_size) + 1
+        self.grid = [[] for _ in range(self.cols * self.rows)]
+
+    def clear(self):
+        for cell in self.grid:
+            cell.clear()
+
+    def insert(self, agent):
+        cx = int(agent.pos.x / self.cell_size)
+        cy = int(agent.pos.y / self.cell_size)
+        self.grid[cy * self.cols + cx].append(agent)
+
+    def get_neighbors(self, agent, radius):
+        cx = int(agent.pos.x / self.cell_size)
+        cy = int(agent.pos.y / self.cell_size)
+        neighbors = []
+        for dy in range(-1, 2):
+            for dx in range(-1, 2):
+                nx, ny = cx + dx, cy + dy
+                if 0 <= nx < self.cols and 0 <= ny < self.rows:
+                    for other in self.grid[ny * self.cols + nx]:
+                        if other is not agent:
+                            dist = (other.pos - agent.pos).length()
+                            if dist < radius:
+                                neighbors.append(other)
+        return neighbors</code></pre>
+
+<h3>9.3 Formations</h3>
+<p>Formations arrange agents into geometric patterns while moving as a group:</p>
+<ul>
+    <li><strong>Anchor point</strong> &mdash; a virtual leader that follows the desired path; each agent maintains a fixed offset relative to the anchor</li>
+    <li><strong>Slot assignment</strong> &mdash; assign agents to formation slots using a cost matrix (distance to each slot), solved greedily or with the Hungarian algorithm for optimal assignment</li>
+    <li><strong>Forming up</strong> &mdash; agents steer toward their assigned slot positions; formation movement begins only when all agents are within tolerance of their slots</li>
+    <li><strong>Wheeling</strong> &mdash; when the formation turns, the anchor traces the turn arc. Inner agents slow down and outer agents speed up to maintain spacing: $v_i = v_{\text{anchor}} \cdot \frac{r_i}{r_{\text{anchor}}}$ where $r_i$ is the agent's turn radius</li>
+</ul>
+
+<h3>9.4 Obstacle Avoidance in Formations</h3>
+<p>When a formation encounters obstacles, several strategies apply:</p>
+<ul>
+    <li><strong>Soft constraints</strong> &mdash; agents can drift from their slot positions to avoid obstacles, then return when clear</li>
+    <li><strong>Formation splitting</strong> &mdash; the formation temporarily breaks into sub-groups that pass on either side of the obstacle, then reforms</li>
+    <li><strong>Dynamic reshaping</strong> &mdash; switch formation type (e.g., from wedge to column) to fit through narrow passages</li>
+</ul>
+
+<h3>9.5 Movement Lines &amp; Priority-Based Collision Resolution</h3>
+<p>For large groups, a <strong>movement line</strong> approach defines a spline or polyline path that agents follow in order:</p>
+<ul>
+    <li>A leader agent plans the path; followers maintain spacing along the same path curve</li>
+    <li><strong>Priority-based resolution</strong> &mdash; assign priority by formation slot order. Higher-priority agents move first; lower-priority agents treat higher-priority ones as moving obstacles and adjust accordingly</li>
+    <li>This avoids deadlocks where two agents block each other &mdash; the lower-priority agent always yields</li>
+</ul>
+
+<div class="card-note">
+<ul>
+    <li>Boids produce emergent flocking from three local rules: separation, cohesion, alignment</li>
+    <li>Bin lattice spatial partitioning makes neighbor queries O(n) instead of O(n&sup2;)</li>
+    <li>Formations use an anchor point with per-agent offsets; wheeling adjusts speed by turn radius</li>
+    <li>Priority-based collision resolution prevents deadlocks in group movement</li>
+</ul>
+</div>
+
+<!-- ==================== Topic 10: Perception & Fairness ==================== -->
+<h2 id="t10">10. Perception &amp; Fairness</h2>
+
+<h3>10.1 Why Perception Matters</h3>
+<p>Omniscient AI that knows everything feels unfair to players. Perception systems limit what AI agents can <em>sense</em>, creating believable behavior and fair gameplay. The key principle: <strong>AI should only act on information it could reasonably perceive</strong>.</p>
+
+<h3>10.2 Visual Perception</h3>
+<p>Sight is modeled with multiple constraints:</p>
+<ul>
+    <li><strong>Range limit</strong> &mdash; maximum detection distance, often scaled by target size: $d_{\max} = d_{\text{base}} \cdot \text{targetScale}$</li>
+    <li><strong>Vision cone</strong> &mdash; a forward-facing cone defined by half-angle $\theta$. Test: $\cos^{-1}\left(\frac{\mathbf{forward} \cdot \mathbf{toTarget}}{|\mathbf{forward}||\mathbf{toTarget}|}\right) < \theta$</li>
+    <li><strong>Occlusion testing</strong> &mdash; cast a ray from the agent's eye to the target. If the ray hits geometry before reaching the target, the target is occluded (not visible). Use multiple rays to different body parts for partial visibility</li>
+    <li><strong>Foveal vs. peripheral vision</strong> &mdash; inner cone (narrow, high acuity) detects details and identifies targets; outer cone (wide, low acuity) detects movement but not identity</li>
+</ul>
+
+<pre><code class="language-python">import math
+
+def can_see(agent, target, max_range, fov_half_angle, obstacles):
+    """Check if agent can see target with range, FOV, and occlusion."""
+    to_target = target.pos - agent.pos
+    distance = to_target.length()
+
+    # Range check
+    if distance > max_range:
+        return False
+
+    # FOV check
+    to_target_norm = to_target.normalize()
+    dot = agent.forward.dot(to_target_norm)
+    angle = math.acos(max(-1, min(1, dot)))
+    if angle > fov_half_angle:
+        return False
+
+    # Occlusion raycast
+    hit = raycast(agent.eye_pos, to_target_norm, distance, obstacles)
+    if hit and hit.distance < distance:
+        return False  # Something blocks the view
+
+    return True</code></pre>
+
+<h3>10.3 Light Level &amp; Stealth</h3>
+<p>In stealth games, detection depends on the target's illumination:</p>
+<ul>
+    <li>Sample light intensity at the target's position from all light sources</li>
+    <li>Reduce effective detection range in dark areas: $d_{\text{eff}} = d_{\max} \cdot \text{lightLevel}$</li>
+    <li>Shadows create safe zones; moving through lit areas increases detection probability</li>
+    <li>Some systems use a <strong>detection meter</strong> that fills gradually rather than instant detection</li>
+</ul>
+
+<h3>10.4 Auditory Perception</h3>
+<p>Sound is typically modeled via an <strong>event system</strong> rather than physics simulation:</p>
+<ul>
+    <li>Actions generate <strong>sound events</strong> with a position, loudness, and type (footstep, gunshot, explosion)</li>
+    <li>Sound attenuates with distance: $\text{perceived} = \text{loudness} - 20 \log_{10}(d)$ (inverse-square law in dB)</li>
+    <li>Walls and obstacles reduce sound transmission (simple check: is there a clear path?)</li>
+    <li>AI agents "hear" events within their auditory range and can investigate the sound source</li>
+    <li>Different surfaces produce different footstep volumes (carpet &lt; wood &lt; metal)</li>
+</ul>
+
+<h3>10.5 Fitts' Law &mdash; Humanlike Aiming</h3>
+<p>To prevent AI from having perfect aim, apply <strong>Fitts' Law</strong> to simulate human targeting constraints:</p>
+
+$$T = a + b \cdot \log_2\left(\frac{2D}{W}\right)$$
+
+<p>Where $T$ is movement time, $D$ is distance to target, $W$ is target width, and $a, b$ are empirically tuned constants. This means:</p>
+<ul>
+    <li>Small, distant targets take longer to aim at</li>
+    <li>Large, close targets are acquired quickly</li>
+    <li>Add a <strong>reaction time delay</strong> before the AI begins aiming (typically 200&ndash;500ms, randomized)</li>
+</ul>
+
+<div class="card-def">
+<strong>Fitts' Law:</strong> Fitts' Law is a predictive model of human motor performance stating that the time to acquire a target is logarithmically related to the ratio of distance over target width: $T = a + b \log_2(2D/W)$. In game AI, it is used to simulate humanlike aiming delays so that AI agents take longer to aim at small or distant targets, preventing unrealistically instant and perfect accuracy that would feel unfair to players.
+</div>
+
+<h3>10.6 Gaussian Aiming Error</h3>
+<p>Add aim inaccuracy using a 2D Gaussian distribution centered on the true target position:</p>
+
+$$\text{aimPoint} = \text{target} + \mathcal{N}(0, \sigma^2) \cdot \hat{x} + \mathcal{N}(0, \sigma^2) \cdot \hat{y}$$
+
+<p>The standard deviation $\sigma$ can vary by:</p>
+<ul>
+    <li><strong>Difficulty level</strong> &mdash; easy AI has high $\sigma$, hard AI has low $\sigma$</li>
+    <li><strong>Weapon type</strong> &mdash; sniper rifles have low $\sigma$, SMGs have high $\sigma$</li>
+    <li><strong>Movement state</strong> &mdash; stationary AI aims better than moving AI</li>
+    <li><strong>Time on target</strong> &mdash; $\sigma$ decreases the longer AI tracks a target (simulating aim refinement)</li>
+</ul>
+
+<div class="card-concept">
+<strong>Rubber banding:</strong> Many games secretly adjust AI accuracy based on player performance. If the player is struggling, AI misses more; if the player is dominating, AI gets more accurate. This dynamic difficulty keeps gameplay engaging without the player noticing.
+</div>
+
+<div class="card-note">
+<ul>
+    <li>Limit AI senses (sight range, FOV, occlusion, hearing radius) for fairness</li>
+    <li>Foveal/peripheral vision creates realistic detection behavior</li>
+    <li>Sound uses event-based systems with distance attenuation, not physics simulation</li>
+    <li>Fitts' Law models humanlike aim time; Gaussian noise simulates aim inaccuracy</li>
+    <li>Reaction time delays and dynamic difficulty prevent AI from feeling omniscient</li>
+</ul>
+</div>
+
+<!-- ==================== Topic 11: Decision Making ==================== -->
+<h2 id="t11">11. Decision Making</h2>
+
+<h3>11.1 Decision Trees</h3>
+<p>The simplest decision architecture. Each internal node tests a condition; leaves are actions:</p>
+<ul>
+    <li><strong>Binary branches</strong> &mdash; yes/no tests traverse left or right</li>
+    <li><strong>Implicit AND</strong> &mdash; a path from root to leaf represents the conjunction of all conditions along that path</li>
+    <li><strong>Implicit OR</strong> &mdash; multiple paths can lead to the same action, representing disjunction</li>
+    <li><strong>Random nodes</strong> &mdash; replace a decision node with a random branch (e.g., 60% attack, 40% retreat) to add variety</li>
+    <li><strong>Stickiness</strong> &mdash; once a random choice is made, keep it for a duration to prevent erratic behavior (e.g., random decision is re-evaluated every 5 seconds, not every frame)</li>
+</ul>
+
+<pre><code class="language-python">class DecisionNode:
+    def __init__(self, test_fn, true_branch, false_branch):
+        self.test = test_fn
+        self.true_branch = true_branch
+        self.false_branch = false_branch
+
+    def evaluate(self, context):
+        if self.test(context):
+            return self.true_branch.evaluate(context)
+        else:
+            return self.false_branch.evaluate(context)
+
+class ActionNode:
+    def __init__(self, action):
+        self.action = action
+
+    def evaluate(self, context):
+        return self.action
+
+# Example: enemy decision tree
+tree = DecisionNode(
+    lambda ctx: ctx['health'] < 30,
+    ActionNode('flee'),            # low health -> flee
+    DecisionNode(
+        lambda ctx: ctx['enemy_visible'],
+        DecisionNode(
+            lambda ctx: ctx['distance'] < 10,
+            ActionNode('melee_attack'),   # close range
+            ActionNode('ranged_attack')   # far range
+        ),
+        ActionNode('patrol')       # no enemy visible
+    )
+)</code></pre>
+
+<h3>11.2 Rule-Based Systems</h3>
+<p>A set of <strong>if-then rules</strong> evaluated against a working memory (database of facts):</p>
+<ul>
+    <li><strong>Fixed priority</strong> &mdash; rules are ordered by priority; the first matching rule fires. Simple but inflexible</li>
+    <li><strong>Dynamic priority</strong> &mdash; each rule has a priority score that changes based on context. Compute all matching rules, fire the highest-priority one</li>
+    <li><strong>Conflict resolution strategies</strong> &mdash; when multiple rules match: specificity (most conditions wins), recency (newest facts preferred), or random</li>
+</ul>
+
+<h3>11.3 The Rete Algorithm</h3>
+<p>Naive rule matching is expensive: $O(R \times F^C)$ where $R$ = rules, $F$ = facts, $C$ = conditions per rule. The <strong>Rete algorithm</strong> (Forgy, 1982) optimizes this:</p>
+<ul>
+    <li>Build a <strong>discrimination network</strong> (directed acyclic graph) from all rule conditions</li>
+    <li><strong>Alpha nodes</strong> test single conditions against individual facts (intra-element tests)</li>
+    <li><strong>Beta nodes</strong> join results from multiple alpha nodes (inter-element tests, variable bindings)</li>
+    <li>When a fact changes, only affected nodes re-evaluate &mdash; unchanged conditions are cached</li>
+    <li>Achieves near-constant time per fact update regardless of rule count</li>
+</ul>
+
+<div class="card-note">
+<strong>Rete trade-off:</strong> The algorithm trades memory for speed. The network caches all partial matches, which can consume significant memory with many rules and facts. Modern variants (Rete II, TREAT) reduce memory usage while maintaining performance.
+</div>
+
+<div class="card-def">
+<strong>Finite State Machine (FSM):</strong> A finite state machine is a computational model in which an agent occupies exactly one state at a time and transitions between states in response to events or conditions. Each state encapsulates a behavior (e.g., Patrol, Chase, Attack) with <code>enter</code>, <code>update</code>, and <code>exit</code> callbacks. FSMs are the most widely used decision-making architecture in game AI due to their simplicity and predictability, though they suffer from combinatorial explosion of transitions as the number of states grows.
+</div>
+
+<h3>11.4 Finite State Machines (FSMs)</h3>
+<p>The workhorse of game AI. An agent is always in one <strong>state</strong>; transitions are triggered by conditions:</p>
+<ul>
+    <li><strong>Moore machine</strong> &mdash; actions are associated with states (execute action while in state)</li>
+    <li><strong>Mealy machine</strong> &mdash; actions are associated with transitions (execute action during state change)</li>
+    <li>Each state has: <code>enter()</code> (setup), <code>update()</code> (per-frame logic), <code>exit()</code> (cleanup)</li>
+</ul>
+
+<pre><code class="language-python">class State:
+    def enter(self, agent): pass
+    def update(self, agent, dt): pass
+    def exit(self, agent): pass
+
+class PatrolState(State):
+    def enter(self, agent):
+        agent.set_animation('walk')
+        agent.pick_patrol_point()
+
+    def update(self, agent, dt):
+        if agent.can_see_player():
+            agent.change_state(ChaseState())
+        elif agent.reached_patrol_point():
+            agent.pick_patrol_point()
+        agent.move_toward(agent.patrol_target, dt)
+
+class ChaseState(State):
+    def enter(self, agent):
+        agent.set_animation('run')
+
+    def update(self, agent, dt):
+        if not agent.can_see_player():
+            agent.change_state(SearchState())
+        elif agent.in_attack_range():
+            agent.change_state(AttackState())
+        agent.move_toward(agent.player.pos, dt)</code></pre>
+
+<h3>11.5 Advanced FSM Variants</h3>
+<ul>
+    <li><strong>Hierarchical FSMs (HFSMs)</strong> &mdash; states contain sub-state machines. A "Combat" state might have sub-states "Aim", "Fire", "Reload". Transitions can occur at any level; exiting a parent state exits all child states</li>
+    <li><strong>Stack-based FSMs</strong> &mdash; push/pop states like a call stack. Useful for interruptible behaviors: push "Investigate Noise" on top of "Patrol", then pop to resume patrol</li>
+    <li><strong>Probabilistic transitions</strong> &mdash; transitions fire with a probability rather than deterministically, adding behavioral variety</li>
+    <li><strong>Global states</strong> &mdash; a special state whose update runs every frame regardless of the current state, handling universal logic like "flee if health critical"</li>
+</ul>
+
+<div class="card-def">
+<strong>Behavior Tree (BT):</strong> A behavior tree is a hierarchical, tree-structured control architecture where internal nodes (sequences, selectors, decorators) compose the execution logic and leaf nodes perform condition checks or actions. Each node returns one of three statuses: Success, Failure, or Running. Behavior trees offer superior modularity over FSMs because subtrees are self-contained and reusable, and adding new behaviors requires only inserting branches rather than rewiring global transition tables.
+</div>
+
+<h3>11.6 Behavior Trees</h3>
+<p>A modular, hierarchical decision structure that has largely replaced FSMs in modern game AI (Halo 2 popularized them):</p>
+
+<p><strong>Node types:</strong></p>
+<ul>
+    <li><strong>Sequence</strong> (AND) &mdash; executes children left-to-right; succeeds only if ALL children succeed; fails on the first failure</li>
+    <li><strong>Selector</strong> (OR / Fallback) &mdash; executes children left-to-right; succeeds on the FIRST success; fails only if all children fail</li>
+    <li><strong>Decorator</strong> &mdash; wraps a single child to modify its behavior:
+        <ul>
+            <li><em>Inverter</em> &mdash; flips success/failure</li>
+            <li><em>Repeater</em> &mdash; runs child N times or until failure</li>
+            <li><em>Limiter</em> &mdash; allows child to run at most N times total</li>
+            <li><em>Timer</em> &mdash; succeeds/fails after a time limit</li>
+        </ul>
+    </li>
+    <li><strong>Leaf nodes</strong> &mdash; conditions (check world state) or actions (perform behavior), returning Success, Failure, or <strong>Running</strong> (still in progress)</li>
+</ul>
+
+<pre><code class="language-python"># Behavior tree node types
+class Selector:
+    """Try children until one succeeds (OR logic)."""
+    def __init__(self, children):
+        self.children = children
+
+    def tick(self, blackboard):
+        for child in self.children:
+            status = child.tick(blackboard)
+            if status != 'FAILURE':
+                return status  # SUCCESS or RUNNING
+        return 'FAILURE'
+
+class Sequence:
+    """Run children until one fails (AND logic)."""
+    def __init__(self, children):
+        self.children = children
+
+    def tick(self, blackboard):
+        for child in self.children:
+            status = child.tick(blackboard)
+            if status != 'SUCCESS':
+                return status  # FAILURE or RUNNING
+        return 'SUCCESS'
+
+# Example: Guard behavior tree
+guard_bt = Selector([
+    Sequence([  # Combat behavior
+        Condition(lambda bb: bb['enemy_visible']),
+        Condition(lambda bb: bb['has_ammo']),
+        Action('attack_enemy')
+    ]),
+    Sequence([  # Investigate behavior
+        Condition(lambda bb: bb['heard_noise']),
+        Action('move_to_noise_source'),
+        Action('look_around')
+    ]),
+    Action('patrol')  # Default: patrol
+])</code></pre>
+
+<h3>11.7 Behavior Tree Concepts</h3>
+<ul>
+    <li><strong>Blackboard</strong> &mdash; a shared data store (dictionary) that nodes read from and write to. Decouples nodes from each other and from game systems</li>
+    <li><strong>Semaphores</strong> &mdash; limit concurrent access to shared resources. E.g., only 3 agents can use the "flanking" behavior simultaneously; the 4th must wait or choose another action</li>
+    <li><strong>Reactive behavior trees</strong> &mdash; re-evaluate from the root each tick, allowing higher-priority branches to preempt running lower-priority ones</li>
+</ul>
+
+<div class="card-concept">
+<strong>BT vs. FSM:</strong> Behavior trees are more modular (subtrees are reusable), easier to extend (add branches without rewiring transitions), and scale better. FSMs become unwieldy with many states due to combinatorial explosion of transitions ($n$ states &rarr; up to $n(n-1)$ transitions).
+</div>
+
+<h3>11.8 Fuzzy Logic</h3>
+<p>Classical boolean logic is crisp (true/false). <strong>Fuzzy logic</strong> allows degrees of truth in $[0, 1]$, better modeling vague concepts like "close" or "healthy":</p>
+
+<p><strong>Process:</strong></p>
+<ol>
+    <li><strong>Fuzzification</strong> &mdash; map crisp input values to fuzzy membership values using membership functions (triangular, trapezoidal, Gaussian):
+    $$\mu_{\text{close}}(d) = \max\left(0, 1 - \frac{d}{d_{\max}}\right)$$</li>
+    <li><strong>Rule evaluation</strong> &mdash; apply fuzzy rules using fuzzy AND (min), OR (max), NOT (1 - x):
+    <br>IF distance IS close AND health IS high THEN aggression IS high</li>
+    <li><strong>Defuzzification</strong> &mdash; convert fuzzy output back to a crisp value. Common method is <strong>centroid</strong>:
+    $$\text{output} = \frac{\sum_i \mu_i \cdot c_i}{\sum_i \mu_i}$$
+    where $c_i$ is the center of each output membership function and $\mu_i$ is its activation level</li>
+</ol>
+
+<div class="card-concept">
+<strong>Fuzzy Logic Pipeline:</strong> The complete fuzzy logic pipeline has three stages: (1) <em>Fuzzification</em> maps crisp numeric inputs to membership degrees in linguistic sets via membership functions (e.g., distance 12 maps to 0.7 "close" and 0.3 "medium"); (2) <em>Rule evaluation</em> applies if-then rules using fuzzy AND (min) and OR (max) operators to produce fuzzy output sets; (3) <em>Defuzzification</em> converts the aggregated fuzzy output back to a single crisp value, typically using the centroid method. This pipeline lets AI reason with imprecise, human-style categories rather than brittle threshold comparisons.
+</div>
+
+<h3>11.9 Combs Method</h3>
+<p>Standard fuzzy rule systems suffer from combinatorial explosion: $n$ inputs with $m$ values each require $m^n$ rules. The <strong>Combs method</strong> reduces this to $n \times m$ rules by decomposing multi-input rules into single-input rules combined with OR:</p>
+<ul>
+    <li>Instead of: IF A is a1 AND B is b1 THEN C is c1</li>
+    <li>Use: IF A is a1 THEN C is c1 <em>OR</em> IF B is b1 THEN C is c1</li>
+    <li>Results are combined by taking the max (fuzzy OR) of all applicable rule outputs</li>
+    <li>Trades precision for scalability &mdash; works well when inputs are somewhat independent</li>
+</ul>
+
+<div class="card-note">
+<ul>
+    <li>Decision trees: simple, fast evaluation via nested conditions; add random nodes for variety</li>
+    <li>Rule-based systems: flexible but expensive matching; Rete algorithm caches partial matches</li>
+    <li>FSMs: states + transitions; extend with hierarchy, stacks, probabilistic transitions</li>
+    <li>Behavior trees: modular sequences/selectors; blackboard for shared data; semaphores for resource limits</li>
+    <li>Fuzzy logic: fuzzify &rarr; evaluate rules &rarr; defuzzify; Combs method scales linearly</li>
+</ul>
+</div>
+
+<!-- ==================== Topic 12: Learning ==================== -->
+<h2 id="t12">12. Learning</h2>
+
+<h3>12.1 Decision Tree Learning &mdash; ID3 Algorithm</h3>
+<p>The <strong>ID3</strong> (Iterative Dichotomiser 3) algorithm automatically constructs a decision tree from labeled training examples:</p>
+
+<div class="card-def">
+<strong>ID3 (Iterative Dichotomiser 3):</strong> ID3 is a top-down decision tree learning algorithm that recursively partitions training data by selecting the attribute with the highest information gain (greatest entropy reduction) at each node. Entropy $H(S) = -\sum p_c \log_2 p_c$ measures class impurity; the attribute that maximally reduces it becomes the splitting criterion. The recursion terminates when a node is pure (single class) or no attributes remain, yielding a tree that can classify new instances by traversing from root to leaf.
+</div>
+
+<p><strong>Core concept &mdash; Entropy:</strong> measures the impurity/uncertainty in a dataset:</p>
+$$H(S) = -\sum_{c \in C} p_c \log_2(p_c)$$
+<p>where $p_c$ is the proportion of examples belonging to class $c$. Entropy is 0 when all examples are the same class (pure) and maximal when classes are evenly split.</p>
+
+<p><strong>Information Gain:</strong> the reduction in entropy from splitting on attribute $A$:</p>
+$$\text{IG}(S, A) = H(S) - \sum_{v \in \text{values}(A)} \frac{|S_v|}{|S|} H(S_v)$$
+<p>where $S_v$ is the subset of examples where attribute $A$ has value $v$.</p>
+
+<p><strong>Algorithm:</strong></p>
+<ol>
+    <li>Compute information gain for each unused attribute</li>
+    <li>Select the attribute with the highest gain as the splitting criterion</li>
+    <li>Create a branch for each attribute value</li>
+    <li>Recurse on each subset; stop when all examples have the same class or no attributes remain</li>
+</ol>
+
+<pre><code class="language-python">import math
+from collections import Counter
+
+def entropy(labels):
+    """Calculate entropy of a label distribution."""
+    counts = Counter(labels)
+    total = len(labels)
+    return -sum(
+        (c / total) * math.log2(c / total)
+        for c in counts.values() if c > 0
+    )
+
+def info_gain(data, labels, attribute_idx):
+    """Calculate information gain for splitting on an attribute."""
+    total_entropy = entropy(labels)
+    values = set(row[attribute_idx] for row in data)
+
+    weighted_entropy = 0
+    for v in values:
+        subset_labels = [
+            labels[i] for i, row in enumerate(data)
+            if row[attribute_idx] == v
+        ]
+        weighted_entropy += (len(subset_labels) / len(labels)) * entropy(subset_labels)
+
+    return total_entropy - weighted_entropy
+
+def build_tree(data, labels, attributes):
+    """Build decision tree using ID3."""
+    # Base cases
+    if len(set(labels)) == 1:
+        return labels[0]  # Pure node
+    if not attributes:
+        return Counter(labels).most_common(1)[0][0]  # Majority vote
+
+    # Find best attribute
+    gains = {a: info_gain(data, labels, a) for a in attributes}
+    best_attr = max(gains, key=gains.get)
+
+    tree = {'attribute': best_attr, 'branches': {}}
+    remaining = [a for a in attributes if a != best_attr]
+
+    for value in set(row[best_attr] for row in data):
+        subset_idx = [i for i, row in enumerate(data) if row[best_attr] == value]
+        subset_data = [data[i] for i in subset_idx]
+        subset_labels = [labels[i] for i in subset_idx]
+        tree['branches'][value] = build_tree(subset_data, subset_labels, remaining)
+
+    return tree</code></pre>
+
+<h3>12.2 ID4 &mdash; Live/Incremental Learning</h3>
+<p><strong>ID4</strong> extends ID3 for online (incremental) learning &mdash; updating the tree as new examples arrive without rebuilding from scratch:</p>
+<ul>
+    <li>Maintain counts at each node for all attribute-value-class combinations</li>
+    <li>When a new example arrives, update counts along the path from root to leaf</li>
+    <li>Recompute information gain at each node; if a different attribute now has higher gain, <strong>restructure</strong> that subtree</li>
+    <li>Useful for adaptive AI that learns player patterns during gameplay</li>
+</ul>
+
+<h3>12.3 Case-Based Reasoning (CBR)</h3>
+<p>Learn by remembering and adapting past experiences rather than building explicit models:</p>
+
+<p><strong>4R Cycle:</strong></p>
+<ol>
+    <li><strong>Retrieve</strong> &mdash; find the most similar past case(s) from the case library. Similarity metric: $\text{sim}(\mathbf{x}, \mathbf{c}) = \sum_i w_i \cdot \text{match}_i(x_i, c_i)$ with feature weights $w_i$</li>
+    <li><strong>Reuse (Adapt)</strong> &mdash; modify the retrieved solution to fit the current problem. Adaptation rules are domain-specific</li>
+    <li><strong>Revise (Evaluate)</strong> &mdash; test the adapted solution; determine if it succeeded or failed</li>
+    <li><strong>Retain (Store)</strong> &mdash; if successful, add the new case to the library for future reference</li>
+</ol>
+
+<p><strong>Efficient retrieval with KD-trees:</strong></p>
+<ul>
+    <li>Build a KD-tree over the feature space of stored cases</li>
+    <li>Nearest-neighbor queries are $O(\log n)$ average case, much faster than linear search</li>
+    <li>Handle mixed feature types (numeric + categorical) with appropriate distance metrics</li>
+</ul>
+
+<div class="card-example">
+<strong>Killer Instinct's Shadow System:</strong> Microsoft's fighting game Killer Instinct uses CBR to create shadow versions of players. The system records player behavior (attack patterns, defensive habits, combo preferences), stores them as cases, and replays adapted versions as AI opponents. Other players can fight your shadow when you're offline.
+</div>
+
+<h3>12.4 N-Grams</h3>
+<p>Predict the next action in a sequence based on the preceding $n-1$ actions:</p>
+<ul>
+    <li><strong>Unigram</strong> ($n=1$): probability of each action independently $P(a)$</li>
+    <li><strong>Bigram</strong> ($n=2$): probability conditioned on previous action $P(a_t | a_{t-1})$</li>
+    <li><strong>Trigram</strong> ($n=3$): $P(a_t | a_{t-2}, a_{t-1})$</li>
+    <li><strong>Window size trade-off</strong> &mdash; larger $n$ captures more context but requires exponentially more training data and may overfit to specific sequences</li>
+</ul>
+
+<pre><code class="language-python">from collections import defaultdict
+
+class NGramPredictor:
+    def __init__(self, n=3):
+        self.n = n
+        self.counts = defaultdict(lambda: defaultdict(int))
+        self.history = []
+
+    def observe(self, action):
+        self.history.append(action)
+        if len(self.history) >= self.n:
+            context = tuple(self.history[-self.n:-1])
+            self.counts[context][action] += 1
+
+    def predict(self):
+        if len(self.history) < self.n - 1:
+            return None
+        context = tuple(self.history[-(self.n-1):])
+        if context not in self.counts:
+            return None
+        actions = self.counts[context]
+        return max(actions, key=actions.get)
+
+# Usage: predict player's next move
+predictor = NGramPredictor(n=3)
+for move in player_moves:
+    prediction = predictor.predict()
+    if prediction:
+        ai_counter = counter_move(prediction)
+    predictor.observe(move)</code></pre>
+
+<p><strong>Hierarchical N-grams:</strong> Try the longest context first; if insufficient data, back off to shorter contexts. E.g., try trigram prediction &rarr; if unseen context, fall back to bigram &rarr; fall back to unigram.</p>
+
+<h3>12.5 Naive Bayes Classifier</h3>
+<p>Classify actions using Bayes' theorem with the naive assumption that features are conditionally independent:</p>
+
+$$P(C | \mathbf{x}) \propto P(C) \prod_{i=1}^{n} P(x_i | C)$$
+
+<ul>
+    <li>$P(C)$ is the prior probability of class $C$ (how often this action occurs overall)</li>
+    <li>$P(x_i | C)$ is the likelihood of feature $x_i$ given class $C$ (estimated from training data)</li>
+    <li>Choose the class with the highest posterior probability</li>
+    <li><strong>Laplace smoothing</strong>: add 1 to all counts to avoid zero probabilities for unseen feature-class combinations: $P(x_i | C) = \frac{\text{count}(x_i, C) + 1}{\text{count}(C) + |V|}$</li>
+</ul>
+
+<h3>12.6 Exploration vs. Exploitation</h3>
+<p>The fundamental dilemma in online learning:</p>
+<ul>
+    <li><strong>Exploitation</strong> &mdash; use the best-known action based on current knowledge (greedy)</li>
+    <li><strong>Exploration</strong> &mdash; try new or uncertain actions to potentially discover better strategies</li>
+    <li><strong>Epsilon-greedy ($\varepsilon$-greedy)</strong> &mdash; with probability $\varepsilon$ choose a random action (explore), otherwise choose the best known (exploit). Common to decay $\varepsilon$ over time: $\varepsilon_t = \varepsilon_0 \cdot \gamma^t$</li>
+</ul>
+
+<h3>12.7 Q-Learning</h3>
+<p>A model-free reinforcement learning algorithm that learns an optimal action-value function $Q(s, a)$:</p>
+
+<div class="card-def">
+<strong>Q-Learning:</strong> Q-learning is an off-policy, model-free reinforcement learning algorithm that learns the optimal action-value function $Q^*(s,a)$ without requiring a model of the environment. It updates Q-values using temporal difference: $Q(s,a) \leftarrow Q(s,a) + \alpha[r + \gamma \max_{a'} Q(s',a') - Q(s,a)]$, where $\alpha$ is the learning rate and $\gamma$ is the discount factor. The "off-policy" property means the agent learns the optimal policy regardless of the exploration strategy it actually follows during training.
+</div>
+
+$$Q(s, a) \leftarrow Q(s, a) + \alpha \left[ r + \gamma \max_{a'} Q(s', a') - Q(s, a) \right]$$
+
+<p>Where:</p>
+<ul>
+    <li>$s$ = current state, $a$ = action taken, $r$ = reward received</li>
+    <li>$s'$ = next state, $a'$ = possible actions in next state</li>
+    <li>$\alpha$ = learning rate (typically 0.1&ndash;0.3)</li>
+    <li>$\gamma$ = discount factor (0&ndash;1); higher values prioritize future rewards</li>
+</ul>
+
+<pre><code class="language-python">import random
+from collections import defaultdict
+
+class QLearningAgent:
+    def __init__(self, actions, alpha=0.1, gamma=0.9, epsilon=0.1):
+        self.Q = defaultdict(lambda: defaultdict(float))
+        self.actions = actions
+        self.alpha = alpha      # learning rate
+        self.gamma = gamma      # discount factor
+        self.epsilon = epsilon  # exploration rate
+
+    def choose_action(self, state):
+        # Epsilon-greedy exploration
+        if random.random() < self.epsilon:
+            return random.choice(self.actions)
+        q_values = self.Q[state]
+        if not q_values:
+            return random.choice(self.actions)
+        return max(q_values, key=q_values.get)
+
+    def learn(self, state, action, reward, next_state):
+        # Q-learning update rule
+        max_next_q = max(self.Q[next_state].values()) if self.Q[next_state] else 0
+        td_error = reward + self.gamma * max_next_q - self.Q[state][action]
+        self.Q[state][action] += self.alpha * td_error
+
+# Example: AI learns combat tactics
+agent = QLearningAgent(actions=['attack', 'defend', 'heal', 'flee'])
+for episode in range(1000):
+    state = env.reset()
+    while not env.done:
+        action = agent.choose_action(state)
+        next_state, reward = env.step(action)
+        agent.learn(state, action, reward, next_state)
+        state = next_state</code></pre>
+
+<div class="card-caution">
+<strong>State representation matters:</strong> Q-learning requires a discrete state space. For continuous game states, discretize features into bins (e.g., health: low/medium/high, distance: close/medium/far). Too many states leads to sparse Q-tables and slow convergence; too few loses important distinctions.
+</div>
+
+<div class="card-note">
+<ul>
+    <li>ID3 builds decision trees by maximizing information gain (entropy reduction) at each split</li>
+    <li>ID4 extends ID3 for incremental online learning by maintaining counts and restructuring</li>
+    <li>Case-based reasoning: retrieve similar cases, adapt, evaluate, store (4R cycle)</li>
+    <li>N-grams predict sequences by conditioning on the last n&minus;1 observations</li>
+    <li>Naive Bayes classifies using independent feature likelihoods with Laplace smoothing</li>
+    <li>Q-learning: model-free RL that learns Q(s,a) values via temporal difference updates</li>
+</ul>
+</div>
+
+<!-- ==================== Topic 13: Advanced PCG ==================== -->
+<h2 id="t13">13. Advanced Procedural Content Generation</h2>
+
+<h3>13.1 PCG Overview</h3>
+<p>Procedural Content Generation creates game content algorithmically rather than manually. Benefits include infinite variety, reduced storage requirements, and reduced authoring burden. PCG can generate terrain, levels, quests, items, music, and narrative.</p>
+
+<h3>13.2 Random Numbers &amp; Seeding</h3>
+<p>Controlled randomness is essential for reproducible PCG:</p>
+<ul>
+    <li><strong>Pseudorandom number generators (PRNGs)</strong> &mdash; deterministic sequences from a seed value. Same seed &rarr; same content. Essential for multiplayer synchronization and save/load</li>
+    <li><strong>Seed propagation</strong> &mdash; derive sub-seeds from a master seed for independent generation streams (terrain, enemies, loot each get their own PRNG)</li>
+    <li><strong>Hash functions</strong> &mdash; map coordinates directly to random values without sequential generation: $\text{value} = \text{hash}(x, y, \text{seed})$. Enables parallel generation and arbitrary-order access</li>
+</ul>
+
+<h3>13.3 Terrain Generation</h3>
+<p>Several approaches to heightmap terrain:</p>
+<ul>
+    <li><strong>Perlin noise layering</strong> &mdash; combine multiple octaves of Perlin/Simplex noise at different frequencies and amplitudes:
+    $$h(x, y) = \sum_{i=0}^{n} \text{persistence}^i \cdot \text{noise}\left(\frac{x \cdot \text{lacunarity}^i}{s}, \frac{y \cdot \text{lacunarity}^i}{s}\right)$$
+    Typical values: persistence $\approx 0.5$, lacunarity $\approx 2.0$</li>
+    <li><strong>Fault formation</strong> &mdash; repeatedly draw random lines across the terrain; raise one side, lower the other. Many iterations produce realistic ridge patterns</li>
+    <li><strong>Thermal erosion</strong> &mdash; simulate rock crumbling: if height difference between neighbors exceeds a talus angle threshold, transfer material downhill</li>
+    <li><strong>Hydraulic erosion</strong> &mdash; simulate water flow: deposit rain, compute flow direction (steepest descent), erode material proportional to water volume and slope, deposit sediment where flow slows</li>
+</ul>
+
+<h3>13.4 Object Placement</h3>
+<p>Placing objects (trees, rocks, buildings) requires avoiding regular grid patterns while maintaining minimum spacing:</p>
+<ul>
+    <li><strong>Halton sequence</strong> &mdash; a low-discrepancy quasi-random sequence. Generate the $n$-th point using base-$b$ digit reversal:
+    $$H_b(n) = \sum_{i=0}^{k} d_i \cdot b^{-(i+1)}$$
+    where $d_i$ are the base-$b$ digits of $n$. Use bases 2 and 3 for x and y coordinates. More uniform than pseudorandom but still irregular</li>
+    <li><strong>Poisson disk sampling</strong> &mdash; guarantees minimum distance $r$ between any two points:
+        <ul>
+            <li>Start with a random seed point</li>
+            <li>Generate $k$ candidates (typically 30) in the annulus $[r, 2r]$ around an active point</li>
+            <li>Accept a candidate if no existing point is within distance $r$ (use spatial grid for fast checking)</li>
+            <li>Remove active point if all candidates rejected; repeat until active list is empty</li>
+        </ul>
+    </li>
+    <li><strong>Density maps</strong> &mdash; modulate placement probability using a grayscale map: forests are dense in valleys, sparse on mountaintops</li>
+</ul>
+
+<div class="card-concept">
+<strong>Poisson Disk Sampling:</strong> Poisson disk sampling generates point distributions where no two points are closer than a minimum distance $r$, producing a "blue noise" pattern that looks natural and avoids both clumping and regular grid artifacts. Bridson's fast algorithm runs in $O(n)$ by maintaining an active list and a background grid for constant-time proximity checks. It is the preferred method for placing vegetation, rocks, and other environmental objects in games because the enforced spacing prevents overlap while the randomness avoids visible repetition.
+</div>
+
+<div class="card-example">
+<strong>Horizon Zero Dawn's approach:</strong> Guerrilla Games used <em>dithered sampling</em> with density maps. A blue noise pattern (Poisson-disk-like) is modulated by a density field. Objects are placed where the noise value exceeds a threshold inversely proportional to desired density. This produces natural-looking distributions at any density level.
+</div>
+
+<h3>13.5 Grammars &amp; L-Systems</h3>
+<p><strong>L-systems</strong> (Lindenmayer systems) use parallel string rewriting rules to generate fractal-like structures, especially plants:</p>
+<ul>
+    <li><strong>Axiom</strong> &mdash; initial string (e.g., "F")</li>
+    <li><strong>Production rules</strong> &mdash; rewriting rules applied in parallel each iteration (e.g., F &rarr; F[+F]F[-F]F)</li>
+    <li><strong>Turtle graphics interpretation</strong>:
+        <ul>
+            <li><code>F</code> = move forward and draw</li>
+            <li><code>+</code> = turn left by angle $\delta$</li>
+            <li><code>-</code> = turn right by angle $\delta$</li>
+            <li><code>[</code> = push state (save position and heading)</li>
+            <li><code>]</code> = pop state (restore position and heading)</li>
+        </ul>
+    </li>
+</ul>
+
+<pre><code class="language-python">def l_system(axiom, rules, iterations):
+    """Generate L-system string by iterating production rules."""
+    current = axiom
+    for _ in range(iterations):
+        next_str = []
+        for ch in current:
+            next_str.append(rules.get(ch, ch))
+        current = ''.join(next_str)
+    return current
+
+# Koch snowflake
+koch = l_system('F', {'F': 'F+F-F-F+F'}, iterations=4)
+
+# Fractal plant
+plant = l_system('X', {
+    'X': 'F+[[X]-X]-F[-FX]+X',
+    'F': 'FF'
+}, iterations=6)
+
+# Stochastic L-system: multiple rules per symbol with probabilities
+import random
+def stochastic_l_system(axiom, rules, iterations):
+    current = axiom
+    for _ in range(iterations):
+        next_str = []
+        for ch in current:
+            if ch in rules:
+                # rules[ch] = [(prob, replacement), ...]
+                r = random.random()
+                cumulative = 0
+                for prob, replacement in rules[ch]:
+                    cumulative += prob
+                    if r <= cumulative:
+                        next_str.append(replacement)
+                        break
+            else:
+                next_str.append(ch)
+        current = ''.join(next_str)
+    return current</code></pre>
+
+<h3>13.6 Search-Based PCG</h3>
+<p>Treat content generation as an optimization problem:</p>
+<ul>
+    <li><strong>Simulated annealing</strong> &mdash; start with a random level; make small random mutations. Accept improvements always; accept worse solutions with probability $P = e^{-\Delta E / T}$ where $T$ decreases over time (cooling schedule). Escapes local optima early, converges later</li>
+    <li><strong>Genetic algorithms</strong> &mdash; maintain a population of candidate levels:
+        <ol>
+            <li><strong>Fitness evaluation</strong> &mdash; score each candidate on playability, difficulty, aesthetics</li>
+            <li><strong>Selection</strong> &mdash; pick parents (tournament, roulette wheel, rank-based)</li>
+            <li><strong>Crossover</strong> &mdash; combine parts of two parents to create offspring</li>
+            <li><strong>Mutation</strong> &mdash; randomly modify offspring</li>
+            <li>Repeat for many generations</li>
+        </ol>
+    </li>
+    <li><strong>Fitness function design</strong> is the key challenge: balance multiple objectives (solvability, difficulty, diversity, aesthetic quality)</li>
+</ul>
+
+<div class="card-def">
+<strong>Wave Function Collapse (WFC):</strong> Wave Function Collapse is a constraint-propagation algorithm for procedural generation that fills a grid by iteratively collapsing the cell with the lowest entropy (fewest remaining valid options) to a single tile, then propagating adjacency constraints to eliminate incompatible tiles in neighboring cells. Inspired by quantum superposition terminology, each uncollapsed cell exists in a "superposition" of all possible tiles until observation forces a choice. WFC is widely used for 2D tilemap and 3D voxel level generation because it guarantees local consistency by construction.
+</div>
+
+<h3>13.7 Constraint Satisfaction &amp; Wave Function Collapse</h3>
+<p><strong>Wave Function Collapse (WFC)</strong> generates content by propagating adjacency constraints from a tileset:</p>
+<ol>
+    <li><strong>Initialize</strong> &mdash; each cell starts in a superposition of all possible tiles</li>
+    <li><strong>Observe</strong> &mdash; select the cell with the lowest entropy (fewest remaining possibilities) and collapse it to a single tile (randomly weighted)</li>
+    <li><strong>Propagate</strong> &mdash; remove tiles from neighboring cells that are now incompatible with the chosen tile, based on adjacency rules</li>
+    <li><strong>Repeat</strong> until all cells are collapsed or a contradiction is reached (backtrack if so)</li>
+</ol>
+
+<pre><code class="language-python">import random, math
+from collections import defaultdict
+
+class WFC:
+    def __init__(self, width, height, tiles, adjacency_rules):
+        self.w, self.h = width, height
+        self.tiles = tiles
+        self.rules = adjacency_rules  # {(tile, direction): set of valid neighbors}
+        # Each cell starts with all tiles possible
+        self.grid = [[set(tiles) for _ in range(width)] for _ in range(height)]
+
+    def entropy(self, x, y):
+        n = len(self.grid[y][x])
+        return math.log2(n) if n > 1 else 0
+
+    def find_min_entropy(self):
+        min_e, best = float('inf'), None
+        for y in range(self.h):
+            for x in range(self.w):
+                e = self.entropy(x, y)
+                if 0 < e < min_e:
+                    min_e = e
+                    best = (x, y)
+        return best
+
+    def collapse(self, x, y):
+        tile = random.choice(list(self.grid[y][x]))
+        self.grid[y][x] = {tile}
+        self.propagate(x, y)
+
+    def propagate(self, x, y):
+        stack = [(x, y)]
+        while stack:
+            cx, cy = stack.pop()
+            for dx, dy, direction in [(0,-1,'N'),(1,0,'E'),(0,1,'S'),(-1,0,'W')]:
+                nx, ny = cx + dx, cy + dy
+                if 0 <= nx < self.w and 0 <= ny < self.h:
+                    valid = set()
+                    for tile in self.grid[cy][cx]:
+                        valid |= self.rules.get((tile, direction), set())
+                    before = len(self.grid[ny][nx])
+                    self.grid[ny][nx] &= valid
+                    if len(self.grid[ny][nx]) < before:
+                        stack.append((nx, ny))
+
+    def generate(self):
+        while True:
+            cell = self.find_min_entropy()
+            if cell is None:
+                break
+            self.collapse(*cell)</code></pre>
+
+<h3>13.8 Player Modeling &amp; Adaptive Content</h3>
+<p>Adapt generated content to individual players:</p>
+<ul>
+    <li><strong>Flow theory</strong> (Csikszentmihalyi) &mdash; optimal experience occurs when challenge matches skill. Too easy &rarr; boredom; too hard &rarr; frustration. PCG can dynamically adjust difficulty to maintain flow</li>
+    <li><strong>Drama management</strong> &mdash; control narrative pacing by adjusting encounter frequency, loot drops, and story beats based on player engagement metrics</li>
+    <li><strong>Player type modeling</strong> &mdash; classify players (Bartle's types: Achiever, Explorer, Socializer, Killer) from behavior patterns, then generate content that matches their preferred play style</li>
+    <li><strong>Difficulty curves</strong> &mdash; track player performance (death rate, completion time, resource usage) and adjust PCG parameters: spawn fewer enemies, add health packs, simplify puzzles</li>
+</ul>
+
+<h3>13.9 Constraint Puzzles</h3>
+<p>Generate puzzles that are guaranteed solvable by working backward from a solution:</p>
+<ul>
+    <li><strong>Forward generation + validation</strong> &mdash; generate random puzzles and test solvability with a solver; reject unsolvable ones (simple but wasteful)</li>
+    <li><strong>Backward generation</strong> &mdash; start from a solved state; apply random inverse operations to create the initial state (guarantees solvability by construction)</li>
+    <li><strong>Difficulty estimation</strong> &mdash; count minimum solver steps, number of red herrings, or use human playtesting data to calibrate perceived difficulty</li>
+</ul>
+
+<div class="card-note">
+<ul>
+    <li>Seeded PRNGs ensure reproducibility; hash functions enable parallel generation</li>
+    <li>Terrain: layered Perlin noise + erosion simulation; objects: Poisson disk sampling with density maps</li>
+    <li>L-systems generate fractal vegetation via parallel string rewriting + turtle graphics</li>
+    <li>Search-based PCG: simulated annealing and genetic algorithms optimize level design</li>
+    <li>Wave Function Collapse propagates tile adjacency constraints from lowest-entropy cells outward</li>
+    <li>Player modeling adapts difficulty to maintain flow and match player preferences</li>
+</ul>
+</div>
+
+<!-- ==================== Topic 14: Camera Control ==================== -->
+<h2 id="t14">14. Camera Control</h2>
+
+<h3>14.1 Camera Fundamentals</h3>
+<p>The camera defines what the player sees. Key parameters:</p>
+<ul>
+    <li><strong>Position</strong> &mdash; 3D world coordinates of the camera</li>
+    <li><strong>Look-at target</strong> &mdash; the point the camera focuses on (usually the player character)</li>
+    <li><strong>Up vector</strong> &mdash; defines camera roll (typically world up: $\langle 0, 1, 0 \rangle$)</li>
+    <li><strong>Field of view (FOV)</strong> &mdash; vertical angle of the view frustum (typically 60&deg;&ndash;90&deg;)</li>
+    <li><strong>Near/far clipping planes</strong> &mdash; objects outside this range are not rendered</li>
+</ul>
+
+<h3>14.2 Camera Types</h3>
+<table>
+    <tr><th>Type</th><th>Description</th><th>Use Case</th></tr>
+    <tr><td><strong>Fixed</strong></td><td>Static position and orientation</td><td>Security cameras, cutscenes</td></tr>
+    <tr><td><strong>Orbit</strong></td><td>Rotates around a target at fixed distance</td><td>Character inspection, 3rd-person</td></tr>
+    <tr><td><strong>Chase/Follow</strong></td><td>Follows behind the player with spring damping</td><td>Racing games, 3rd-person action</td></tr>
+    <tr><td><strong>First-person</strong></td><td>Attached to character's head/eyes</td><td>FPS, immersive sims</td></tr>
+    <tr><td><strong>RTS/Top-down</strong></td><td>Elevated view looking down at an angle</td><td>Strategy, simulation</td></tr>
+    <tr><td><strong>Cinematic</strong></td><td>Scripted paths, dolly, crane moves</td><td>Cutscenes, replays</td></tr>
+</table>
+
+<h3>14.3 Chase Camera with Spring Damping</h3>
+<p>A spring-damped chase camera avoids jerky movement by treating the camera as a mass-spring system:</p>
+
+$$\mathbf{a}_{\text{cam}} = k_s (\mathbf{p}_{\text{ideal}} - \mathbf{p}_{\text{cam}}) - k_d \cdot \mathbf{v}_{\text{cam}}$$
+
+<p>Where $k_s$ is the spring stiffness (higher = snappier tracking), $k_d$ is the damping coefficient (higher = less oscillation), and $\mathbf{p}_{\text{ideal}}$ is the desired camera position behind the player.</p>
+
+<div class="card-def">
+<strong>Spring-Damped Chase Camera:</strong> A spring-damped chase camera models the camera as a mass connected to the player by a virtual spring and dashpot, governed by $\mathbf{a} = k_s(\mathbf{p}_{\text{ideal}} - \mathbf{p}_{\text{cam}}) - k_d \mathbf{v}_{\text{cam}}$. The spring constant $k_s$ controls responsiveness (how quickly the camera catches up) while the damping constant $k_d$ suppresses oscillation. This second-order system produces smooth, physically plausible camera motion that avoids both the rigidity of hard-attached cameras and the sluggishness of pure interpolation.
+</div>
+
+<pre><code class="language-python">class ChaseCamera:
+    def __init__(self, offset, stiffness=5.0, damping=3.0):
+        self.offset = offset       # Desired offset from target (e.g., [0, 5, -10])
+        self.stiffness = stiffness
+        self.damping = damping
+        self.velocity = Vector3(0, 0, 0)
+
+    def update(self, target_pos, target_forward, dt):
+        # Compute ideal position behind target
+        ideal = target_pos + target_forward * self.offset.z + Vector3(0, self.offset.y, 0)
+
+        # Spring-damper acceleration
+        displacement = ideal - self.position
+        accel = self.stiffness * displacement - self.damping * self.velocity
+
+        # Integrate
+        self.velocity += accel * dt
+        self.position += self.velocity * dt
+
+        # Always look at target
+        self.look_at = target_pos + Vector3(0, 1.5, 0)  # Slightly above center</code></pre>
+
+<h3>14.4 Occlusion Avoidance</h3>
+<p>Prevent objects from blocking the view between camera and target:</p>
+<ul>
+    <li><strong>Raycast test</strong> &mdash; cast a ray from the target to the desired camera position. If it hits geometry, move the camera to the hit point (pulling it closer)</li>
+    <li><strong>Near clipping plane adjustment</strong> &mdash; move the near plane forward to prevent geometry from intersecting the view frustum (avoids "seeing through walls")</li>
+    <li><strong>Camera boom</strong> &mdash; use a rigid or spring-based arm from the target; collisions shorten the arm dynamically</li>
+    <li><strong>Transparency</strong> &mdash; make occluding objects semi-transparent or invisible rather than moving the camera</li>
+</ul>
+
+<h3>14.5 Virtual Cinematography</h3>
+<p>Apply real film techniques to game cameras:</p>
+<ul>
+    <li><strong>Line of interest</strong> &mdash; an imaginary line between two characters in dialogue. The camera should generally stay on one side (the "180-degree rule") to maintain spatial coherence</li>
+    <li><strong>Rule of thirds</strong> &mdash; position the subject at one-third intersections rather than dead center for more dynamic framing</li>
+    <li><strong>Jump cut avoidance</strong> &mdash; when switching camera angles, ensure sufficient change in position or angle (&gt;30&deg;) to avoid jarring "jump cuts"</li>
+    <li><strong>Shot types</strong> &mdash; establishing shot (wide), medium shot (waist up), close-up (face), over-the-shoulder; each conveys different emotional context</li>
+</ul>
+
+<h3>14.6 Constraint-Based Camera Planning</h3>
+<p>Define camera behavior as a constraint satisfaction problem:</p>
+<ul>
+    <li><strong>Hard constraints</strong> (must satisfy): target must be visible, camera must not clip through geometry, FOV within acceptable range</li>
+    <li><strong>Soft constraints</strong> (optimize): target at rule-of-thirds position, camera at eye level, smooth transitions, maintain consistent screen direction</li>
+    <li><strong>Solver</strong> &mdash; evaluate candidate camera positions and select the one that best satisfies all constraints. Can use gradient descent, evolutionary algorithms, or discrete search over a candidate grid</li>
+    <li>Multiple constraint sets for different gameplay contexts (combat, exploration, dialogue, cutscene) that blend smoothly during transitions</li>
+</ul>
+
+<div class="card-note">
+<ul>
+    <li>Chase cameras use spring-damper systems for smooth, responsive following</li>
+    <li>Occlusion avoidance via raycasts, boom shortening, or dynamic transparency</li>
+    <li>Virtual cinematography applies film rules: 180&deg; rule, rule of thirds, shot variety</li>
+    <li>Constraint-based planners balance hard requirements (visibility) with soft preferences (framing)</li>
+</ul>
+</div>
+
+<!-- ==================== Topic 15: Minimax & MCTS ==================== -->
+<h2 id="t15">15. Minimax &amp; Monte Carlo Tree Search</h2>
+
+<h3>15.1 Zero-Sum Games</h3>
+<p>A <strong>zero-sum game</strong> is one where one player's gain is exactly the other's loss. Total utility sums to zero. Examples: chess, checkers, Go, tic-tac-toe. Formally, for payoffs $u_1$ and $u_2$: $u_1 + u_2 = 0$.</p>
+
+<h3>15.2 Minimax Algorithm</h3>
+<p>Optimal play in zero-sum games: the <strong>maximizing</strong> player chooses moves that maximize the evaluation; the <strong>minimizing</strong> player chooses moves that minimize it:</p>
+
+$$\text{minimax}(s) = \begin{cases} \text{eval}(s) & \text{if } s \text{ is terminal or depth limit} \\ \max_{a} \text{minimax}(\text{result}(s, a)) & \text{if MAX's turn} \\ \min_{a} \text{minimax}(\text{result}(s, a)) & \text{if MIN's turn} \end{cases}$$
+
+<pre><code class="language-python">def minimax(state, depth, is_maximizing):
+    if depth == 0 or state.is_terminal():
+        return state.evaluate()
+
+    if is_maximizing:
+        best = float('-inf')
+        for move in state.get_moves():
+            state.make_move(move)
+            val = minimax(state, depth - 1, False)
+            state.undo_move(move)
+            best = max(best, val)
+        return best
+    else:
+        best = float('inf')
+        for move in state.get_moves():
+            state.make_move(move)
+            val = minimax(state, depth - 1, True)
+            state.undo_move(move)
+            best = min(best, val)
+        return best</code></pre>
+
+<p><strong>Complexity:</strong> $O(b^d)$ where $b$ is the branching factor and $d$ is the depth. Chess has $b \approx 35$ and $d \approx 80$ for a full game, making exhaustive search impossible.</p>
+
+<h3>15.3 Alpha-Beta Pruning</h3>
+<p>Prune branches that cannot affect the final decision, reducing the effective branching factor:</p>
+<ul>
+    <li>$\alpha$ = best value MAX can guarantee so far (lower bound)</li>
+    <li>$\beta$ = best value MIN can guarantee so far (upper bound)</li>
+    <li>Prune when $\alpha \geq \beta$ (the current branch cannot produce a better result for the player whose turn it is)</li>
+</ul>
+
+<pre><code class="language-python">def alpha_beta(state, depth, alpha, beta, is_maximizing):
+    if depth == 0 or state.is_terminal():
+        return state.evaluate()
+
+    if is_maximizing:
+        value = float('-inf')
+        for move in state.get_moves():
+            state.make_move(move)
+            value = max(value, alpha_beta(state, depth - 1, alpha, beta, False))
+            state.undo_move(move)
+            alpha = max(alpha, value)
+            if alpha >= beta:
+                break  # Beta cutoff - MIN won't allow this
+        return value
+    else:
+        value = float('inf')
+        for move in state.get_moves():
+            state.make_move(move)
+            value = min(value, alpha_beta(state, depth - 1, alpha, beta, True))
+            state.undo_move(move)
+            beta = min(beta, value)
+            if alpha >= beta:
+                break  # Alpha cutoff - MAX won't allow this
+        return value
+
+# Usage
+best_score = alpha_beta(root_state, depth=6, alpha=float('-inf'), beta=float('inf'), is_maximizing=True)</code></pre>
+
+<p><strong>Performance:</strong> With optimal move ordering, alpha-beta reduces the search from $O(b^d)$ to $O(b^{d/2})$, effectively doubling the searchable depth. Move ordering heuristics (e.g., try captures first in chess) are critical for achieving this.</p>
+
+<h3>15.4 Evaluation Functions</h3>
+<p>When we can't search to terminal states, an <strong>evaluation function</strong> estimates position quality:</p>
+<ul>
+    <li><strong>Material counting</strong> &mdash; weighted sum of piece values (chess: pawn=1, knight/bishop=3, rook=5, queen=9)</li>
+    <li><strong>Positional features</strong> &mdash; piece mobility, center control, king safety, pawn structure</li>
+    <li><strong>Linear combination</strong>: $\text{eval}(s) = \sum_i w_i \cdot f_i(s)$ where $f_i$ are features and $w_i$ are learned weights</li>
+    <li><strong>Neural network evaluators</strong> &mdash; modern engines (AlphaZero, Stockfish NNUE) use neural networks trained on millions of positions</li>
+</ul>
+
+<h3>15.5 Iterative Deepening</h3>
+<p>Search to depth 1, then depth 2, then depth 3, etc., until time runs out:</p>
+<ul>
+    <li>Always has a complete result from the previous depth to fall back on (anytime algorithm)</li>
+    <li>Previous iterations provide move ordering for alpha-beta in deeper searches</li>
+    <li>Overhead is small: most nodes are at the deepest level, so re-searching shallow levels costs little</li>
+    <li>Combined with a <strong>transposition table</strong> (hash table of previously evaluated positions) to avoid redundant work</li>
+</ul>
+
+<h3>15.6 Expectiminimax</h3>
+<p>Extends minimax for games with <strong>chance</strong> (dice, card draws). Add <strong>chance nodes</strong> that compute expected value:</p>
+
+$$\text{expecti}(s) = \begin{cases} \max_{a} \text{expecti}(\text{result}(s, a)) & \text{MAX's turn} \\ \min_{a} \text{expecti}(\text{result}(s, a)) & \text{MIN's turn} \\ \sum_{o} P(o) \cdot \text{expecti}(\text{result}(s, o)) & \text{chance node} \end{cases}$$
+
+<p>Example: Backgammon has dice rolls between moves. The chance node averages over all 21 possible dice outcomes.</p>
+
+<div class="card-def">
+<strong>Monte Carlo Tree Search (MCTS):</strong> MCTS is an anytime, simulation-based search algorithm that builds a search tree incrementally through repeated iterations of four steps: selection (traverse the tree using a bandit policy), expansion (add a child node), simulation (play out random moves to a terminal state), and backpropagation (update win/visit statistics along the path). Unlike minimax, MCTS requires no evaluation function because terminal game outcomes from random rollouts serve as value estimates, making it applicable to games where crafting heuristics is infeasible.
+</div>
+
+<h3>15.7 Monte Carlo Tree Search (MCTS)</h3>
+<p>A simulation-based search that doesn't need an evaluation function. Four phases repeated iteratively:</p>
+<ol>
+    <li><strong>Selection</strong> &mdash; traverse the tree from root using a selection policy (UCT) until reaching a node with unexplored children</li>
+    <li><strong>Expansion</strong> &mdash; add one (or more) child nodes for unexplored moves</li>
+    <li><strong>Simulation (Rollout)</strong> &mdash; play random moves from the new node until the game ends, obtaining a win/loss result</li>
+    <li><strong>Backpropagation</strong> &mdash; update visit counts and win counts for all nodes along the path from the new node back to the root</li>
+</ol>
+
+<h3>15.8 UCT Formula</h3>
+<p>The <strong>Upper Confidence Bound for Trees (UCT)</strong> balances exploitation (high win rate) with exploration (low visit count):</p>
+
+$$\text{UCT}(v) = \frac{w_v}{n_v} + C \sqrt{\frac{\ln N_p}{n_v}}$$
+
+<p>Where:</p>
+<ul>
+    <li>$w_v$ = number of wins after playing through node $v$</li>
+    <li>$n_v$ = number of visits to node $v$</li>
+    <li>$N_p$ = number of visits to the parent node</li>
+    <li>$C$ = exploration constant (typically $\sqrt{2}$); higher $C$ favors exploration</li>
+</ul>
+
+<div class="card-concept">
+<strong>UCT Exploitation-Exploration Balance:</strong> The UCT formula $\frac{w}{n} + C\sqrt{\frac{\ln N}{n}}$ explicitly balances two competing objectives. The first term (exploitation) favors nodes with high win rates, directing search toward promising moves. The second term (exploration) favors rarely-visited nodes, ensuring no branch is permanently ignored. The constant $C$ controls this trade-off: lower $C$ produces deeper, more focused search while higher $C$ produces broader, more exploratory search. UCT is provably optimal in the limit, converging to the minimax value as iterations increase.
+</div>
+
+<pre><code class="language-python">import math, random
+
+class MCTSNode:
+    def __init__(self, state, parent=None, move=None):
+        self.state = state
+        self.parent = parent
+        self.move = move
+        self.children = []
+        self.wins = 0
+        self.visits = 0
+        self.untried_moves = state.get_moves()
+
+    def uct_value(self, c=1.414):
+        if self.visits == 0:
+            return float('inf')
+        exploitation = self.wins / self.visits
+        exploration = c * math.sqrt(math.log(self.parent.visits) / self.visits)
+        return exploitation + exploration
+
+    def best_child(self, c=1.414):
+        return max(self.children, key=lambda n: n.uct_value(c))
+
+def mcts(root_state, iterations=1000):
+    root = MCTSNode(root_state)
+
+    for _ in range(iterations):
+        node = root
+        state = root_state.copy()
+
+        # 1. Selection - traverse tree using UCT
+        while not node.untried_moves and node.children:
+            node = node.best_child()
+            state.make_move(node.move)
+
+        # 2. Expansion - add one child
+        if node.untried_moves:
+            move = random.choice(node.untried_moves)
+            node.untried_moves.remove(move)
+            state.make_move(move)
+            child = MCTSNode(state.copy(), parent=node, move=move)
+            node.children.append(child)
+            node = child
+
+        # 3. Simulation - random rollout
+        sim_state = state.copy()
+        while not sim_state.is_terminal():
+            sim_state.make_move(random.choice(sim_state.get_moves()))
+        result = sim_state.get_result()  # 1 = win, 0 = loss
+
+        # 4. Backpropagation - update stats
+        while node is not None:
+            node.visits += 1
+            node.wins += result
+            node = node.parent
+            result = 1 - result  # Flip perspective
+
+    # Return most-visited child's move
+    return max(root.children, key=lambda c: c.visits).move</code></pre>
+
+<div class="card-concept">
+<strong>Why MCTS revolutionized Go:</strong> Traditional minimax with alpha-beta failed for Go because the branching factor (~250) is too large and no good evaluation function existed. MCTS sidesteps both problems: it uses random rollouts instead of evaluation functions, and UCT focuses search on the most promising moves. AlphaGo combined MCTS with neural network policy/value networks to defeat world champions.
+</div>
+
+<h3>15.9 MCTS Enhancements</h3>
+<ul>
+    <li><strong>Heavy playouts</strong> &mdash; use heuristic or learned policies instead of uniform random moves during rollouts for more informative simulations</li>
+    <li><strong>RAVE (Rapid Action Value Estimation)</strong> &mdash; share statistics between nodes that play the same move, even in different positions. Accelerates early convergence</li>
+    <li><strong>Progressive widening</strong> &mdash; for games with very large action spaces, gradually increase the number of children considered as visit count grows</li>
+    <li><strong>Parallelization</strong> &mdash; root parallelization (multiple trees, merge results), leaf parallelization (parallel rollouts from same leaf), or virtual loss (pretend the node lost to encourage other threads to explore elsewhere)</li>
+</ul>
+
+<div class="card-note">
+<ul>
+    <li>Minimax: recursively maximize/minimize for two-player zero-sum games; $O(b^d)$ complexity</li>
+    <li>Alpha-beta pruning reduces to $O(b^{d/2})$ with good move ordering</li>
+    <li>Evaluation functions estimate position quality when full search is infeasible</li>
+    <li>Iterative deepening provides anytime behavior and improves move ordering</li>
+    <li>Expectiminimax handles chance nodes by computing expected values</li>
+    <li>MCTS uses selection (UCT), expansion, rollout, backpropagation &mdash; no evaluation function needed</li>
+    <li>UCT balances exploitation (win rate) with exploration ($C\sqrt{\ln N / n}$)</li>
+</ul>
+</div>
+
+    </div>
+</article>
+
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+<script src="notes.js"></script>
+</body>
+</html>

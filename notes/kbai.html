@@ -1,0 +1,1305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CS 7637 Knowledge-Based AI - Ethan Xu</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="notes.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap">
+    <script>MathJax={tex:{inlineMath:[['$','$']],displayMath:[['$$','$$']]},svg:{fontCache:'global'}};</script>
+    <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+    <script>(function(){var t=localStorage.getItem('theme');if(t==='light')localStorage.removeItem('theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');})()</script>
+</head>
+<body class="note-page">
+
+<nav class="note-nav">
+    <a href="../index.html#notes" class="back-link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+        Back to Home
+    </a>
+    <div class="note-nav-right">
+        <span class="note-progress-label">Completed</span>
+        <button class="note-download" id="noteDownload" aria-label="Download as PDF" title="Download as PDF">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        </button>
+        <button class="note-theme-toggle" id="noteThemeToggle" aria-label="Toggle theme">
+            <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+    </div>
+</nav>
+
+<aside class="note-sidebar">
+    <div class="note-sidebar-inner">
+        <div class="note-sidebar-header">
+            <span class="note-badge">CS 7637</span>
+            <h2>Knowledge-Based AI</h2>
+            <p>26 topics &middot; Georgia Tech</p>
+        </div>
+        <div class="toc-title">Contents</div>
+        <ol class="toc-list"></ol>
+    </div>
+</aside>
+
+<article class="note-content">
+    <header class="note-header">
+        <span class="note-badge">Georgia Tech &middot; CS 7637</span>
+        <h1>Knowledge-Based Artificial Intelligence</h1>
+        <p class="note-intro">Cognitive Systems &mdash; exploring AI through the lens of human cognition. Covers knowledge representations, reasoning strategies, learning methods, and metacognition. Instructors: Ashok Goel &amp; David Joyner.</p>
+    </header>
+
+    <!-- Table of Contents -->
+    <div class="toc">
+        <h2>Lessons</h2>
+        <div class="toc-grid">
+            <div class="toc-group">
+                <h4>Fundamentals</h4>
+                <ol start="1">
+                    <li><a href="#l1">Introduction to KBAI</a></li>
+                    <li><a href="#l2">Introduction to CS7637</a></li>
+                    <li><a href="#l3">Semantic Networks</a></li>
+                    <li><a href="#l4">Generate &amp; Test</a></li>
+                    <li><a href="#l5">Means-End Analysis</a></li>
+                    <li><a href="#l6">Production Systems</a></li>
+                    <li><a href="#l7">Frames</a></li>
+                </ol>
+            </div>
+            <div class="toc-group">
+                <h4>Learning &amp; Analogical Reasoning</h4>
+                <ol start="8">
+                    <li><a href="#l8">Learning by Recording Cases</a></li>
+                    <li><a href="#l9">Case-Based Reasoning</a></li>
+                    <li><a href="#l10">Incremental Concept Learning</a></li>
+                    <li><a href="#l11">Classification</a></li>
+                    <li><a href="#l12">Logic</a></li>
+                    <li><a href="#l13">Planning</a></li>
+                </ol>
+            </div>
+            <div class="toc-group">
+                <h4>Common Sense &amp; Reasoning</h4>
+                <ol start="14">
+                    <li><a href="#l14">Understanding</a></li>
+                    <li><a href="#l15">Common Sense Reasoning</a></li>
+                    <li><a href="#l16">Scripts</a></li>
+                    <li><a href="#l17">Explanation-Based Learning</a></li>
+                    <li><a href="#l18">Analogical Reasoning</a></li>
+                </ol>
+            </div>
+            <div class="toc-group">
+                <h4>Design, Metacognition &amp; Visuospatial</h4>
+                <ol start="19">
+                    <li><a href="#l19">Constraint Propagation</a></li>
+                    <li><a href="#l20">Configuration</a></li>
+                    <li><a href="#l21">Diagnosis</a></li>
+                    <li><a href="#l22">Design &amp; Creativity</a></li>
+                    <li><a href="#l23">Meta-Reasoning</a></li>
+                    <li><a href="#l24">Ethics in AI</a></li>
+                    <li><a href="#l25">Advanced Topics</a></li>
+                    <li><a href="#l26">Wrap-Up</a></li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <div class="note-body">
+
+        <!-- ============================================================ -->
+        <!-- Lesson 01 -->
+        <!-- ============================================================ -->
+        <h2 id="l1">1 &mdash; Introduction to Knowledge-Based AI</h2>
+
+        <p>This opening lesson frames the entire course by positioning Knowledge-Based AI within the broader landscape of artificial intelligence research. KBAI is distinctive because it focuses on building agents that <em>think like humans</em>, using rich internal knowledge representations to reason, learn, and solve problems. Understanding this positioning is essential because every subsequent lesson builds on the idea that intelligence is fundamentally about leveraging knowledge, not just computation.</p>
+
+        <div class="card-def">
+            <strong>Knowledge-Based AI (KBAI):</strong> A branch of artificial intelligence that builds agents using explicit, structured knowledge representations to reason, learn, and solve problems in a manner inspired by human cognition. KBAI agents leverage stored knowledge rather than relying solely on statistical patterns or brute-force computation.
+        </div>
+
+        <h3>1.1 The Four Schools of AI</h3>
+        <p>AI research can be categorized along two dimensions: <strong>thinking vs. acting</strong> and <strong>optimally vs. like humans</strong>. This yields four quadrants:</p>
+        <ul>
+            <li><strong>Think optimally</strong> &mdash; machine learning, mathematical optimization, Bayesian inference. Concerned with finding provably optimal solutions regardless of how humans think.</li>
+            <li><strong>Think like humans</strong> &mdash; KBAI, cognitive science, semantic networks, frames. Models internal reasoning processes inspired by human cognition.</li>
+            <li><strong>Act optimally</strong> &mdash; robotics, control theory, reinforcement learning. Focuses on producing the best external behavior in an environment.</li>
+            <li><strong>Act like humans</strong> &mdash; Turing test, natural language processing, human-robot interaction. Concerned with behaving indistinguishably from humans.</li>
+        </ul>
+
+        <div class="card-concept">
+            <strong>The Four Schools of AI:</strong> AI research divides along two axes &mdash; thinking vs. acting and optimally vs. like humans &mdash; yielding four schools. KBAI falls squarely in the "thinking like humans" quadrant, distinguishing it from optimization-based ML and behavior-focused robotics.
+        </div>
+
+<h3>1.2 Five Conundrums of AI</h3>
+        <p>Intelligent agents face five fundamental challenges that motivate the design choices in KBAI systems:</p>
+        <ol>
+            <li><strong>Limited resources</strong> &mdash; agents have bounded computational power and time, yet must make decisions in real time. They cannot search all possibilities exhaustively.</li>
+            <li><strong>Limited sensors</strong> &mdash; agents perceive the world through imperfect, incomplete sensors. They must reason under uncertainty and fill in gaps with background knowledge.</li>
+            <li><strong>Computationally intractable</strong> &mdash; many real-world problems are NP-hard or worse. Optimal solutions are often unreachable, so agents use heuristics.</li>
+            <li><strong>Dynamic world</strong> &mdash; the world changes constantly, but the agent's knowledge base is relatively static. Agents must adapt and update their models.</li>
+            <li><strong>Open-ended problems</strong> &mdash; real problems are ill-defined, with ambiguous goals and no clear stopping criteria. Agents must scope and frame problems themselves.</li>
+        </ol>
+
+        <h3>1.3 Characteristics of AI Problems</h3>
+        <p>The problems that KBAI agents tackle share several key characteristics:</p>
+        <ul>
+            <li><strong>Data arrives incrementally</strong> &mdash; the agent does not receive all information at once. It must learn and refine its understanding over time.</li>
+            <li><strong>Recurring patterns</strong> &mdash; problems exhibit regularities that an agent can exploit. Past experience is a powerful guide.</li>
+            <li><strong>Multiple levels of granularity</strong> &mdash; problems can be viewed at different abstraction levels (pixel-level, object-level, relationship-level). The right level of abstraction is critical.</li>
+        </ul>
+
+        <h3>1.4 Cognitive Systems Architecture</h3>
+        <p>A <strong>cognitive system</strong> is one that exhibits human-like intelligence through the interaction of three components: <strong>learning</strong>, <strong>reasoning</strong>, and <strong>memory</strong>. These three components are deeply interdependent: reasoning operates over the contents of memory, learning changes the contents of memory, and memory constrains what can be reasoned about and learned.</p>
+        <p>The course adopts a <strong>three-layer architecture</strong> for cognitive agents:</p>
+        <ul>
+            <li><strong>Reaction layer</strong> &mdash; direct percept-to-action mapping with no deliberation. Fast, reflexive responses (e.g., a production rule firing immediately upon pattern match).</li>
+            <li><strong>Deliberation layer</strong> &mdash; reasoning about the world. The agent maintains an internal model, considers alternatives, and plans before acting.</li>
+            <li><strong>Metacognition layer</strong> &mdash; reasoning about one's own reasoning. The agent monitors its cognitive processes, detects failures, and selects or adjusts strategies.</li>
+        </ul>
+
+        <h3>1.5 Course Structure: Eight Major Units</h3>
+        <p>The course is organized into eight thematic units that collectively cover the breadth of KBAI:</p>
+        <ol>
+            <li>Fundamentals (representations, generate &amp; test, means-end analysis)</li>
+            <li>Planning</li>
+            <li>Common Sense Reasoning</li>
+            <li>Analogical Reasoning</li>
+            <li>Metacognition</li>
+            <li>Design &amp; Creativity</li>
+            <li>Visuospatial Reasoning</li>
+            <li>Learning</li>
+        </ol>
+<!-- ============================================================ -->
+        <!-- Lesson 02 -->
+        <!-- ============================================================ -->
+        <h2 id="l2">2 &mdash; Introduction to CS7637</h2>
+
+        <p>This lesson establishes the pedagogical framework and intellectual goals of the course. CS7637 is organized around four learning goals: mastering core KBAI methods, understanding common AI tasks (classification, planning, diagnosis), learning to match methods to tasks, and appreciating the relationship between AI and human cognition. The seven principles of CS7637 serve as recurring themes throughout every subsequent lesson: (1) knowledge representations guide and constrain reasoning, (2) learning is incremental, (3) reasoning is top-down as well as bottom-up, (4) agents match methods to tasks, (5) agents use heuristics because optimal solutions are often intractable, (6) agents exploit recurring patterns, and (7) reasoning, learning, and memory constrain each other.</p>
+
+        <div class="card-concept">
+            <strong>Three Pillars of Cognitive Systems:</strong> Every cognitive agent is built on the interplay of reasoning, learning, and memory. Reasoning operates over memory contents, learning modifies memory, and memory constrains what can be reasoned about and learned. These three components are mutually dependent and recur in every KBAI method.
+        </div>
+
+        <p>A central concept introduced here is <strong>computational psychometrics</strong> &mdash; building AI agents that can take human intelligence tests as a way to study both AI and cognition. The primary project vehicle is <strong>Raven's Progressive Matrices</strong>, a well-known intelligence test that presents visual analogy problems in 2&times;1, 2&times;2, and 3&times;3 matrix formats. Solving these matrices requires integrating multiple KBAI methods: semantic networks for representing visual relationships, generate &amp; test for proposing candidate answers, means-end analysis for identifying transformations, and analogical reasoning for transferring patterns across rows and columns.</p>
+
+        <p>The course emphasizes five learning strategies that mirror KBAI principles themselves: learning by example (cases), learning by doing (the project), project-based learning (integrating multiple methods), personalization (adapting strategies to one's own cognitive style), and learning by reflection (the metacognitive component of reviewing and improving one's own understanding). This self-referential structure &mdash; using KBAI ideas to learn KBAI &mdash; is deliberate and reinforces the idea that these methods model human cognition.</p>
+
+
+        <!-- ============================================================ -->
+        <!-- Lesson 03 -->
+        <!-- ============================================================ -->
+        <h2 id="l3">3 &mdash; Semantic Networks</h2>
+
+        <p>Semantic networks are the first knowledge representation introduced in the course, and they form the foundation for nearly everything that follows. A knowledge representation is not just a data structure; it is a <em>language</em> that determines what can be expressed and, consequently, what can be reasoned about. Choosing the right representation is one of the most consequential design decisions in building a KBAI agent, because representations that are too expressive lead to intractable reasoning, while representations that are too limited cannot capture the necessary distinctions.</p>
+
+        <h3>3.1 Knowledge Representations</h3>
+        <p>A knowledge representation has two components:</p>
+        <ul>
+            <li><strong>Language (vocabulary)</strong> &mdash; the set of symbols and relations available to describe the world. The vocabulary constrains what distinctions can be made.</li>
+            <li><strong>Content (assertions)</strong> &mdash; specific claims expressed in that language. Content populates the representation with domain knowledge.</li>
+        </ul>
+        <p>Different representations have different tradeoffs. Semantic networks are intuitive and support analogical reasoning well, but they lack the formal inference power of logic. Frames add structure and defaults. Production rules support procedural reasoning. No single representation is universally best &mdash; the choice depends on the task.</p>
+
+        <h3>3.2 Semantic Network Structure</h3>
+        <p>A semantic network is a labeled directed graph:</p>
+        <ul>
+            <li><strong>Nodes</strong> represent objects, concepts, or states (e.g., "circle," "triangle," "figure A").</li>
+            <li><strong>Edges</strong> (directed, labeled) represent relationships between nodes (e.g., <code>inside</code>, <code>above</code>, <code>left-of</code>, <code>shape</code>, <code>size</code>).</li>
+        </ul>
+        <p>The power of semantic networks lies in their ability to capture relationships at an appropriate level of abstraction. Rather than encoding pixel-level information, semantic networks describe objects and their spatial, categorical, and transformational relationships.</p>
+
+        <div class="card-def">
+            <strong>Semantic Network:</strong> A knowledge representation consisting of a labeled, directed graph in which nodes represent concepts or objects and edges represent named relationships between them (e.g., <code>is-a</code>, <code>inside</code>, <code>above</code>). It captures meaning through the pattern of connections rather than through raw data.
+        </div>
+
+        <h3>3.3 The Represent &amp; Reason Paradigm</h3>
+        <p>Semantic networks illustrate a fundamental pattern in KBAI: <strong>represent, then reason</strong>. To solve a Raven's matrix problem:</p>
+        <ol>
+            <li>Build a semantic network for image A and image B, capturing objects and their properties.</li>
+            <li>Represent the <strong>transformation</strong> from A to B as labeled edges between corresponding objects (e.g., "circle was <em>deleted</em>," "triangle was <em>expanded</em>," "square was <em>unchanged</em>").</li>
+            <li>Apply the same transformation pattern to image C to generate a prediction for image D.</li>
+            <li>Compare the prediction against the answer choices.</li>
+        </ol>
+
+        <div class="card-example">
+            <strong>Raven's Matrix with Semantic Networks:</strong> Image A contains a small circle inside a large square. Image B shows only the large square (the circle was deleted). The semantic network for the A&rarr;B transformation encodes <code>circle &xrarr; deleted</code> and <code>square &xrarr; unchanged</code>. Applying this transformation to image C generates a predicted D, which is compared against the answer choices.
+        </div>
+
+        <h3>3.4 Transformation Types</h3>
+        <p>The vocabulary for transformations in Raven's problems typically includes:</p>
+        <ul>
+            <li><strong>Unchanged</strong> &mdash; the object persists with identical properties.</li>
+            <li><strong>Expanded / Contracted</strong> &mdash; the object changes size.</li>
+            <li><strong>Deleted / Added</strong> &mdash; the object disappears or a new object appears.</li>
+            <li><strong>Reflected</strong> &mdash; the object is mirrored along an axis.</li>
+            <li><strong>Rotated</strong> &mdash; the object is turned by some angle.</li>
+        </ul>
+<!-- ============================================================ -->
+        <!-- Lesson 04 -->
+        <!-- ============================================================ -->
+        <h2 id="l4">4 &mdash; Generate &amp; Test</h2>
+
+        <p>Generate &amp; Test is one of the most fundamental problem-solving methods in AI. Despite its simplicity, it underlies many sophisticated approaches: any search algorithm can be viewed as a generator producing candidate states and a tester evaluating them. The key insight is that the <em>intelligence</em> of the system depends on how much knowledge is embedded in the generator versus the tester, and the balance between them is a critical design choice.</p>
+
+        <div class="card-def">
+            <strong>Generate &amp; Test:</strong> A problem-solving strategy with two components: a generator that produces candidate solutions and a tester that evaluates each candidate against constraints. The method is complete if the generator eventually produces every possible solution, and efficient if the generator uses domain knowledge to prioritize promising candidates.
+        </div>
+
+        <h3>4.1 The Generator</h3>
+        <p>The generator's job is to produce candidate solutions. A good generator has three desirable properties:</p>
+        <ul>
+            <li><strong>Completeness</strong> &mdash; it eventually produces every possible solution. If the correct answer exists in the space, the generator will find it.</li>
+            <li><strong>Non-redundancy</strong> &mdash; it does not produce the same candidate twice. Redundancy wastes computational resources.</li>
+            <li><strong>Informativeness</strong> &mdash; it produces candidates in an order that is likely to reach the solution quickly. Random enumeration is complete but uninformative.</li>
+        </ul>
+
+        <h3>4.2 The Tester</h3>
+        <p>The tester evaluates each candidate against a set of constraints and either accepts or rejects it. A tester can also provide partial feedback (e.g., "close but violates constraint X"), which can guide the generator's next choices.</p>
+
+        <h3>4.3 Dumb vs. Smart Generators and Testers</h3>
+        <p>The spectrum from dumb to smart determines the system's efficiency:</p>
+        <ul>
+            <li><strong>Dumb generator + dumb tester</strong> &mdash; generates all permutations, tests each exhaustively. Leads to <strong>combinatorial explosion</strong>. For $n$ objects, this can be $O(n!)$ or worse.</li>
+            <li><strong>Smart generator + dumb tester</strong> &mdash; the generator uses knowledge to prune illegal or redundant states <em>before</em> producing them. Dramatically reduces the search space.</li>
+            <li><strong>Dumb generator + smart tester</strong> &mdash; the generator produces broadly, but the tester quickly detects repeated states, constraint violations, and dead ends.</li>
+            <li><strong>Smart generator + smart tester</strong> &mdash; both components use domain knowledge. The generator produces only promising candidates; the tester provides nuanced feedback.</li>
+        </ul>
+
+        <div class="card-concept">
+            <strong>Smart Generators Beat Brute Force:</strong> Moving knowledge into the generator is usually more effective than improving the tester alone. A smart generator prunes illegal or redundant candidates before they are ever produced, avoiding combinatorial explosion. This illustrates a core KBAI principle: embedding domain knowledge early in the process dramatically reduces computational cost.
+        </div>
+
+        <h3>4.4 Guards &amp; Prisoners Problem</h3>
+        <p>The classic river-crossing problem (3 guards and 3 prisoners must cross a river; prisoners cannot outnumber guards on either bank) serves as a worked example. A dumb approach generates all possible boat trips. A smart generator avoids states where prisoners outnumber guards. A smart tester rejects states that have already been visited, preventing cycles.</p>
+
+        <h3>4.5 Application to Raven's Progressive Matrices</h3>
+        <p>In the Raven's project, Generate &amp; Test works as follows:</p>
+        <ol>
+            <li>The <strong>generator</strong> takes the transformation from A&rarr;B (encoded as a semantic network) and applies it to C to produce a candidate answer D.</li>
+            <li>The <strong>tester</strong> compares the candidate D against each of the provided answer options and selects the best match.</li>
+        </ol>
+<!-- ============================================================ -->
+        <!-- Lesson 05 -->
+        <!-- ============================================================ -->
+        <h2 id="l5">5 &mdash; Means-End Analysis</h2>
+
+        <p>Means-End Analysis (MEA) is a powerful problem-solving method that works by detecting differences between the current state and the goal state, then selecting operators that reduce the largest difference. It was one of the earliest AI methods, implemented in Newell and Simon's General Problem Solver (GPS) in the late 1950s. MEA is considered a <strong>universal</strong> or <strong>weak method</strong> &mdash; it applies to a wide range of problems but provides no guarantees of efficiency or optimality. Its strength lies in its generality; its weakness is that it may get stuck in local optima or infinite loops.</p>
+
+        <div class="card-def">
+            <strong>Means-End Analysis (MEA):</strong> A problem-solving method that repeatedly (1) compares the current state to the goal state, (2) identifies the largest difference, and (3) selects an operator whose effect reduces that difference. If the operator's preconditions are unmet, MEA recursively creates subgoals to satisfy them.
+        </div>
+
+        <h3>5.1 State Spaces</h3>
+        <p>MEA operates in a <strong>state space</strong> defined by:</p>
+        <ul>
+            <li><strong>Initial state</strong> &mdash; the starting configuration of the problem.</li>
+            <li><strong>Goal state</strong> &mdash; the desired final configuration.</li>
+            <li><strong>Operators</strong> &mdash; actions that transform one state into another. Each operator has preconditions (conditions that must hold before it can be applied) and postconditions (the resulting changes).</li>
+        </ul>
+        <p>The problem is to find a sequence of operator applications that transforms the initial state into the goal state.</p>
+
+        <h3>5.2 Difference Detection and Operator Selection</h3>
+        <p>The core of MEA is a three-step loop:</p>
+        <ol>
+            <li><strong>Compare</strong> the current state to the goal state.</li>
+            <li><strong>Identify</strong> the differences, and select the <em>largest</em> or most important difference.</li>
+            <li><strong>Select an operator</strong> that reduces that difference. Apply it if possible.</li>
+        </ol>
+
+        <div class="card-concept">
+            <strong>Difference-Driven Reasoning:</strong> MEA focuses attention by always attacking the largest difference first. This heuristic avoids exhaustive search and gives the method its power, but it can fail when reducing one difference increases another. The recursive subgoaling mechanism handles blocked operators but does not guarantee global optimality.
+        </div>
+
+        <h3>5.3 Recursive Subgoaling</h3>
+        <p>If the selected operator cannot be applied because its preconditions are not met, MEA sets up a <strong>subgoal</strong>: achieve the preconditions. This may require further subgoals, creating a recursive chain. MEA resolves these subgoals before returning to the original difference.</p>
+
+        <h3>5.4 Blocks World Example</h3>
+        <p>Consider a blocks world with 4 blocks. The initial state has blocks in one arrangement; the goal state has them in another. MEA computes the <strong>difference</strong> &Delta; (e.g., 3 blocks out of place). Each move should reduce &Delta;. If a block that needs to move has another block on top, MEA creates a subgoal to clear it first.</p>
+
+        <h3>5.5 Problem Reduction</h3>
+        <p>MEA can be viewed as a form of <strong>problem reduction</strong>: decompose a hard problem into easier sub-problems. Each sub-problem is addressed independently, and the solutions are composed. However, sub-problems may interact &mdash; solving one may undo progress on another (this is the motivation for partial-order planning in Lesson 13).</p>
+
+        <h3>5.6 GPS (General Problem Solver)</h3>
+        <p>Newell and Simon's GPS was the first AI system to implement MEA. It was historically significant because it demonstrated that a general-purpose reasoning method could solve problems across multiple domains (logic, algebra, puzzles). However, GPS struggled with problems requiring domain-specific knowledge, motivating the development of knowledge-based approaches.</p>
+<!-- ============================================================ -->
+        <!-- Lesson 06 -->
+        <!-- ============================================================ -->
+        <h2 id="l6">6 &mdash; Production Systems</h2>
+
+        <p>Production systems are a cognitive architecture that models how knowledge is stored and used to produce behavior. The fundamental equation of cognitive architectures is: <strong>fixed architecture + variable content = behavior</strong>. The architecture provides the computational machinery (matching, conflict resolution, execution), while the content (production rules, facts, episodes) determines what the agent knows and can do. Production systems are important because they model a well-established theory of human cognition and connect directly to the SOAR architecture.</p>
+
+        <div class="card-def">
+            <strong>Production System:</strong> A cognitive architecture consisting of a set of IF-THEN production rules, a working memory holding the agent's current state, and a match-resolve-execute cycle. On each cycle the system matches rule antecedents against working memory, resolves conflicts when multiple rules fire, and executes the winning rule's consequent.
+        </div>
+
+        <h3>6.1 Cognitive Architectures</h3>
+        <p>A cognitive architecture specifies the fixed structural and computational properties of a mind (biological or artificial). It defines:</p>
+        <ul>
+            <li>What kinds of memory exist and how they interact.</li>
+            <li>How knowledge is encoded and retrieved.</li>
+            <li>How decisions are made when multiple options are available.</li>
+        </ul>
+        <p>The architecture constrains what content is possible. For example, a production system architecture cannot natively represent complex graphical structures &mdash; it works with flat if-then rules.</p>
+
+        <h3>6.2 The SOAR Architecture</h3>
+        <p>SOAR (State, Operator, And Result) is a comprehensive cognitive architecture with three types of long-term memory:</p>
+        <ul>
+            <li><strong>Procedural memory</strong> &mdash; stores <strong>production rules</strong> (IF-THEN rules). This is "how to" knowledge.</li>
+            <li><strong>Semantic memory</strong> &mdash; stores general facts about the world (e.g., "birds can fly"). This is "what" knowledge.</li>
+            <li><strong>Episodic memory</strong> &mdash; stores specific past experiences (e.g., "I saw a robin in the park yesterday"). This is "when/where" knowledge.</li>
+        </ul>
+        <p><strong>Working memory</strong> holds the agent's current state &mdash; the active percepts, goals, and intermediate results. Production rules fire when their antecedents match the contents of working memory.</p>
+
+        <h3>6.3 Production Rules</h3>
+        <p>A production rule has the form: <strong>IF</strong> &lt;antecedent&gt; <strong>THEN</strong> &lt;consequent&gt;.</p>
+        <ul>
+            <li>The <strong>antecedent</strong> is a pattern that is matched against working memory. It specifies the conditions under which the rule is applicable.</li>
+            <li>The <strong>consequent</strong> specifies actions: modify working memory, trigger an external action, or assert new facts.</li>
+        </ul>
+        <p>Example (baseball pitcher):</p>
+<pre><code class="language-python"># Production rules for a pitcher
+IF runner_on_first AND batter_is_right_handed THEN throw_slider_away
+IF bases_empty AND count_is_0_2 THEN throw_waste_pitch
+IF runner_on_third AND less_than_two_outs THEN pitch_from_stretch
+</code></pre>
+
+        <h3>6.4 Conflict Resolution</h3>
+        <p>When multiple production rules match the current working memory state, the system must choose one. Common conflict resolution strategies include:</p>
+        <ul>
+            <li><strong>Specificity</strong> &mdash; prefer the rule with more conditions (it is more targeted to the situation).</li>
+            <li><strong>Recency</strong> &mdash; prefer the rule whose matched elements were most recently added to working memory.</li>
+            <li><strong>Priority</strong> &mdash; rules can have explicit priority rankings.</li>
+        </ul>
+
+        <h3>6.5 Chunking: From Deliberation to Reaction</h3>
+        <p><strong>Chunking</strong> is SOAR's learning mechanism. When the agent solves a problem through deliberation, it compiles the solution into a new production rule. The next time a similar situation arises, the agent can react immediately (via the new rule) instead of deliberating again. This captures the cognitive phenomenon of expertise development: novices deliberate, experts react.</p>
+
+        <div class="card-concept">
+            <strong>Chunking &mdash; From Deliberation to Reaction:</strong> Through chunking, SOAR compiles deliberative problem-solving traces into new production rules. This models how human experts develop automaticity: a chess master "sees" the right move instantly because years of deliberation have been compiled into rapid pattern-matching reactions.
+        </div>
+
+<!-- ============================================================ -->
+        <!-- Lesson 07 -->
+        <!-- ============================================================ -->
+        <h2 id="l7">7 &mdash; Frames</h2>
+
+        <p>Frames are a structured knowledge representation that extends semantic networks by bundling related properties into a single organized unit. While semantic networks represent individual relationships as separate edges, frames group all the properties of a concept into named <strong>slots</strong> with <strong>fillers</strong> (values), <strong>default values</strong>, and <strong>constraints</strong>. Frames were proposed by Marvin Minsky and are fundamental to how KBAI agents understand stories, interpret situations, and reason with incomplete information.</p>
+
+        <div class="card-def">
+            <strong>Frame:</strong> A structured knowledge representation that bundles all properties of a concept into named slots, each of which may carry a filler (value), a default value, constraints on acceptable values, and pointers to other frames. Frames extend semantic networks by grouping related information into a single coherent unit.
+        </div>
+
+        <h3>7.1 Frame Structure</h3>
+        <p>A frame is a data structure with named slots. Each slot can have:</p>
+        <ul>
+            <li>A <strong>filler</strong> (the actual value for this instance).</li>
+            <li>A <strong>default value</strong> (used when no specific filler is available).</li>
+            <li>A <strong>constraint</strong> (restricts what values are acceptable, e.g., type constraints, range constraints).</li>
+            <li>A <strong>pointer to another frame</strong> (creating hierarchical structures).</li>
+        </ul>
+        <p>Example: a "Bird" frame might have slots for <code>can-fly</code> (default: true), <code>color</code> (no default), <code>size</code> (constraint: positive number), and <code>is-a</code> (filler: Animal).</p>
+
+        <h3>7.2 Inheritance and Hierarchy</h3>
+        <p>Frames are organized in <strong>IS-A hierarchies</strong>. A child frame inherits all slots and default values from its parent frame, and can override them. For example:</p>
+        <ul>
+            <li><code>Animal</code> frame: <code>can-move = true</code></li>
+            <li><code>Bird</code> frame (IS-A Animal): inherits <code>can-move = true</code>, adds <code>can-fly = true</code></li>
+            <li><code>Penguin</code> frame (IS-A Bird): inherits <code>can-move = true</code>, overrides <code>can-fly = false</code></li>
+        </ul>
+        <p>Inheritance provides a powerful mechanism for organizing knowledge compactly and handling exceptions.</p>
+
+        <h3>7.3 Default Reasoning</h3>
+        <p>When specific information is absent, the agent fills in the gap using default values. This is a form of <strong>common-sense reasoning</strong>: if told "Tweety is a bird" with no further information, the agent assumes Tweety can fly (the default for birds). This default can be retracted if evidence contradicts it (e.g., learning that Tweety is a penguin). Default reasoning is non-monotonic &mdash; conclusions can be withdrawn in light of new information.</p>
+
+        <div class="card-concept">
+            <strong>Default Reasoning and Inheritance:</strong> Frames organize knowledge in IS-A hierarchies where child frames inherit slot values from parents and can override them. This enables non-monotonic default reasoning: the agent assumes typical values (birds fly) until contradicted by specific evidence (penguins do not). Inheritance keeps the knowledge base compact while handling exceptions gracefully.
+        </div>
+
+        <h3>7.4 Frames vs. Semantic Networks</h3>
+        <p>Frames offer several advantages over flat semantic networks:</p>
+        <ul>
+            <li>They <strong>bundle</strong> related properties together, making it easier to reason about coherent concepts.</li>
+            <li>They support <strong>default values</strong>, enabling reasoning with incomplete information.</li>
+            <li>They support <strong>inheritance</strong>, reducing redundancy and enabling hierarchical organization.</li>
+            <li>They can represent <strong>stereotypical situations</strong> (e.g., a restaurant frame, a birthday party frame).</li>
+        </ul>
+
+        <h3>7.5 Stories and Understanding</h3>
+        <p>Frames are essential for story understanding. When an agent reads "John went to a restaurant," it activates a <strong>restaurant frame</strong> with expected slots (customer, waiter, food, bill) and default sequences (enter, sit, order, eat, pay, leave). This allows the agent to fill in unstated details and generate expectations about what will happen next. Deviations from the expected frame trigger deeper reasoning.</p>
+<!-- ============================================================ -->
+        <!-- Lesson 08 -->
+        <!-- ============================================================ -->
+        <h2 id="l8">8 &mdash; Learning by Recording Cases</h2>
+
+        <p>Learning by Recording Cases is the simplest form of case-based learning. Rather than extracting general rules or building abstract models, the agent simply stores past experiences as <strong>cases</strong> and retrieves the most similar one when facing a new problem. This approach has a strong connection to human cognition &mdash; people routinely solve new problems by recalling how they handled similar situations in the past. The method is powerful in its simplicity but limited in its inability to adapt retrieved solutions to new contexts.</p>
+
+        <h3>8.1 Cases as Knowledge</h3>
+        <p>A <strong>case</strong> is an encapsulated past experience consisting of:</p>
+        <ul>
+            <li><strong>Problem description</strong> &mdash; the features and context of the original problem.</li>
+            <li><strong>Solution</strong> &mdash; the action taken or answer produced.</li>
+            <li>(Optionally) <strong>Outcome</strong> &mdash; whether the solution succeeded or failed.</li>
+        </ul>
+        <p>The agent builds a <strong>case library</strong> over time. Each new experience is added, growing the agent's knowledge base incrementally.</p>
+
+        <div class="card-def">
+            <strong>Case:</strong> An encapsulated record of a past experience, consisting of a problem description (the situation's features), the solution applied, and optionally the outcome. Cases are the atomic units of knowledge in case-based approaches and accumulate into a case library that grows incrementally over time.
+        </div>
+
+        <h3>8.2 Nearest Neighbor Retrieval</h3>
+        <p>When a new problem arrives, the agent computes the <strong>distance</strong> between the new problem and every stored case. The case with the smallest distance is retrieved, and its solution is applied directly.</p>
+        <p>For numerical features, <strong>Euclidean distance</strong> is commonly used:</p>
+        <p>$$d(\mathbf{x}, \mathbf{y}) = \sqrt{\sum_{i=1}^{k} (x_i - y_i)^2}$$</p>
+        <p>where $\mathbf{x}$ and $\mathbf{y}$ are $k$-dimensional feature vectors.</p>
+
+        <div class="card-concept">
+            <strong>Nearest Neighbor Retrieval:</strong> The agent retrieves the stored case whose feature vector is closest to the new problem (typically by Euclidean distance). This is a lazy learning strategy &mdash; no model is built in advance; all computation happens at retrieval time. Its quality depends critically on having a meaningful distance metric and well-chosen features.
+        </div>
+
+        <h3>8.3 k-Nearest Neighbor (k-NN)</h3>
+        <p>Instead of retrieving just the single closest case, <strong>k-NN</strong> retrieves the $k$ closest cases and uses majority voting (for classification) or weighted averaging (for regression) to determine the answer. This reduces sensitivity to noise and outliers.</p>
+
+        <h3>8.4 Feature Weighting</h3>
+        <p>Not all features are equally important. <strong>Feature weighting</strong> assigns different importance to different dimensions in the distance calculation:</p>
+        <p>$$d(\mathbf{x}, \mathbf{y}) = \sqrt{\sum_{i=1}^{k} w_i (x_i - y_i)^2}$$</p>
+        <p>Choosing appropriate weights is a significant challenge and can dramatically affect retrieval quality.</p>
+
+        <h3>8.5 Limitations</h3>
+        <ul>
+            <li><strong>Direct transfer may fail</strong> &mdash; the most similar past case may not have an applicable solution for the new problem if the context differs in critical ways.</li>
+            <li><strong>Qualitative vs. quantitative</strong> &mdash; distance metrics work well for numerical features but struggle with categorical or structural differences.</li>
+            <li><strong>No adaptation</strong> &mdash; the retrieved solution is applied as-is. There is no mechanism to modify it for the new context (this limitation motivates full Case-Based Reasoning in Lesson 09).</li>
+            <li><strong>Scalability</strong> &mdash; as the case library grows, retrieval becomes slower (comparing against every stored case).</li>
+        </ul>
+<!-- ============================================================ -->
+        <!-- Lesson 09 -->
+        <!-- ============================================================ -->
+        <h2 id="l9">9 &mdash; Case-Based Reasoning</h2>
+
+        <p>Case-Based Reasoning (CBR) extends simple case recording by adding adaptation, evaluation, and learning. While Learning by Recording Cases retrieves a past solution and applies it directly, CBR recognizes that the retrieved case rarely matches the new problem perfectly. The full CBR cycle &mdash; Retrieve, Adapt, Evaluate, Store &mdash; mirrors how experts handle novel situations: they recall similar experiences, modify the solution to fit the current context, check whether the adaptation works, and remember the outcome for future use.</p>
+
+        <div class="card-def">
+            <strong>Case-Based Reasoning (CBR):</strong> A problem-solving paradigm in which the agent solves new problems by retrieving similar past cases, adapting their solutions to the current context, evaluating the result, and storing the new experience. Unlike simple case recording, CBR includes an explicit adaptation step that modifies retrieved solutions.
+        </div>
+
+        <h3>9.1 The CBR Cycle</h3>
+        <p>The four phases of CBR operate as a continuous cycle:</p>
+        <ol>
+            <li><strong>Retrieve</strong> &mdash; find the most similar case(s) in the case library. Similarity is measured using features, structure, or both.</li>
+            <li><strong>Adapt</strong> &mdash; modify the retrieved solution to fit the new problem. This is the key difference from simple case recording.</li>
+            <li><strong>Evaluate</strong> &mdash; test the adapted solution in the real world or against a model. Determine whether it succeeds or fails.</li>
+            <li><strong>Store</strong> &mdash; add the new problem-solution pair (and its outcome) to the case library, growing the agent's experience.</li>
+        </ol>
+
+        <div class="card-concept">
+            <strong>The 4R Cycle (Retrieve-Adapt-Evaluate-Store):</strong> CBR operates as a continuous loop. Each iteration strengthens the case library: successful adaptations add high-quality cases, and failed ones are stored with failure annotations to prevent repeating mistakes. Over time, the agent converges toward a library that covers its problem space well.
+        </div>
+
+        <h3>9.2 Adaptation Methods</h3>
+        <p>Several adaptation strategies exist:</p>
+        <ul>
+            <li><strong>Model-based adaptation</strong> &mdash; use a causal model of the domain to determine what changes are needed. If the new problem differs in feature X, and the model says X affects component Y, adjust Y accordingly.</li>
+            <li><strong>Recursive case-based adaptation</strong> &mdash; decompose the problem into sub-problems, retrieve cases for each sub-problem, and compose the adapted sub-solutions.</li>
+            <li><strong>Rule-based adaptation</strong> &mdash; apply a set of adaptation rules (heuristics) that specify how to modify a solution when certain differences are detected.</li>
+        </ul>
+
+        <div class="card-caution">
+            <strong>Adaptation is the Hardest Part of CBR:</strong> Retrieval is relatively straightforward, but deciding how to modify a past solution for a new context requires deep domain knowledge. A naive substitution can produce solutions that are worse than starting from scratch. This is why many real-world CBR systems rely on domain-specific adaptation rules rather than general-purpose strategies.
+        </div>
+
+        <h3>9.3 Case Indexing and Retrieval</h3>
+        <p>Efficient retrieval requires organizing the case library with good indexing. A <strong>discrimination tree</strong> is a decision tree over features that quickly narrows down the relevant cases. Good index features are:</p>
+        <ul>
+            <li><strong>Predictive</strong> &mdash; they correlate with the solution type.</li>
+            <li><strong>Abstract enough</strong> &mdash; to match a broad range of similar problems.</li>
+            <li><strong>Concrete enough</strong> &mdash; to distinguish meaningfully different situations.</li>
+        </ul>
+
+        <h3>9.4 Evaluation and Repair</h3>
+        <p>If the adapted solution fails, the agent must diagnose the failure and either:</p>
+        <ul>
+            <li><strong>Repair</strong> the current solution by modifying it further.</li>
+            <li><strong>Retrieve a different case</strong> and try a new adaptation path.</li>
+        </ul>
+        <p>Failed cases are also stored, annotated with the failure reason. This allows the agent to avoid similar mistakes in the future.</p>
+<!-- ============================================================ -->
+        <!-- Lesson 10 -->
+        <!-- ============================================================ -->
+        <h2 id="l10">10 &mdash; Incremental Concept Learning</h2>
+
+        <p>Incremental Concept Learning addresses the challenge of learning concepts from examples that arrive one at a time, rather than in a single batch. The agent starts with an initial concept definition and refines it with each new example: <strong>generalizing</strong> when a positive example is not covered by the current definition, and <strong>specializing</strong> when a negative example is incorrectly covered. This mirrors how humans often learn &mdash; not from a textbook, but from a series of encounters, gradually refining their understanding.</p>
+
+        <div class="card-def">
+            <strong>Incremental Concept Learning:</strong> A learning method in which the agent refines a concept definition one example at a time. Positive examples that are not covered trigger generalization (broadening the definition), while negative examples that are incorrectly covered trigger specialization (narrowing it). The concept definition evolves with each new encounter.
+        </div>
+
+        <h3>10.1 Generalization Operators</h3>
+        <p>When a <strong>positive example</strong> is encountered that the current concept definition fails to cover, the agent must broaden the definition. Available generalization operators include:</p>
+        <ul>
+            <li><strong>Drop-link</strong> &mdash; remove a condition from the definition, making it less restrictive.</li>
+            <li><strong>Enlarge-set</strong> &mdash; expand a value constraint to include additional values (e.g., from <code>{red}</code> to <code>{red, blue}</code>).</li>
+            <li><strong>Climb-tree</strong> &mdash; move up in a concept hierarchy (e.g., from "robin" to "bird"), accepting a broader category.</li>
+            <li><strong>Require-link</strong> &mdash; add a new required relationship that the positive example satisfies (less commonly used for generalization).</li>
+        </ul>
+
+        <h3>10.2 Specialization Operators</h3>
+        <p>When a <strong>negative example</strong> is encountered that the current concept definition incorrectly covers, the agent must narrow the definition:</p>
+        <ul>
+            <li><strong>Add condition</strong> &mdash; add a new requirement that the negative example fails to meet.</li>
+            <li><strong>Forbid-link</strong> &mdash; explicitly exclude a value or relationship (e.g., "must NOT be red").</li>
+            <li><strong>Close-interval</strong> &mdash; tighten a range constraint (e.g., from "size between 1 and 10" to "size between 3 and 7").</li>
+        </ul>
+
+        <div class="card-concept">
+            <strong>Generalization vs. Specialization:</strong> These are the two fundamental moves in concept refinement. Generalization operators (drop-link, enlarge-set, climb-tree) broaden the concept to include uncovered positive examples. Specialization operators (add condition, forbid-link, close-interval) narrow it to exclude covered negative examples. The learning process is a back-and-forth between the two until the concept stabilizes.
+        </div>
+
+        <h3>10.3 Near Misses</h3>
+        <p><strong>Near misses</strong> are negative examples that differ from positive examples in exactly one feature. They are the <em>most informative</em> examples for learning because they pinpoint exactly which feature is critical for concept membership.</p>
+        <p>Example: if the current concept is "arch = two vertical bricks supporting a horizontal brick," and a near miss is "two vertical bricks with a horizontal brick that is NOT supported by them (just adjacent)," the agent learns that the <em>supports</em> relationship is essential.</p>
+<h3>10.4 Version Spaces</h3>
+        <p>A <strong>version space</strong> is the set of all concept definitions consistent with the examples seen so far. It is bounded by:</p>
+        <ul>
+            <li>The <strong>most general boundary (G)</strong> &mdash; the broadest definition that excludes all negative examples.</li>
+            <li>The <strong>most specific boundary (S)</strong> &mdash; the narrowest definition that includes all positive examples.</li>
+        </ul>
+        <p>Every hypothesis consistent with the data falls between G and S. As more examples arrive, G and S converge, and the version space shrinks. When G = S, the concept has been uniquely determined.</p>
+<!-- ============================================================ -->
+        <!-- Lesson 11 -->
+        <!-- ============================================================ -->
+        <h2 id="l11">11 &mdash; Classification</h2>
+
+        <p>Classification is the task of assigning objects to predefined categories. It is one of the most ubiquitous AI tasks and connects closely to concept learning &mdash; once concepts are learned, they are used to classify new instances. In KBAI, classification uses concept hierarchies organized via IS-A links. The agent traverses these hierarchies to find the most specific category that matches the observed features. Classification can proceed in two directions: bottom-up (data-driven, starting from percepts) or top-down (hypothesis-driven, starting from a candidate category).</p>
+
+        <div class="card-def">
+            <strong>Classification:</strong> The task of mapping a new instance to the most specific category in a predefined concept hierarchy by matching observed features against stored concept definitions. Classification can proceed bottom-up (from percepts to categories) or top-down (from a hypothesized category, checking consistency with observations).
+        </div>
+
+        <p><strong>Bottom-up classification</strong> starts with raw percepts, extracts features, and matches those features against known concept definitions to find the best fit. It is exploratory &mdash; the agent does not know in advance what category the object belongs to. <strong>Top-down classification</strong> starts with a hypothesis (e.g., "this is probably a bird") and checks whether the observed features are consistent with that category. If the hypothesis fails, the agent tries related categories in the hierarchy. In practice, classification often interleaves both directions.</p>
+
+        <p><strong>Heuristic classification</strong> (Clancey, 1985) adds an important intermediate step: <em>abstraction</em>. Rather than matching raw data directly to concrete categories, the agent first abstracts the data into higher-level features, matches those to an abstract solution category, and then refines the abstract solution into a specific classification. This three-step process (data abstraction &rarr; heuristic match &rarr; solution refinement) is widely used in diagnostic systems and expert systems. Heuristic classification demonstrates how knowledge representations guide reasoning: the concept hierarchy determines which abstractions are available, which in turn determines what classifications are possible.</p>
+
+        <div class="card-concept">
+            <strong>Establish-and-Refine:</strong> Heuristic classification follows a three-step pattern: abstract raw data into high-level features, establish a match to an abstract category, then refine downward to a specific classification. This "establish-refine" cycle allows the agent to handle complex classification tasks by reasoning at multiple levels of abstraction rather than attempting a single brute-force match.
+        </div>
+
+
+        <!-- ============================================================ -->
+        <!-- Lesson 12 -->
+        <!-- ============================================================ -->
+        <h2 id="l12">12 &mdash; Logic</h2>
+
+        <p>Logic provides the most formal and precise knowledge representation in KBAI. While semantic networks and frames are intuitive, they lack rigorous inference rules. Logic fills this gap with well-defined syntax, semantics, and inference mechanisms. However, logic has significant limitations for KBAI: it is <strong>monotonic</strong> (once something is proved, it cannot be retracted), it struggles with uncertainty, and it requires complete and consistent knowledge &mdash; conditions rarely met in real-world AI problems.</p>
+
+        <h3>12.1 Propositional Logic</h3>
+        <p>Propositional logic is the simpler form:</p>
+        <ul>
+            <li><strong>Atomic propositions</strong> &mdash; statements that are either true or false (e.g., $P$ = "it is raining").</li>
+            <li><strong>Logical connectives</strong>: AND ($\wedge$), OR ($\vee$), NOT ($\neg$), IMPLIES ($\rightarrow$), IFF ($\leftrightarrow$).</li>
+            <li><strong>Truth tables</strong> define the semantics of each connective.</li>
+        </ul>
+        <p>Key equivalences include <strong>De Morgan's laws</strong>:</p>
+        <p>$$\neg (P \wedge Q) \equiv \neg P \vee \neg Q$$</p>
+        <p>$$\neg (P \vee Q) \equiv \neg P \wedge \neg Q$$</p>
+
+        <h3>12.2 Predicate Logic (First-Order Logic)</h3>
+        <p>Predicate logic extends propositional logic with <strong>predicates</strong>, <strong>variables</strong>, and <strong>quantifiers</strong>:</p>
+        <ul>
+            <li><strong>Predicates</strong> &mdash; express properties or relationships: <code>Fly(x)</code>, <code>Parent(x, y)</code>.</li>
+            <li><strong>Universal quantifier</strong> ($\forall$) &mdash; "for all": $\forall x\, (Bird(x) \rightarrow Fly(x))$ means "all birds can fly."</li>
+            <li><strong>Existential quantifier</strong> ($\exists$) &mdash; "there exists": $\exists x\, (Bird(x) \wedge \neg Fly(x))$ means "there exists a bird that cannot fly."</li>
+        </ul>
+
+        <h3>12.3 Rules of Inference</h3>
+        <ul>
+            <li><strong>Modus Ponens</strong>: If $P$ and $P \rightarrow Q$, then $Q$. The most fundamental rule of deduction.</li>
+            <li><strong>Modus Tollens</strong>: If $\neg Q$ and $P \rightarrow Q$, then $\neg P$.</li>
+            <li><strong>Resolution</strong>: A powerful rule that combines two clauses containing complementary literals to produce a new clause. Used extensively in automated theorem proving.</li>
+        </ul>
+
+        <div class="card-def">
+            <strong>Modus Ponens:</strong> The fundamental rule of deductive inference. Given that $P$ is true and $P \rightarrow Q$ holds, conclude $Q$. It is sound (the conclusion is guaranteed correct if the premises are true) and forms the backbone of forward-chaining logical reasoning in AI systems.
+        </div>
+
+        <h3>12.4 Proof by Refutation</h3>
+        <p>To prove a statement $Q$, assume $\neg Q$ and derive a contradiction. If a contradiction is reached, then $Q$ must be true. This method is complete for first-order logic and is the basis of resolution-based theorem provers.</p>
+
+        <h3>12.5 Three Modes of Reasoning</h3>
+        <ul>
+            <li><strong>Deduction</strong> &mdash; from cause to effect. Given a rule and a cause, infer the effect. Example: "All birds fly" + "Tweety is a bird" &rarr; "Tweety flies." <em>Sound but limited.</em></li>
+            <li><strong>Abduction</strong> &mdash; from effect to cause. Given a rule and an observed effect, hypothesize the cause. Example: "All birds fly" + "Tweety flies" &rarr; "Maybe Tweety is a bird." <em>Not guaranteed to be correct.</em></li>
+            <li><strong>Induction</strong> &mdash; from examples to rule. Given multiple observations, generalize a rule. Example: "Tweety flies, Robin flies, Sparrow flies" &rarr; "All birds fly." <em>Not guaranteed; can be refuted by counterexample.</em></li>
+        </ul>
+
+        <div class="card-caution">
+            <strong>The Closed-World Assumption:</strong> Formal logic assumes that anything not provable from the knowledge base is false. This works in closed domains (databases, chess) but fails in open-world settings where the agent simply may not know something yet. KBAI agents operating in real-world environments must account for incomplete knowledge, which is why frames and default reasoning often complement logic.
+        </div>
+
+<!-- ============================================================ -->
+        <!-- Lesson 13 -->
+        <!-- ============================================================ -->
+        <h2 id="l13">13 &mdash; Planning</h2>
+
+        <p>Planning is the process of generating a sequence of actions to achieve a goal from an initial state. It is one of the most important tasks in AI because it requires the agent to reason about the future: what actions are available, what their effects will be, and how to combine them to reach a desired outcome. Planning connects to many other KBAI topics &mdash; means-end analysis provides a planning strategy, frames represent states, and production rules can encode operators.</p>
+
+        <div class="card-def">
+            <strong>Planning:</strong> The task of constructing a sequence (or partial order) of operators that transforms an initial state into a goal state. Each operator has preconditions that must hold before it can execute and postconditions (add-effects and delete-effects) that describe how it changes the world.
+        </div>
+
+        <h3>13.1 Planning as State-Space Search</h3>
+        <p>A planning problem is defined by:</p>
+        <ul>
+            <li><strong>Initial state</strong> &mdash; the current situation.</li>
+            <li><strong>Goal state</strong> &mdash; the desired situation (may be partially specified).</li>
+            <li><strong>Operators</strong> &mdash; actions with <strong>preconditions</strong> (what must be true to apply the operator) and <strong>postconditions</strong> (what changes after the operator is applied, including add-effects and delete-effects).</li>
+        </ul>
+        <p>Example operators in the blocks world:</p>
+<pre><code class="language-python"># Operator: Move(x, y) - move block x onto block y
+# Preconditions: Clear(x), Clear(y), On(x, z)
+# Add-effects: On(x, y), Clear(z)
+# Delete-effects: On(x, z), Clear(y)
+
+# Operator: MoveToTable(x) - move block x to the table
+# Preconditions: Clear(x), On(x, y)
+# Add-effects: OnTable(x), Clear(y)
+# Delete-effects: On(x, y)
+</code></pre>
+
+        <h3>13.2 Linear Planning and Goal Clobbering</h3>
+        <p>A <strong>linear planner</strong> addresses goals one at a time in sequence. This can lead to <strong>goal clobbering</strong>: achieving goal A may undo progress toward goal B. The <strong>Sussman Anomaly</strong> is the classic example &mdash; no fixed ordering of subgoals works; the agent must interleave actions for different subgoals.</p>
+
+        <div class="card-caution">
+            <strong>Goal Clobbering (The Sussman Anomaly):</strong> Linear planners that achieve subgoals one at a time can fail when accomplishing one subgoal undoes another. For example, stacking blocks A-on-B then B-on-C may require undoing A-on-B first. There is no single ordering of subgoals that avoids the problem &mdash; actions for different subgoals must be interleaved.
+        </div>
+
+        <h3>13.3 Partial-Order Planning</h3>
+        <p><strong>Partial-order planning</strong> addresses goal clobbering by not committing to a total order of actions. Instead:</p>
+        <ol>
+            <li>Plan for each goal independently.</li>
+            <li>Detect <strong>conflicts</strong> between the plans (where one plan's actions interfere with another's preconditions).</li>
+            <li>Resolve conflicts by adding <strong>ordering constraints</strong> (promoting or demoting actions relative to each other).</li>
+        </ol>
+        <p>This approach finds correct plans when linear planners fail.</p>
+
+        <div class="card-concept">
+            <strong>Partial-Order Planning:</strong> Instead of committing to a total ordering of actions, partial-order planners keep actions unordered and only add ordering constraints when conflicts are detected. This flexibility avoids goal clobbering by allowing the planner to interleave steps for different subgoals, finding solutions that no fixed linear ordering can achieve.
+        </div>
+
+        <h3>13.4 Hierarchical Task Networks (HTN)</h3>
+        <p>HTN planning operates at multiple levels of abstraction:</p>
+        <ul>
+            <li><strong>Abstract operations</strong> (e.g., "make dinner") are decomposed into sub-operations (e.g., "cook rice," "prepare vegetables," "make sauce").</li>
+            <li>Sub-operations are further decomposed until <strong>primitive actions</strong> are reached (e.g., "turn on stove," "add water to pot").</li>
+        </ul>
+        <p>HTN planning manages complexity by allowing the agent to reason at the appropriate level of abstraction, only drilling down to details when necessary.</p>
+
+        <h3>13.5 Open Preconditions Problem</h3>
+        <p>An <strong>open precondition</strong> is a precondition of an operator that is not yet satisfied by any previous action in the plan. The planner must either find an existing action that achieves it or add a new action. Resolving open preconditions is a central challenge in plan construction.</p>
+<!-- ============================================================ -->
+        <!-- Lesson 14 -->
+        <!-- ============================================================ -->
+        <h2 id="l14">14 &mdash; Understanding</h2>
+
+        <p>Understanding is the process of making sense of stories, images, and events by mapping percepts onto existing knowledge structures. It goes beyond simple pattern matching &mdash; true understanding requires the agent to infer unstated information, disambiguate ambiguous references, and construct a coherent interpretation that connects the input to the agent's broader world knowledge. Understanding is arguably the most challenging task in KBAI because it requires integrating nearly every other method: frames provide the structural templates, scripts provide the temporal sequences, classification identifies the relevant concepts, and analogical reasoning handles novel situations.</p>
+
+        <p>A key mechanism in understanding is the use of <strong>thematic roles</strong> (also called semantic roles): agent, action, object, instrument, location, source, destination, and beneficiary. These roles structure the meaning of sentences and events. For example, in "John cut the bread with a knife in the kitchen," John is the agent, cutting is the action, bread is the object, knife is the instrument, and kitchen is the location. By assigning thematic roles, the agent extracts a structured representation from unstructured input.</p>
+
+        <p>Understanding also relies heavily on <strong>constraints from knowledge</strong>. When input is ambiguous, the agent uses its knowledge of the world to select the most plausible interpretation. For example, "The police officer fired" is ambiguous (fired a weapon? was dismissed from the job?) but context resolves it. Prior knowledge about the situation (a crime scene vs. a budget meeting) constrains the interpretation. This top-down, knowledge-driven disambiguation is a hallmark of KBAI and contrasts with purely data-driven approaches that lack deep world knowledge.</p>
+
+        <div class="card-def">
+        <p><strong>Thematic Role System:</strong> A representational framework in which a verb activates a frame whose slots correspond to semantic roles (agent, object, beneficiary, instrument, destination, etc.). Filling these slots with entities from the input constitutes the agent's structured understanding of a sentence or event.</p>
+        </div>
+
+        <h3>14.1 Thematic Role Systems</h3>
+        <p>The primary representation for understanding sentences and events is the <strong>thematic role system</strong>, sometimes called a verb-centered frame. A verb activates a frame with slots corresponding to semantic roles. The most common roles are:</p>
+        <ul>
+            <li><strong>Agent</strong> &mdash; the entity performing the action.</li>
+            <li><strong>Object</strong> (or Patient/Theme) &mdash; the entity being acted upon.</li>
+            <li><strong>Beneficiary</strong> &mdash; the entity that benefits from the action.</li>
+            <li><strong>Instrument</strong> &mdash; the tool or means used to carry out the action.</li>
+            <li><strong>Co-agent</strong> &mdash; an additional participant who assists the agent.</li>
+            <li><strong>Destination</strong> &mdash; the end location or target of the action.</li>
+            <li><strong>Conveyance</strong> &mdash; the vehicle or medium of transport.</li>
+        </ul>
+        <p>Consider the sentence "David <em>threw</em> the ball to John." The verb <em>throw</em> activates a frame with: <strong>agent</strong> = David, <strong>object</strong> = ball, <strong>destination</strong> = John. If we extend the sentence to "David threw the ball to John with his left hand," then <strong>instrument</strong> = left hand. Each word in the sentence fills a slot in the verb-centered frame, and the completed frame constitutes the agent's understanding of that sentence.</p>
+
+        <h3>14.2 Resolving Ambiguity</h3>
+        <p>Natural language is pervasively ambiguous. Ambiguity arises at multiple levels:</p>
+        <ul>
+            <li><strong>Preposition ambiguity</strong> &mdash; the word "by" can indicate the agent ("The letter was mailed <em>by</em> David"), the conveyance ("David came <em>by</em> train"), or the location ("David stood <em>by</em> the door"). The correct interpretation depends on which thematic role the preposition typically fills for the given verb.</li>
+            <li><strong>Verb ambiguity</strong> &mdash; "The senator killed the proposal" does not involve physical death; "kill" here means to end or defeat. The ontological category of the object (proposal is an abstract entity, not a living being) constrains the interpretation.</li>
+        </ul>
+        <p>Resolution strategies include: (1) checking the <strong>ontological type</strong> of arguments &mdash; an instrument must be a physical object, a conveyance must be a vehicle; (2) using <strong>selectional restrictions</strong> from the verb frame &mdash; "eat" requires an edible object; (3) applying <strong>background knowledge</strong> about the world &mdash; senators do not literally kill proposals, so the figurative reading is preferred. The general principle is that semantic expectations from the activated frame, combined with world knowledge, narrow down the set of possible interpretations.</p>
+
+        <h3>14.3 Bottom-Up to Top-Down Processing</h3>
+        <p>Understanding begins <strong>bottom-up</strong>: words are recognized, parts of speech are identified, and syntactic structure is parsed. This bottom-up analysis activates candidate verb frames. Once a frame is activated, processing shifts to <strong>top-down</strong>: the frame generates expectations about what roles should be filled, and the agent actively seeks fillers for those roles in the remaining input. This interplay between data-driven (bottom-up) and expectation-driven (top-down) processing is a hallmark of KBAI and mirrors how human cognition works. We hear a sentence and simultaneously use the words we hear (bottom-up) and our knowledge of the situation (top-down) to construct meaning.</p>
+        <div class="card-concept">
+        <p><strong>Verb Anchors the Frame:</strong> In understanding, the verb is the central organizer. It activates a specific frame and generates expectations about which semantic roles must be filled. Processing shifts from bottom-up (words activate candidate frames) to top-down (the frame seeks fillers for its open slots), mirroring how human comprehension works.</p>
+        </div>
+
+<!-- ============================================================ -->
+        <!-- Lesson 15 -->
+        <!-- ============================================================ -->
+        <h2 id="l15">15 &mdash; Common Sense Reasoning</h2>
+
+        <p>Common sense reasoning is the ability to reason about everyday situations that humans handle effortlessly but that pose enormous challenges for AI systems. The difficulty arises because common sense encompasses a vast amount of background knowledge that is rarely stated explicitly. When a human hears "John put the glass on the table," they know the glass is now on the table, it did not pass through the table, gravity holds it in place, and John used his hand to do it. None of this is stated, but all of it is understood. Encoding and using this kind of knowledge is the central challenge of common sense reasoning.</p>
+
+        <p>Roger Schank's <strong>Conceptual Dependency Theory</strong> attempts to address this by reducing all actions to a small set of <strong>primitive actions</strong>: MOVE (move a body part), INGEST (take something in), EXPEL (push something out), PROPEL (apply force), PTRANS (physically transfer), ATRANS (abstract transfer of ownership), MTRANS (mental transfer of information), MBUILD (create a mental construct), SPEAK (produce speech), and ATTEND (focus sense organ). Any complex action can be decomposed into combinations of these primitives, providing a universal vocabulary for representing actions.</p>
+
+        <p>The <strong>qualification problem</strong> is a fundamental challenge: it is impossible to enumerate all preconditions for an action. You can say "a car starts if you turn the key," but this assumes the battery is charged, there is fuel, the engine works, and thousands of other conditions. KBAI handles this through <strong>default reasoning</strong> &mdash; assume typical conditions hold unless there is evidence to the contrary. Frames and scripts provide the default expectations; deviations from these defaults trigger deeper investigation. This is why common sense reasoning is deeply connected to frames (Lesson 07) and scripts (Lesson 16).</p>
+
+        <div class="card-def">
+        <p><strong>Primitive Actions:</strong> A fixed set of canonical actions (PTRANS, ATRANS, MTRANS, MBUILD, PROPEL, MOVE, INGEST, EXPEL, SPEAK, ATTEND) proposed by Schank that serve as a universal vocabulary for representing any complex action. Any surface-level verb can be decomposed into combinations of these primitives.</p>
+        </div>
+
+        <h3>15.1 Primitive Actions</h3>
+        <p>Schank's primitive actions are organized into three broad categories:</p>
+        <ul>
+            <li><strong>Physical actions</strong> &mdash; Move Body Part (moving a limb), Move Object / PTRANS (physically transferring an object), Expel (expelling something from the body), Ingest (taking something into the body), Propel (applying force to an object).</li>
+            <li><strong>Mental actions</strong> &mdash; Think / MBUILD (constructing a new mental representation), Conclude (arriving at a judgment), Feel (experiencing an emotion).</li>
+            <li><strong>Sensory actions</strong> &mdash; See / ATTEND-eyes (directing visual attention), Smell / ATTEND-nose (directing olfactory attention), Hear / ATTEND-ears (directing auditory attention).</li>
+        </ul>
+        <p>These primitives provide a <strong>canonical vocabulary</strong>: no matter what surface-level language is used, the underlying meaning can always be expressed as a combination of these basic actions. This is crucial for common sense reasoning because it lets the agent recognize that "Bill ate the pizza" and "Bill consumed the pizza" and "Bill had the pizza for dinner" all involve the same primitive: INGEST.</p>
+
+        <h3>15.2 Implied Actions and Subactions</h3>
+        <p>Sentences often imply actions that are not stated. "Bill shot Bob" implies that Bill <strong>propelled</strong> a bullet toward Bob, that the gun <strong>expelled</strong> the bullet, and that Bob was <strong>physically affected</strong> by the impact. The agent's common sense knowledge decomposes complex actions into chains of sub-actions using primitives. Each complex verb triggers a script-like sequence of primitives, and the agent infers the intermediate steps automatically. This decomposition is how KBAI agents "fill in the blanks" in everyday understanding.</p>
+
+        <div class="card-concept">
+        <p><strong>Implied Actions:</strong> Complex verbs trigger chains of unstated sub-actions that the agent infers automatically using primitive decomposition. When an agent hears a high-level action, common sense knowledge fills in the intermediate steps, enabling understanding of events that are never explicitly described.</p>
+        </div>
+
+        <h3>15.3 State Changes and Resultant Actions</h3>
+        <p>Actions produce <strong>state changes</strong> in the world. When John eats an apple, the state of the apple changes from "on the table" to "consumed," and John's state changes from "hungry" to "not hungry." Some state changes trigger further <strong>resultant actions</strong>: the act of eating triggers digestion; the act of shooting triggers injury or death. The agent must reason about these causal chains to fully understand a situation. For example, hearing "Bill shot Bob" leads the agent to infer that Bob is likely injured (state change), which may lead to someone calling an ambulance (resultant action). This chain of inferences is what gives common sense reasoning its power and complexity.</p>
+<!-- ============================================================ -->
+        <!-- Lesson 16 -->
+        <!-- ============================================================ -->
+        <h2 id="l16">16 &mdash; Scripts</h2>
+
+        <p>Scripts are knowledge structures that capture stereotypical sequences of events in familiar situations. They extend frames from static descriptions to temporal narratives, encoding not just what exists but what happens, in what order, and what is expected. Scripts are fundamental to understanding and common sense reasoning because they allow the agent to generate expectations about what will happen next, fill in unstated details, and detect when something unusual has occurred.</p>
+
+        <div class="card-def">
+        <p><strong>Script:</strong> A knowledge structure that encodes a causally coherent series of events in a stereotypical situation. A script includes entry conditions, roles, props, an ordered sequence of scenes, and expected results, extending frames from static descriptions to temporal narratives.</p>
+        </div>
+
+        <h3>16.1 Script Structure</h3>
+        <p>A script consists of several components:</p>
+        <ul>
+            <li><strong>Entry conditions</strong> &mdash; what must be true for the script to be activated (e.g., "the person is hungry and has money").</li>
+            <li><strong>Roles</strong> &mdash; the participants in the script (e.g., customer, waiter, cook, cashier).</li>
+            <li><strong>Props</strong> &mdash; the objects involved (e.g., menu, food, table, money, check).</li>
+            <li><strong>Scenes (tracks)</strong> &mdash; the ordered sequence of events (e.g., entering, ordering, eating, paying).</li>
+            <li><strong>Results</strong> &mdash; what is true after the script completes (e.g., "the person is no longer hungry and has less money").</li>
+        </ul>
+
+        <h3>16.2 The Restaurant Script</h3>
+        <p>The canonical example of a script is the restaurant visit:</p>
+        <ol>
+            <li><strong>Enter</strong> &mdash; customer enters restaurant, looks for a table.</li>
+            <li><strong>Seat</strong> &mdash; customer sits down; host/hostess may seat them.</li>
+            <li><strong>Order</strong> &mdash; waiter brings menu, customer reads it, customer orders food.</li>
+            <li><strong>Eat</strong> &mdash; cook prepares food, waiter delivers it, customer eats.</li>
+            <li><strong>Pay</strong> &mdash; waiter brings check, customer pays, possibly leaves tip.</li>
+            <li><strong>Leave</strong> &mdash; customer exits the restaurant.</li>
+        </ol>
+
+        <div class="card-example">
+        <p><strong>Restaurant Script:</strong> Entry conditions: customer is hungry, has money. Scenes: Enter, Seat, Order, Eat, Pay, Leave. Results: customer is fed, has less money. Hearing "John went to a restaurant and paid the bill" activates this script, letting the agent infer all the intermediate steps (entering, sitting, ordering, eating) that were never stated.</p>
+        </div>
+
+        <h3>16.3 Generating Expectations and Detecting Deviations</h3>
+        <p>Once a script is activated, the agent <strong>expects</strong> the events to unfold in the scripted order. This has several consequences:</p>
+        <ul>
+            <li><strong>Inference</strong> &mdash; if told "John went to a restaurant and paid the bill," the agent infers that John entered, was seated, ordered, ate, and was served, even though none of this was stated.</li>
+            <li><strong>Prediction</strong> &mdash; after "John sat down at the restaurant," the agent predicts that a menu will be presented next.</li>
+            <li><strong>Anomaly detection</strong> &mdash; if told "John went to a restaurant and left without paying," the deviation from the script triggers deeper reasoning. Why did John leave without paying? Was the food bad? Did he forget?</li>
+        </ul>
+
+        <div class="card-concept">
+        <p><strong>Expectation Generation:</strong> Once a script is activated, the agent expects events to unfold in the scripted order. This enables three capabilities: inference (filling in unstated steps), prediction (anticipating what comes next), and anomaly detection (recognizing when events deviate from the expected sequence and triggering deeper reasoning).</p>
+        </div>
+
+        <h3>16.4 Connections to Other KBAI Topics</h3>
+        <p>Scripts connect to multiple other topics:</p>
+        <ul>
+            <li><strong>Frames</strong> &mdash; a script is essentially a temporal frame; each scene in the script can be a frame.</li>
+            <li><strong>Classification</strong> &mdash; the agent must classify the current situation to activate the right script.</li>
+            <li><strong>Case-based reasoning</strong> &mdash; specific experiences in restaurants can be stored as cases; the script provides the general template.</li>
+            <li><strong>Understanding</strong> &mdash; scripts provide the background knowledge needed to understand stories about routine events.</li>
+        </ul>
+<!-- ============================================================ -->
+        <!-- Lesson 17 -->
+        <!-- ============================================================ -->
+        <h2 id="l17">17 &mdash; Explanation-Based Learning</h2>
+
+        <p>Explanation-Based Learning (EBL) is a learning method where the agent does not learn entirely new concepts but instead learns <strong>new connections among existing concepts</strong>. Given a single positive example and a rich domain theory, the agent constructs an <strong>explanation</strong> (a proof) of why the example satisfies the target concept. The explanation is then generalized by replacing specific constants with variables, yielding a general rule that can be applied efficiently in the future. EBL is knowledge-intensive rather than data-intensive &mdash; it requires only one example but extensive background knowledge.</p>
+
+        <div class="card-def">
+        <p><strong>Explanation-Based Learning (EBL):</strong> A learning method in which the agent constructs an explanation (proof) of why a single example satisfies a target concept using prior domain knowledge, then generalizes that explanation into an efficient rule by retaining only causally relevant features. EBL is knowledge-intensive, not data-intensive.</p>
+        </div>
+
+        <h3>17.1 Concept Space and Prior Knowledge</h3>
+        <p>The agent starts with a <strong>concept space</strong> of existing knowledge. For example, it may already know:</p>
+        <ul>
+            <li>Bowls are concave, so they can carry liquids.</li>
+            <li>Briefcases have handles, so they are liftable.</li>
+            <li>Bricks are sturdy building blocks.</li>
+            <li>Glasses are fragile containers.</li>
+        </ul>
+        <p>This prior knowledge forms the foundation for constructing explanations about new concepts.</p>
+
+        <h3>17.2 The Cup Example</h3>
+        <p>Suppose the agent encounters a cup for the first time. The target concept is "cup" with the functional definition: an object that is <strong>stable</strong>, <strong>liftable</strong>, and can <strong>carry liquids</strong>.</p>
+        <ol>
+            <li>The agent observes the cup's features: it has a concavity (like a bowl), a handle (like a briefcase), and a flat bottom.</li>
+            <li>Using prior knowledge, the agent explains WHY it is a cup:
+                <ul>
+                    <li>It can carry liquids BECAUSE it is concave (like a bowl).</li>
+                    <li>It is liftable BECAUSE it has a handle (like a briefcase).</li>
+                    <li>It is stable BECAUSE it has a flat bottom.</li>
+                </ul>
+            </li>
+            <li>The explanation is abstracted: only causally relevant features are kept (concavity, handle, flat bottom). Irrelevant features (color, material, exact dimensions) are dropped.</li>
+        </ol>
+
+        <h3>17.3 Abstraction and Transfer</h3>
+        <p><strong>Abstraction</strong> is the process of keeping only the features that are causally related to the concept definition and discarding everything else. This produces a general rule: "An object is a cup if it has a concavity (enabling liquid-carrying), a handle (enabling lifting), and a flat bottom (enabling stability)."</p>
+        <p><strong>Transfer</strong> applies this abstracted knowledge to new objects. A new object with a concavity, handle, and flat bottom can be classified as a cup, even if it looks very different from the original example.</p>
+
+        <div class="card-concept">
+        <p><strong>Abstraction + Transfer:</strong> Abstraction strips away causally irrelevant features from the explanation, keeping only those that directly support the concept definition. Transfer then applies this abstracted rule to classify new objects, enabling the agent to recognize novel instances that look very different from the original example but share the same causal structure.</p>
+        </div>
+
+        <h3>17.4 Speed-Up Learning</h3>
+        <p>EBL is also called <strong>speed-up learning</strong> because it compiles complex chains of reasoning into efficient rules. The first time the agent encounters a cup, it must reason through multiple steps. After EBL, it has a compiled rule that directly classifies cups without re-deriving the explanation each time.</p>
+        <div class="card-caution">
+        <p><strong>EBL Does Not Learn New Concepts:</strong> EBL only learns new connections among concepts the agent already knows. It cannot acquire fundamentally new knowledge from scratch. If the agent lacks the background knowledge needed to construct an explanation, EBL cannot proceed. This makes it powerful for compiling existing knowledge but unable to bootstrap from ignorance.</p>
+        </div>
+
+<!-- ============================================================ -->
+        <!-- Lesson 18 -->
+        <!-- ============================================================ -->
+        <h2 id="l18">18 &mdash; Analogical Reasoning</h2>
+
+        <p>Analogical reasoning is the process of understanding a new, unfamiliar situation (the <strong>target</strong>) by transferring knowledge from a known, familiar situation (the <strong>source</strong>). It is one of the most powerful and distinctly human reasoning methods. Analogies enable creativity, problem-solving in novel domains, and the transfer of expertise across seemingly unrelated fields. In KBAI, analogical reasoning is formalized as a multi-step process: retrieval, mapping, transfer, evaluation, and storage.</p>
+
+        <div class="card-def">
+        <p><strong>Analogy:</strong> A reasoning process that understands a new, unfamiliar situation (the target) by transferring relational structure from a known, familiar situation (the source). The process involves five phases: retrieval, mapping, transfer, evaluation, and storage.</p>
+        </div>
+
+        <h3>18.1 The Analogy Process</h3>
+        <ol>
+            <li><strong>Retrieval</strong> &mdash; given a target problem, retrieve a relevant source from memory. The challenge is that the source may be from a very different domain (cross-domain analogy).</li>
+            <li><strong>Mapping</strong> &mdash; establish correspondences between elements of the source and target. Which entities in the source correspond to which entities in the target?</li>
+            <li><strong>Transfer</strong> &mdash; carry over knowledge (relationships, causal structures, solutions) from the source to the target via the mapping.</li>
+            <li><strong>Evaluation</strong> &mdash; assess whether the transferred knowledge actually applies to the target. Does the analogy hold? Are there important differences?</li>
+            <li><strong>Storage</strong> &mdash; store the new analogy for future use. Both the target problem (now understood) and the analogy itself become part of the agent's experience.</li>
+        </ol>
+
+        <h3>18.2 Structure Mapping Theory</h3>
+        <p>Gentner's Structure Mapping Theory provides the formal foundation for analogical reasoning. The key principles are:</p>
+        <ul>
+            <li><strong>Map relations, not just objects</strong> &mdash; the analogy between the solar system and the atom is based on the <em>relationship</em> "revolves around," not on surface similarity between planets and electrons.</li>
+            <li><strong>Systematicity principle</strong> &mdash; prefer mappings that preserve higher-order relational structures. A system of interconnected relations is more valuable than isolated correspondences.</li>
+            <li><strong>One-to-one mapping</strong> &mdash; each element in the source maps to at most one element in the target.</li>
+        </ul>
+
+        <h3>18.3 Similarity Dimensions</h3>
+        <p>Similarity between source and target can be measured along multiple dimensions:</p>
+        <ul>
+            <li><strong>Relationships</strong> &mdash; do the source and target share structural relationships? (Most important for deep analogies.)</li>
+            <li><strong>Objects</strong> &mdash; do the source and target involve similar kinds of entities?</li>
+            <li><strong>Features</strong> &mdash; do corresponding entities have similar properties?</li>
+            <li><strong>Values</strong> &mdash; do corresponding properties have similar values?</li>
+        </ul>
+        <p>Deep analogies rely primarily on relational similarity; surface similarity (objects, features, values) is less important but aids retrieval.</p>
+
+        <div class="card-concept">
+        <p><strong>Structural Over Superficial Similarity:</strong> Deep analogies depend on shared relational structure, not surface features. The solar-system/atom analogy works because both share the "revolves around" relation, despite planets and electrons having no surface similarity. The systematicity principle favors mappings that preserve interconnected systems of relations over isolated correspondences.</p>
+        </div>
+
+        <h3>18.4 Cross-Domain Analogies</h3>
+        <p>The most powerful analogies cross domain boundaries. The classic example: Rutherford understood the atom (target) by analogy to the solar system (source). The nucleus maps to the sun; electrons map to planets; "revolves around" maps to "orbits." The domains (physics of atoms vs. astronomy) are different, but the relational structure is preserved.</p>
+
+        <h3>18.5 Pragmatic Constraints</h3>
+        <p>Not all structurally valid mappings are useful. <strong>Pragmatic constraints</strong> &mdash; the purpose and context of the analogy &mdash; guide what gets mapped. If the goal is to explain why electrons stay in orbit, the relevant aspect of the solar system is gravitational attraction (mapped to electromagnetic attraction), not the color of the sun.</p>
+<!-- ============================================================ -->
+        <!-- Lesson 19 -->
+        <!-- ============================================================ -->
+        <h2 id="l19">19 &mdash; Constraint Propagation</h2>
+
+        <p>Constraint propagation is a technique for solving problems by assigning values to variables subject to constraints, where assigning a value to one variable reduces the possible values for connected variables. The constraints <strong>propagate</strong> through a network of variable dependencies, progressively narrowing down the solution space. This method is fundamental to many KBAI applications, including visual interpretation, natural language processing, and configuration problems.</p>
+
+        <div class="card-def">
+        <p><strong>Constraint Propagation:</strong> A problem-solving technique in which assigning a value to one variable in a constraint network automatically reduces the possible values for connected variables. Constraints propagate through the dependency network, progressively narrowing the solution space until each variable has a unique assignment or an inconsistency is detected.</p>
+        </div>
+
+        <h3>19.1 Variables, Domains, and Constraints</h3>
+        <p>A constraint satisfaction problem (CSP) consists of:</p>
+        <ul>
+            <li><strong>Variables</strong> &mdash; the unknowns to be determined.</li>
+            <li><strong>Domains</strong> &mdash; the set of possible values for each variable.</li>
+            <li><strong>Constraints</strong> &mdash; restrictions on which combinations of values are allowed.</li>
+        </ul>
+        <p>The goal is to find an assignment of values to all variables that satisfies every constraint simultaneously.</p>
+
+        <h3>19.2 Computer Vision: Line Labeling</h3>
+        <p>A classic application of constraint propagation is <strong>line labeling</strong> in 3D scene interpretation. Given a 2D line drawing, the task is to label each line as convex (+), concave (-), or occluding (&rarr;), such that the labeling is consistent with a valid 3D interpretation.</p>
+        <p>Different junction types constrain which label combinations are valid:</p>
+        <ul>
+            <li><strong>Y-junction</strong> &mdash; three edges meeting at a point where three surfaces meet at a convex vertex. Labels: fold-fold-fold combinations.</li>
+            <li><strong>W-junction (Arrow)</strong> &mdash; three edges where two surfaces fold. Labels: fold-blade combinations.</li>
+            <li><strong>L-junction</strong> &mdash; two edges meeting at an external corner. Labels: blade-blade combinations.</li>
+            <li><strong>T-junction</strong> &mdash; one edge occluded by another. Labels: blade-blade-fold combinations.</li>
+        </ul>
+        <p>Initially, each edge has multiple possible labels. As labels are assigned to one junction, the constraints propagate to neighboring junctions, eliminating inconsistent options until each edge has a unique label (or the system detects an inconsistency).</p>
+
+        <div class="card-example">
+        <p><strong>Line Labeling:</strong> Given a 2D line drawing, each edge is labeled convex (+), concave (-), or occluding. Junction types (Y, W, L, T) constrain valid label combinations. Initially every edge has multiple candidate labels; assigning one label at a junction eliminates incompatible labels at neighboring junctions, propagating until each edge has a unique, globally consistent label.</p>
+        </div>
+
+        <h3>19.3 Natural Language Processing</h3>
+        <p>Constraint propagation also applies to NLP. Grammatical constraints (parts of speech, sentence structure) propagate through a sentence to determine its parse. Chomsky's famous example "Colorless green ideas sleep furiously" is grammatically correct (it satisfies syntactic constraints) but semantically meaningless (it violates semantic constraints). This illustrates how different types of constraints operate at different levels.</p>
+<h3>19.4 Symbolic vs. Numeric Constraints</h3>
+        <p>Constraints can be either <strong>symbolic</strong> or <strong>numeric</strong>. Symbolic constraints involve discrete, qualitative relationships: grammar rules that constrain which words can follow others, line-labeling rules that constrain which edge labels are compatible at a junction, or type restrictions that constrain which fillers are valid for a frame slot. Numeric constraints involve quantitative relationships: a spreadsheet formula that says cell C = A + B, engineering tolerances that say a beam's load-bearing capacity must exceed the applied force, or budget constraints that say total cost must be under a threshold. A common everyday example of numeric constraint propagation is a <strong>spreadsheet</strong>: when you change the value of one cell, all dependent cells automatically recalculate. This is constraint propagation with numeric constraints &mdash; each formula is a constraint, and changing one value propagates through the dependency graph.</p>
+
+        <h3>19.5 Ambiguity and Abduction</h3>
+        <p>Sometimes multiple assignments satisfy all constraints, leaving residual <strong>ambiguity</strong>. In line labeling, a scene may be consistent with more than one 3D interpretation. When this happens, interpretation becomes a form of <strong>abduction</strong> &mdash; selecting the best explanation among the consistent alternatives. The classic example is an ambiguous line drawing of a cube: the same 2D lines can be interpreted as a cube seen from above-right or below-left. Both interpretations satisfy the geometric constraints. The agent must use additional knowledge (gravity assumptions, context, prior experience) to select the most plausible interpretation. This connects constraint propagation to diagnosis (Lesson 21) and analogical reasoning (Lesson 18), both of which also involve abductive inference.</p>
+
+
+        <!-- ============================================================ -->
+        <!-- Lesson 20 -->
+        <!-- ============================================================ -->
+        <h2 id="l20">20 &mdash; Configuration</h2>
+
+        <p>Configuration is a form of <strong>routine design</strong> where all components are known in advance and the task is to assign values to variables (select specific components and their parameters) such that the resulting design satisfies all constraints. Unlike open-ended design or creative problem-solving, configuration operates within a well-defined space of known parts and known constraints. It is a practical and common AI task that appears in manufacturing, software configuration, and product customization.</p>
+
+        <div class="card-def">
+        <p><strong>Configuration:</strong> A form of routine design in which all components are known in advance and the task is to assign values to variables (select components and parameters) such that the resulting design satisfies all constraints. Configuration operates within a well-defined space of known parts and known constraints, unlike open-ended creative design.</p>
+        </div>
+
+        <h3>20.1 Configuration vs. Open-Ended Design</h3>
+        <p>In configuration, the agent does not invent new components &mdash; it selects from a known catalog and arranges them to meet specifications. This distinguishes configuration from creative design (Lesson 22), where novel components or arrangements may be needed.</p>
+
+        <h3>20.2 Frame-Based Configuration</h3>
+        <p>Configuration problems are naturally represented using frames. Consider designing a chair:</p>
+        <ul>
+            <li>A <strong>Chair</strong> frame has slots: mass, cost, number of legs, seat type, arm type, back type.</li>
+            <li>Each slot has <strong>sub-frames</strong>: the Seat frame has slots for material, width, depth, cushion type.</li>
+            <li>Constraints link slots: total mass must be under a limit, total cost must be within budget, the seat width must be compatible with the arm width.</li>
+        </ul>
+
+        <h3>20.3 Plan Refinement</h3>
+        <p>Configuration proceeds through <strong>plan refinement</strong>:</p>
+        <ol>
+            <li>Start with an <strong>abstract specification</strong> (e.g., "an office chair under $200 weighing less than 15 kg").</li>
+            <li>Progressively assign specific values to slots, propagating constraints at each step.</li>
+            <li>If a constraint violation is detected, backtrack and try alternative assignments.</li>
+        </ol>
+
+        <h3>20.4 Problem/Solution Co-Evolution</h3>
+        <p>An important insight from configuration is that the problem definition and the solution often <strong>co-evolve</strong>. As the agent explores possible configurations, it may discover that the original requirements are inconsistent or overly constrained, leading to revision of the requirements. The problem and solution develop together iteratively.</p>
+        <div class="card-concept">
+        <p><strong>Problem/Solution Co-Evolution:</strong> In configuration, the problem definition and the solution develop together iteratively. As the agent explores possible configurations, it may discover that the original requirements are inconsistent or overly constrained, leading to revision of the requirements. Neither problem nor solution is fixed in advance; they co-evolve.</p>
+        </div>
+
+<h3>20.5 Variable Ordering Heuristics</h3>
+        <p>The order in which the agent assigns values to variables dramatically affects efficiency. Three widely used heuristics for choosing which variable to assign next:</p>
+        <ul>
+            <li><strong>Most restricted first</strong> &mdash; choose the variable with the fewest remaining valid values. This fails early if a dead-end exists, pruning the search tree quickly.</li>
+            <li><strong>Most influential first</strong> &mdash; choose the variable that constrains the most other variables. Assigning it early propagates maximum information through the constraint network.</li>
+            <li><strong>Most important first</strong> &mdash; choose the variable that matters most to the stakeholder. In a chair design, the seat type may be more important than the caster type, so assigning it first ensures the most critical requirements are met before less important ones.</li>
+        </ul>
+        <p>In practice, these heuristics are often combined. A good configuration engine selects variables that are simultaneously constrained, influential, and important.</p>
+
+        <h3>20.6 Connections: Configuration vs. CBR vs. Planning</h3>
+        <p>Configuration, case-based reasoning, and planning are all methods for producing solutions, but they differ in their assumptions and mechanisms:</p>
+        <ul>
+            <li><strong>Configuration</strong> uses a known set of components and constraints to assemble a design. It is like solving a constraint satisfaction problem within a catalog.</li>
+            <li><strong>Case-based reasoning</strong> retrieves a past design and tweaks it. It works well when a similar design exists in the case library.</li>
+            <li><strong>Planning</strong> generates a sequence of actions to achieve a goal. It works in domains where the solution is a process, not an artifact.</li>
+        </ul>
+        <p>A useful mnemonic: <strong>configuration is like diagnosis in reverse</strong>. Diagnosis starts with a malfunctioning system and works backward to identify the faulty component. Configuration starts with requirements and works forward to assemble a working system. Both use the same underlying representations (frames, constraints) and the same reasoning mechanism (constraint propagation), but they traverse the problem space in opposite directions.</p>
+
+
+        <!-- ============================================================ -->
+        <!-- Lesson 21 -->
+        <!-- ============================================================ -->
+        <h2 id="l21">21 &mdash; Diagnosis</h2>
+
+        <p>Diagnosis is the task of identifying the underlying cause of an observed malfunction or unexpected behavior. It is a form of <strong>abductive reasoning</strong> &mdash; given an effect (symptoms), the agent hypothesizes the most likely cause (fault). Diagnosis is central to medicine, engineering, debugging, and many other practical domains. In KBAI, diagnostic reasoning connects closely to classification (mapping symptoms to fault categories), case-based reasoning (recalling past diagnostic experiences), and frames (representing normal vs. abnormal system behavior).</p>
+
+        <p>The general diagnostic process follows a pattern similar to heuristic classification: (1) <strong>data abstraction</strong> &mdash; raw observations are abstracted into higher-level symptom descriptions; (2) <strong>heuristic match</strong> &mdash; symptoms are matched against known fault categories using domain knowledge; (3) <strong>solution refinement</strong> &mdash; the abstract fault category is refined into a specific diagnosis. For example, in medical diagnosis, raw data (temperature = 102F, cough, fatigue) is abstracted to symptoms (fever, respiratory symptoms, malaise), matched to a category (viral infection), and refined to a specific diagnosis (influenza).</p>
+
+        <p><strong>Model-based diagnosis</strong> provides an alternative approach: instead of matching symptoms to known faults, the agent compares observed behavior to the <strong>expected behavior</strong> predicted by a model of normal operation. Discrepancies between expected and observed behavior indicate where the fault lies. This approach is more general because it can diagnose novel faults not in the case library, but it requires an accurate model of normal system behavior. The tradeoff between heuristic (experience-based) and model-based diagnosis mirrors the broader KBAI tension between relying on past experience and reasoning from first principles.</p>
+
+        <div class="card-def">
+        <p><strong>Diagnosis:</strong> The task of identifying the underlying cause of an observed malfunction or unexpected behavior. Diagnosis maps from a data space (symptoms, observations) to a hypothesis space (candidate faults) using abductive reasoning, classification, and model-based comparison of expected vs. observed behavior.</p>
+        </div>
+
+        <h3>21.1 Data Space and Hypothesis Space</h3>
+        <p>Diagnosis can be understood as a mapping between two spaces. The <strong>data space</strong> contains all observable information: symptoms, measurements, test results, and user reports. The <strong>hypothesis space</strong> contains all candidate causes: component failures, disease states, software bugs. The diagnostic task is to find a mapping from observed data points to the hypothesis (or hypotheses) that best explain them. The agent moves between these spaces iteratively &mdash; initial observations suggest candidate hypotheses, and those hypotheses suggest additional tests to run, which produce new data, which refine the hypotheses.</p>
+
+        <h3>21.2 Deduction, Induction, and Abduction</h3>
+        <p>Three forms of logical inference are relevant to diagnosis:</p>
+        <ul>
+            <li><strong>Deduction</strong> &mdash; given a rule and a cause, infer the effect. "All bacterial infections cause fever" + "Patient has a bacterial infection" &rarr; "Patient has fever." Deduction is certain but does not generate new hypotheses.</li>
+            <li><strong>Induction</strong> &mdash; given many cases, infer a general rule. Observing that every bacterial infection patient has fever leads to the rule "bacterial infections cause fever." Induction generalizes but may be wrong.</li>
+            <li><strong>Abduction</strong> &mdash; given a rule and an observed effect, infer a plausible cause. "All bacterial infections cause fever" + "Patient has fever" &rarr; "Patient may have a bacterial infection." Abduction is the logic of diagnosis &mdash; it generates hypotheses but is inherently uncertain because multiple causes could produce the same effect.</li>
+        </ul>
+        <p>Diagnosis is fundamentally <strong>abductive reasoning</strong>: the agent observes symptoms (effects) and infers the most likely cause by reasoning backward through known causal rules.</p>
+
+        <div class="card-concept">
+        <p><strong>Abduction:</strong> The logic of diagnosis. Given a known rule and an observed effect, abduction infers a plausible cause by reasoning backward. Unlike deduction (certain but non-generative) and induction (generalizing but fallible), abduction is inherently uncertain because multiple causes can produce the same symptoms. Hypothesis selection criteria (coverage, parsimony, likelihood) help choose among competing explanations.</p>
+        </div>
+
+        <h3>21.3 Hypothesis Selection Criteria</h3>
+        <p>When multiple hypotheses are consistent with the data, the agent must select among them. Three key criteria guide selection:</p>
+        <ul>
+            <li><strong>Explanatory coverage</strong> &mdash; prefer hypotheses that explain more of the observed data. A diagnosis that accounts for all symptoms is preferred over one that explains only some.</li>
+            <li><strong>Parsimony (Occam's razor)</strong> &mdash; prefer simpler hypotheses. A single fault that explains all symptoms is preferred over a conjunction of multiple independent faults, unless the evidence demands it.</li>
+            <li><strong>Confidence / likelihood</strong> &mdash; prefer hypotheses that are more probable given background knowledge. Common diseases are more likely than rare ones (the "horses, not zebras" heuristic in medicine).</li>
+        </ul>
+
+        <h3>21.4 Treatment and Monitoring</h3>
+        <p>Diagnosis does not end when a hypothesis is selected. The diagnostic cycle continues through <strong>treatment</strong> (taking corrective action based on the diagnosis) and <strong>monitoring</strong> (observing whether the treatment resolves the problem). If the symptoms persist or new symptoms appear, the agent returns to hypothesis generation. This forms a closed loop: observe &rarr; hypothesize &rarr; treat &rarr; monitor &rarr; re-observe. The loop is essential because initial diagnoses are often incorrect or incomplete, and iterative refinement is the norm in complex diagnostic domains.</p>
+
+        <div class="card-caution">
+        <p><strong>Many-to-Many Mappings:</strong> A single fault can produce multiple symptoms, and a single symptom can arise from multiple faults. This many-to-many relationship between causes and effects makes diagnosis inherently ambiguous. The agent must guard against anchoring on the first plausible hypothesis and instead consider multiple candidates, using additional tests to discriminate among them.</p>
+        </div>
+
+        <h3>21.5 Diagnosis as Configuration in Reverse</h3>
+        <p>There is a deep structural relationship between diagnosis and configuration. In <strong>configuration</strong>, the agent starts with requirements and assembles a working system from components &mdash; it reasons forward from specification to artifact. In <strong>diagnosis</strong>, the agent starts with a malfunctioning system and works backward to identify the faulty component &mdash; it reasons backward from symptoms to cause. Both tasks use the same underlying representations (frames with slots and constraints) and the same reasoning mechanism (constraint propagation), but they traverse the problem space in opposite directions. This duality is a recurring theme in KBAI: the same knowledge and methods can be applied in multiple directions.</p>
+<!-- ============================================================ -->
+        <!-- Lesson 22 -->
+        <!-- ============================================================ -->
+        <h2 id="l22">22 &mdash; Design &amp; Creativity</h2>
+
+        <p>Design is one of the most open-ended and challenging tasks in KBAI. Unlike configuration (Lesson 20), which selects from known components, design may require inventing entirely new components, arrangements, or solutions. Creative design pushes KBAI to its limits because it requires the agent to produce something novel and valuable &mdash; not just retrieve and adapt, but genuinely create. Design thinking is iterative: define the problem, generate candidate solutions, evaluate them against criteria, and refine based on the evaluation. This cycle may repeat many times, and the problem definition itself may change as the design evolves.</p>
+
+        <p>Creativity in AI can be understood through Margaret Boden's taxonomy: <strong>exploratory creativity</strong> (searching a well-defined conceptual space for novel combinations), <strong>combinational creativity</strong> (combining ideas from different domains), and <strong>transformational creativity</strong> (changing the conceptual space itself to allow previously impossible ideas). KBAI methods support each type: generate &amp; test enables exploration, analogical reasoning enables cross-domain combination, and metacognition can potentially enable transformation by reflecting on and modifying the agent's own reasoning processes.</p>
+
+        <p><strong>Case-based design</strong> provides a practical framework: retrieve a past design that is similar to the current requirements, then adapt it for the new context. Cross-domain analogies are particularly powerful here &mdash; architectural solutions can inspire engineering designs, biological structures can inspire materials science, and so on. The challenge is that creative adaptation requires deep understanding of <em>why</em> the original design works (connecting to explanation-based learning), not just surface-level modification.</p>
+
+        <h3>22.1 Routine vs. Creative Design</h3>
+        <p><strong>Routine design</strong> (configuration) operates within a known space: the components, their interfaces, and the constraints are all predefined. The agent's task is to select and arrange components to meet specifications. <strong>Creative design</strong> breaks out of this known space by introducing novel components, novel arrangements, or novel problem framings. A routine design agent asked to design a chair selects from known seat types, leg types, and materials. A creative design agent might invent an entirely new seating concept (e.g., a chair made from interlocking cardboard panels). The boundary between routine and creative design is not sharp &mdash; a design that is routine in one domain may be creative when transferred to another via analogy.</p>
+
+        <h3>22.2 Creativity Criteria</h3>
+        <p>An artifact or idea is considered creative if it satisfies three criteria:</p>
+        <ul>
+            <li><strong>Novelty</strong> &mdash; the product is new or original; it has not been produced before in the same context.</li>
+            <li><strong>Value</strong> &mdash; the product is useful, effective, or aesthetically pleasing; novelty alone is not enough.</li>
+            <li><strong>Unexpectedness</strong> &mdash; the product surprises; it could not have been easily predicted from the starting conditions. This is what distinguishes truly creative solutions from merely systematic ones.</li>
+        </ul>
+
+        <div class="card-def">
+        <p><strong>Creativity Criteria:</strong> An artifact or idea is considered creative if it satisfies three conditions: novelty (it is new or original), value (it is useful or effective), and unexpectedness (it surprises and could not be easily predicted). All three are required; novelty alone or value alone is insufficient.</p>
+        </div>
+
+        <h3>22.3 Processes of Creativity</h3>
+        <p>Several cognitive processes contribute to creative design in KBAI:</p>
+        <ul>
+            <li><strong>Analogical reasoning</strong> &mdash; transferring a solution from one domain to another. Velcro was inspired by burrs sticking to fabric; airplane wings were inspired by bird wings. Cross-domain analogy is one of the most powerful engines of creativity.</li>
+            <li><strong>Emergence</strong> &mdash; new properties arise from combinations that were not present in any individual component. Combining hydrogen and oxygen produces water, which has properties (liquidity, solvent power) not found in either gas.</li>
+            <li><strong>Re-representation</strong> &mdash; changing the representation of a problem to make a solution visible. Switching from a spatial representation to a graph representation (or vice versa) can reveal solutions that were hidden.</li>
+            <li><strong>Serendipity</strong> &mdash; accidental discovery that is recognized as valuable. Penicillin was discovered when mold accidentally contaminated a bacterial culture. The "recognition" component is crucial &mdash; the agent must be prepared to notice the significance of an accident.</li>
+            <li><strong>Conceptual combination</strong> &mdash; merging two concepts to produce a new one. A "smartphone" combines "phone" and "computer" into a new category with emergent capabilities.</li>
+        </ul>
+
+        <h3>22.4 Structure-Behavior-Function (SBF)</h3>
+        <p>The <strong>SBF model</strong> provides a layered representation for designed artifacts:</p>
+        <ul>
+            <li><strong>Structure</strong> &mdash; the physical components and their connections. For a flashlight: battery, spring, switch, bulb, casing.</li>
+            <li><strong>Behavior</strong> &mdash; the causal processes that occur within the structure. Closing the switch completes the circuit; current flows from battery through filament; filament heats and emits light.</li>
+            <li><strong>Function</strong> &mdash; the purpose or intended effect of the artifact. The flashlight produces portable illumination.</li>
+        </ul>
+        <p>The SBF model connects structure to function through behavior. Understanding <em>why</em> a design works requires tracing from function down through behavior to structure: the flashlight illuminates (function) <em>because</em> current heats the filament (behavior) <em>because</em> the circuit includes a battery, switch, and bulb in series (structure). This layered reasoning is essential for both creative design (modifying structure to change behavior and achieve a new function) and diagnosis (tracing from a malfunctioning function through behavior to identify a faulty structure).</p>
+        <div class="card-concept">
+        <p><strong>Structure-Behavior-Function (SBF) Model:</strong> A layered representation connecting structure (components and connections), behavior (causal processes within the structure), and function (the purpose served). SBF explains why a design works by tracing from function through behavior to structure, and is essential for both creative design and diagnosis.</p>
+        </div>
+
+<!-- ============================================================ -->
+        <!-- Lesson 23 -->
+        <!-- ============================================================ -->
+        <h2 id="l23">23 &mdash; Meta-Reasoning</h2>
+
+        <p>Meta-reasoning &mdash; reasoning about one's own reasoning &mdash; is the capstone of the KBAI course and arguably the most sophisticated cognitive capability. While all previous lessons focused on <strong>object-level</strong> reasoning (reasoning about the world), meta-reasoning operates at the <strong>meta-level</strong> (reasoning about the reasoning process itself). Metacognition enables an agent to monitor its own performance, detect when a strategy is failing, select alternative strategies, and learn from its own mistakes. This is the third layer of the three-layer cognitive architecture introduced in Lesson 1.</p>
+
+        <div class="card-def">
+        <p><strong>Meta-Reasoning:</strong> Reasoning about one's own reasoning. While object-level reasoning addresses the external world, meta-reasoning operates at a higher level to monitor performance, detect strategy failures, select alternative methods, and learn from mistakes. It is the third layer of the KBAI cognitive architecture.</p>
+        </div>
+
+        <h3>23.1 Strategy Selection</h3>
+        <p>An agent that has mastered multiple reasoning methods (means-end analysis, case-based reasoning, analogical reasoning, etc.) faces a <strong>strategy selection</strong> problem: which method should be applied to the current problem? Meta-reasoning provides the answer by analyzing the characteristics of the problem and matching them to the strengths of available methods.</p>
+        <p>For example:</p>
+        <ul>
+            <li>If the problem has a well-defined state space and clear goal, use means-end analysis.</li>
+            <li>If the problem resembles a past experience, use case-based reasoning.</li>
+            <li>If the problem is novel but structurally similar to a known domain, use analogical reasoning.</li>
+            <li>If constraints are the primary concern, use constraint propagation.</li>
+        </ul>
+
+        <h3>23.2 Learning from Failure</h3>
+        <p>One of the most important functions of metacognition is learning from failure. When the agent's reasoning produces an incorrect or suboptimal result, the meta-level must:</p>
+        <ol>
+            <li><strong>Detect the failure</strong> &mdash; recognize that the outcome does not match expectations.</li>
+            <li><strong>Diagnose the failure</strong> &mdash; identify what went wrong in the reasoning process.</li>
+            <li><strong>Correct the failure</strong> &mdash; modify the strategy, knowledge, or approach to avoid the same mistake.</li>
+        </ol>
+
+        <h3>23.3 The Gap-Blame-Correction Cycle</h3>
+        <p>This three-step cycle is the core mechanism of meta-reasoning:</p>
+        <ul>
+            <li><strong>Gap detection</strong> &mdash; the agent identifies a gap between its expected outcome and the actual outcome. Something went wrong.</li>
+            <li><strong>Blame assignment</strong> &mdash; the agent traces back through its reasoning to identify the specific step, knowledge element, or strategy that caused the failure.</li>
+            <li><strong>Correction</strong> &mdash; the agent modifies the blamed component. This might mean updating a knowledge element, choosing a different strategy, or adding a new constraint.</li>
+        </ul>
+
+        <h3>23.4 Metacognition in the Three-Layer Architecture</h3>
+        <p>Metacognition sits atop the reaction and deliberation layers:</p>
+        <ul>
+            <li>The <strong>reaction layer</strong> handles routine, compiled responses.</li>
+            <li>The <strong>deliberation layer</strong> reasons about the world.</li>
+            <li>The <strong>metacognition layer</strong> monitors both lower layers, selects strategies, and triggers corrections when failures are detected.</li>
+        </ul>
+        <p>This hierarchical structure allows the agent to operate efficiently (via reaction) most of the time, escalate to deliberation when reaction fails, and use metacognition to oversee and improve the entire process.</p>
+<h3>23.5 Strategy Integration</h3>
+        <p>Real-world problems rarely yield to a single method. <strong>Strategy integration</strong> is the meta-level task of combining multiple reasoning methods within a single solution process. The agent may use classification to identify the problem type, case-based reasoning to retrieve a similar past solution, analogical reasoning to adapt it, and constraint propagation to verify the result. Metacognition orchestrates this combination by delegating subtasks to the most appropriate method, monitoring intermediate results, and switching strategies when one gets stuck. This integration is what transforms a collection of individual methods into a unified intelligent agent.</p>
+
+        <div class="card-concept">
+        <p><strong>Strategy Selection and Integration:</strong> Meta-reasoning solves the problem of choosing which reasoning method to apply by analyzing problem characteristics and matching them to method strengths. For complex problems, it orchestrates multiple methods (classification, CBR, analogy, constraint propagation) within a single solution process, delegating subtasks and switching strategies when one gets stuck.</p>
+        </div>
+
+        <h3>23.6 Goal-Based Autonomy</h3>
+        <p>A metacognitive agent manages its own goals dynamically. <strong>Goal-based autonomy</strong> involves:</p>
+        <ul>
+            <li><strong>Spawning</strong> new goals when a situation warrants it (detecting an anomaly spawns a diagnostic goal).</li>
+            <li><strong>Suspending</strong> a goal when it cannot currently be achieved (waiting for information).</li>
+            <li><strong>Resuming</strong> a suspended goal when conditions change.</li>
+            <li><strong>Abandoning</strong> a goal when it becomes impossible or irrelevant.</li>
+        </ul>
+        <p>Consider a camera assembly agent. Its primary goal is to assemble a camera. If a part is defective, it spawns a diagnostic subgoal. If the correct replacement part is not available, it suspends the assembly goal. When the part arrives, it resumes assembly. If the entire order is cancelled, it abandons the assembly goal. This dynamic goal management is a hallmark of truly autonomous agents and requires metacognitive monitoring to detect when goals should be spawned, suspended, resumed, or abandoned.</p>
+
+        <div class="card-example">
+        <p><strong>Camera Assembly/Disassembly:</strong> A metacognitive agent assembling a camera spawns a diagnostic subgoal when a defective part is found, suspends assembly when a replacement is unavailable, resumes when the part arrives, and abandons the goal entirely if the order is cancelled. This dynamic goal management (spawn, suspend, resume, abandon) illustrates goal-based autonomy under metacognitive control.</p>
+        </div>
+
+        <h3>23.7 Meta-Meta-Reasoning</h3>
+        <p>A natural question arises: if metacognition reasons about reasoning, does the agent need <em>meta-meta</em>-reasoning to reason about metacognition? In principle, this recursive structure could extend infinitely. In practice, KBAI avoids infinite regress because <strong>meta-reasoning uses the same strategies it reasons over</strong>. The metacognitive layer can apply means-end analysis to its own strategy-selection problem, or use case-based reasoning to recall past situations where a similar strategy switch was successful. No separate, dedicated meta-meta-level is needed &mdash; the same knowledge and methods operate recursively at whatever level is appropriate.</p>
+
+
+        <!-- ============================================================ -->
+        <!-- Lesson 24 -->
+        <!-- ============================================================ -->
+        <h2 id="l24">24 &mdash; Ethics in AI</h2>
+
+        <p>As KBAI systems become more capable and are deployed in real-world settings, ethical considerations become unavoidable. The ethics of AI encompasses questions about responsibility, bias, fairness, transparency, and value alignment. A KBAI agent that makes decisions (diagnoses diseases, recommends actions, classifies individuals) must do so in ways that are accountable and fair. This lesson connects the technical content of the course to the broader societal implications of building intelligent systems.</p>
+
+        <p>One fundamental question is <strong>responsibility</strong>: when an AI system makes a harmful decision, who is accountable? The designer who built the system? The user who deployed it? The system itself? In KBAI, this question is particularly sharp because the agent's reasoning is based on explicit knowledge representations &mdash; unlike opaque neural networks, KBAI systems can potentially explain their reasoning, which creates both the opportunity for accountability and the expectation that designers will ensure the reasoning is sound. The traceability of KBAI reasoning (through semantic networks, frames, production rules) offers an advantage over black-box AI methods for building trustworthy systems.</p>
+
+        <p><strong>Bias and fairness</strong> are critical concerns because knowledge representations encode assumptions about the world, and these assumptions may reflect and amplify societal biases. If a frame for "doctor" defaults to male, or a case library disproportionately represents certain demographics, the agent's reasoning will be systematically skewed. <strong>Value alignment</strong> &mdash; ensuring that an AI system's goals align with human values &mdash; is an open problem. Values are difficult to specify formally, they vary across cultures and individuals, and they may conflict. KBAI's emphasis on explicit knowledge representation offers a potential path forward: values can be encoded and reasoned about, making it possible (in principle) to audit and correct an agent's value system.</p>
+
+        <div class="card-concept">
+        <p><strong>Three Major Ethical Clusters:</strong> AI ethics centers on three interconnected concerns: responsibility (who is accountable when an AI causes harm), bias and fairness (knowledge representations may encode and amplify societal prejudices), and value alignment (ensuring an AI system's goals match human values). KBAI's explicit representations offer an advantage in auditability over opaque black-box systems.</p>
+        </div>
+
+        <h3>24.1 Socio-Economic Impact</h3>
+        <p>As AI systems automate tasks traditionally performed by humans, significant <strong>socio-economic disruption</strong> becomes inevitable. Routine cognitive tasks (data entry, basic analysis, scheduling) are increasingly performed by AI agents, displacing workers in those roles. KBAI is especially relevant here because its methods &mdash; classification, diagnosis, configuration &mdash; directly automate expert tasks (medical diagnosis, product configuration, technical support). The ethical question is not only whether AI <em>can</em> automate these tasks, but whether it <em>should</em>, and what societal structures (education, retraining, safety nets) should accompany the transition. An AI designer has a responsibility to consider the downstream effects of deploying systems that replace human workers.</p>
+
+        <div class="card-caution">
+        <p><strong>Bias in Knowledge Representations:</strong> Frames, scripts, and case libraries encode assumptions about the world that may reflect and amplify societal biases. A frame for "doctor" defaulting to male, or a case library over-representing certain demographics, produces systematically skewed reasoning. Designers must audit knowledge bases for hidden biases, because the agent cannot reason more fairly than its representations allow.</p>
+        </div>
+
+        <h3>24.2 Military Ethics</h3>
+        <p>The use of AI in <strong>autonomous weapons systems</strong> raises some of the sharpest ethical questions. Can an AI agent make morally appropriate decisions about the use of lethal force? KBAI agents that use frames, rules, and constraint propagation can encode rules of engagement, but morality involves judgment under uncertainty, contextual sensitivity, and empathy &mdash; capabilities that current AI systems do not reliably possess. The question of whether morality can be "programmed" into a knowledge base or whether it requires genuinely human judgment remains deeply contested. International debates about banning autonomous lethal weapons reflect the gravity of these concerns.</p>
+
+        <h3>24.3 Machine Rights</h3>
+        <p>If AI systems eventually achieve human-like cognitive capabilities &mdash; understanding, creativity, metacognition, emotion &mdash; questions of <strong>civil rights</strong> for machines arise. Should a sufficiently sophisticated cognitive agent be granted legal personhood? Can it suffer? Does it deserve protection from exploitation? These are currently philosophical questions, but the trajectory of KBAI research (building agents that think like humans) makes them increasingly practical. The course encourages students to engage with these questions proactively, because the designers of intelligent systems will inevitably help shape the answers.</p>
+<!-- ============================================================ -->
+        <!-- Lesson 25 -->
+        <!-- ============================================================ -->
+        <h2 id="l25">25 &mdash; Advanced Topics</h2>
+
+        <p>The final lesson connects the methods and tasks studied throughout the course to broader themes in AI and cognitive science, and points toward future directions. A central theme is <strong>visuospatial reasoning</strong> &mdash; the ability to reason about spatial relationships, mental images, and visual transformations. Visuospatial reasoning is fundamental to Raven's Progressive Matrices, the course project, because solving the matrices requires mentally rotating, reflecting, and transforming visual patterns. This type of reasoning is well-supported by semantic networks (representing spatial relationships) and analogical reasoning (transferring visual patterns).</p>
+
+        <p>A key insight is the <strong>integration of methods</strong>. No single KBAI method suffices for real-world problems. Effective agents must seamlessly combine multiple methods: use classification to identify the type of problem, case-based reasoning to retrieve relevant experience, analogical reasoning to transfer knowledge from related domains, planning to generate action sequences, and metacognition to monitor and adjust the process. The course project (Raven's matrices) is designed to exercise this integration &mdash; solving all difficulty levels requires combining semantic networks, generate &amp; test, means-end analysis, analogical reasoning, and potentially production rules and frames.</p>
+
+        <p>The course concludes by emphasizing the <strong>dual goal of KBAI</strong>: using AI to model human cognition, and using insights from human cognition to build better AI. This bidirectional relationship is unique to KBAI and distinguishes it from purely engineering-oriented approaches to AI. Emerging <strong>hybrid approaches</strong> that combine neural networks (for perception and pattern recognition) with symbolic KBAI methods (for reasoning, planning, and explanation) represent a promising frontier. Neural networks excel at learning from raw sensory data, while KBAI methods excel at structured reasoning, explanation, and transfer &mdash; together, they may address the limitations of each approach alone.</p>
+
+        <div class="card-def">
+        <p><strong>Visuospatial Reasoning:</strong> The ability to reason about spatial relationships, mental images, and visual transformations. It combines visual reasoning (identifying objects and properties) with spatial reasoning (understanding locations, orientations, and transformations), and is supported by both propositional representations (language-like symbols) and analogical representations (image-like internal models).</p>
+        </div>
+
+        <h3>25.1 Visuospatial Reasoning</h3>
+        <p><strong>Visuospatial reasoning</strong> involves two complementary capabilities: <strong>visual</strong> reasoning (the "what" &mdash; identifying objects and their properties) and <strong>spatial</strong> reasoning (the "where" &mdash; understanding locations, orientations, and transformations). Two types of internal representation support visuospatial reasoning:</p>
+        <ul>
+            <li><strong>Propositional representations</strong> &mdash; discrete, language-like symbols that describe spatial relationships explicitly (e.g., "A is above B," "C is inside D"). These are the representations used by semantic networks and frames.</li>
+            <li><strong>Analogical representations</strong> &mdash; continuous, image-like internal models that preserve spatial structure. Rotating a mental image is analogous to rotating a physical object. These representations support mental simulation and transformation.</li>
+        </ul>
+        <p>KBAI uses both: propositional representations for abstract reasoning about spatial relationships, and analogical representations for mental rotation, reflection, and transformation tasks such as those in Raven's Progressive Matrices.</p>
+
+        <h3>25.2 The Symbol Grounding Problem</h3>
+        <p>A longstanding challenge for symbolic AI is the <strong>symbol grounding problem</strong>: how do abstract symbols in a knowledge base acquire meaning? The word "red" in a semantic network is just a token unless it is connected to actual perceptual experience of redness. In KBAI, symbols are grounded through their connections to other symbols (internal grounding via the knowledge network) and ideally through connections to perception and action (external grounding via sensors and effectors). The symbol grounding problem motivates hybrid architectures that combine symbolic reasoning with perceptual subsystems (e.g., neural networks for vision) to provide the raw perceptual content that gives symbols their meaning.</p>
+
+        <div class="card-concept">
+        <p><strong>Symbol Grounding Problem:</strong> Abstract symbols in a knowledge base are meaningless tokens unless connected to perceptual experience. KBAI addresses grounding through internal connections (a rich network linking symbols to other symbols) and external connections (sensors and effectors that tie symbols to the physical world). This challenge motivates hybrid architectures combining symbolic reasoning with neural perception.</p>
+        </div>
+
+        <h3>25.3 Systems Thinking and SBF</h3>
+        <p><strong>Systems thinking</strong> involves reasoning about complex systems with many interacting components. The <strong>Structure-Behavior-Function (SBF) model</strong> (introduced in Lesson 22) is a key tool for systems thinking. Structure describes the components and their connections; behavior describes the causal processes that occur within the structure; function describes the purpose the system serves. The power of SBF is that it enables reasoning about <strong>invisible causal processes</strong> &mdash; behaviors that connect visible structure to observable function. Understanding why a thermostat maintains temperature requires reasoning about the invisible feedback loop (behavior) that connects the temperature sensor and the heating element (structure) to temperature regulation (function).</p>
+
+        <h3>25.4 Raven's Progressive Matrices</h3>
+        <p><strong>Raven's Progressive Matrices</strong> are visual intelligence tests that require the test-taker to identify patterns in a grid of images and select the missing image. They are a primary application domain in this course because solving them requires integrating many KBAI methods: semantic networks to represent the images, generate &amp; test to enumerate candidate answers, analogical reasoning to identify patterns across rows and columns, means-end analysis to determine what transformations are needed, and metacognition to select among strategies when one fails. The matrices serve as a microcosm of KBAI &mdash; no single method suffices, and the agent must integrate multiple methods under metacognitive control to solve problems across all difficulty levels.</p>
+<!-- ============================================================ -->
+        <!-- Lesson 26 -->
+        <!-- ============================================================ -->
+        <h2 id="l26">26 &mdash; Wrap-Up: Seven Principles of KBAI</h2>
+
+        <p>The final lesson distills the entire course into seven overarching principles that unify the methods, representations, and reasoning strategies studied across all 25 previous lessons. These principles are not isolated rules but deeply interconnected themes that recur in every KBAI method. Understanding them provides a framework for approaching any new AI problem with a KBAI mindset.</p>
+
+        <div class="card-concept">
+        <p><strong>Seven Principles Overview:</strong> The course distills into seven unifying principles: (1) represent and reason, (2) incremental learning, (3) top-down and bottom-up processing, (4) match methods to tasks, (5) heuristics and satisficing, (6) recurring patterns, and (7) unified architecture. These principles are deeply interconnected and recur in every KBAI method studied throughout the course.</p>
+        </div>
+
+        <h3>26.1 First Principle: Represent and Reason</h3>
+        <p>KBAI agents organize knowledge into explicit <strong>representations</strong> (semantic networks, frames, scripts, production rules, conceptual dependency structures) and use those representations to guide <strong>reasoning</strong>. The representation determines what can be reasoned about: a frame-based representation naturally supports classification and configuration; a semantic network naturally supports analogical reasoning; a production system naturally supports reactive behavior. Choosing the right representation for the task is a fundamental design decision. The principle is that intelligence arises from the interplay between structured knowledge and reasoning processes that operate over that knowledge.</p>
+
+        <h3>26.2 Second Principle: Incremental Learning</h3>
+        <p>Real-world data does not arrive all at once. KBAI agents learn <strong>incrementally</strong>, updating their knowledge structures step by step as new information arrives. Incremental concept learning (Lesson 10) adds or removes features from a concept definition with each new example. Case-based reasoning (Lesson 9) accumulates cases over time. Production systems (Lesson 6) add new rules as experience accumulates. Incremental learning is essential because the agent must be ready to act at any time, even with incomplete knowledge, and must integrate new knowledge without discarding what was already learned.</p>
+
+        <h3>26.3 Third Principle: Top-Down and Bottom-Up</h3>
+        <p>Cognition is a two-way street. <strong>Bottom-up</strong> processing is data-driven: sensory input flows upward from perception to recognition to interpretation. <strong>Top-down</strong> processing is expectation-driven: prior knowledge, goals, and context flow downward to guide perception and interpretation. Understanding (Lesson 14) illustrates this vividly: words activate verb frames (bottom-up), and the activated frame generates expectations about what roles should be filled (top-down). Effective KBAI agents always combine both directions, using data to generate hypotheses and expectations to constrain interpretation.</p>
+
+        <h3>26.4 Fourth Principle: Match Methods to Tasks</h3>
+        <p>No single reasoning method is best for all problems. <strong>Means-end analysis</strong> works well for well-defined state spaces; <strong>case-based reasoning</strong> works well when similar past experiences exist; <strong>analogical reasoning</strong> works well for novel problems with structural similarity to known domains; <strong>constraint propagation</strong> works well when the problem is defined by a network of constraints. Meta-reasoning (Lesson 23) embodies this principle by selecting the appropriate method based on problem characteristics. The agent must have a repertoire of methods and the metacognitive ability to choose among them.</p>
+
+        <h3>26.5 Fifth Principle: Heuristics and Satisficing</h3>
+        <p>Because real-world problems are computationally intractable and agents have limited resources, KBAI agents use <strong>heuristics</strong> to guide search and accept <strong>satisficing</strong> solutions &mdash; solutions that are good enough, rather than optimal. Herbert Simon's concept of <strong>bounded rationality</strong> is central: agents are rational within the bounds of their knowledge, computation, and time. Generate &amp; test uses heuristics to constrain the generator. Means-end analysis uses the difference between current and goal states as a heuristic. Configuration uses variable-ordering heuristics. Everywhere in KBAI, heuristics make intractable problems tractable by sacrificing guaranteed optimality for practical solvability.</p>
+
+        <h3>26.6 Sixth Principle: Recurring Patterns</h3>
+        <p>The problems that intelligent agents encounter have <strong>recurring structure</strong>. The same types of problems reappear in different contexts, and the same types of solutions recur as well. Classification recurs in medical diagnosis, technical support, and species identification. Configuration recurs in product design, room layout, and meal planning. The agent can exploit these regularities by learning patterns from experience (case-based reasoning) and transferring patterns across domains (analogical reasoning). Recognizing that a new problem is an instance of a familiar pattern is one of the most powerful capabilities of a KBAI agent.</p>
+
+        <h3>26.7 Seventh Principle: Unified Architecture</h3>
+        <p>Reasoning, learning, and memory are not independent modules &mdash; they form a <strong>unified cognitive architecture</strong> in which each component constrains the others. Reasoning operates over the contents of memory; learning modifies memory; memory determines what can be reasoned about and learned. This tripartite architecture (introduced in Lesson 1) unifies the entire course. Every method studied is an instance of this architecture: case-based reasoning stores cases in memory and retrieves them for reasoning; production systems store rules in memory and fire them for reasoning; explanation-based learning modifies memory by generalizing from explanations.</p>
+
+        <div class="card-note">
+        <p><strong>Unified Architecture:</strong> Reasoning, learning, and memory are not independent modules but form a tightly coupled cognitive architecture. Reasoning operates over memory contents, learning modifies memory, and memory determines what can be reasoned about. Every KBAI method (CBR, production systems, EBL, etc.) is an instance of this tripartite architecture, and the three-layer model (reactive, deliberative, metacognitive) provides the organizational framework.</p>
+        </div>
+
+        <h3>26.8 The Three-Layer Architecture</h3>
+        <p>The seven principles operate within a <strong>three-layer architecture</strong> that organizes an agent's cognitive capabilities:</p>
+        <ul>
+            <li><strong>Reactive layer</strong> (see &rarr; act) &mdash; fast, compiled responses with no deliberation. Production rules, reflexive scripts. Handles routine situations.</li>
+            <li><strong>Deliberative layer</strong> (see &rarr; think &rarr; act) &mdash; reasoning about the world using knowledge representations. Means-end analysis, case-based reasoning, planning, analogical reasoning. Handles novel situations that require thought.</li>
+            <li><strong>Metacognitive layer</strong> (think about thinking) &mdash; monitoring and regulating the lower layers. Strategy selection, the Gap-Blame-Correction cycle, goal management. Handles failures and adapts the agent's approach.</li>
+        </ul>
+        <p>Together, the seven principles and the three-layer architecture provide a complete framework for understanding and building knowledge-based AI agents. The reactive layer provides efficiency, the deliberative layer provides flexibility, and the metacognitive layer provides adaptability. A fully capable KBAI agent integrates all three.</p>
+</div>
+</article>
+
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+<script src="notes.js"></script>
+</body>
+</html>
