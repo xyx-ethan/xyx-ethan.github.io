@@ -1,0 +1,484 @@
+/* ===== Paper page — top-tier journal aesthetic ===== */
+
+.paper-page {
+    background: var(--bg-body);
+    min-height: 100vh;
+}
+
+.paper-nav {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: var(--bg-sidebar);
+    border-bottom: 1px solid var(--border-sidebar);
+    padding: 12px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+}
+
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-nav);
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.back-link:hover { color: var(--text-body); }
+.back-link svg { width: 16px; height: 16px; }
+
+.paper-nav-right { display: flex; align-items: center; gap: 8px; }
+
+.paper-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--text-nav);
+    text-decoration: none;
+    padding: 6px 12px;
+    border: 1px solid var(--border-main);
+    border-radius: 6px;
+    transition: all 0.2s;
+}
+
+.paper-link:hover {
+    color: var(--text-body);
+    border-color: var(--border-card-hover);
+    background: var(--bg-nav-hover);
+}
+
+.paper-link svg { width: 13px; height: 13px; }
+
+/* ===== Paper body ===== */
+.paper {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 56px 40px 96px;
+    font-family: "Crimson Pro", Georgia, "Times New Roman", serif;
+    font-size: 16.5px;
+    line-height: 1.7;
+    color: var(--text-body);
+    letter-spacing: 0.005em;
+}
+
+.paper p {
+    margin-bottom: 14px;
+    text-align: justify;
+    hyphens: auto;
+}
+
+/* ===== Paper header ===== */
+.paper-header {
+    margin-bottom: 48px;
+    padding-bottom: 32px;
+    border-bottom: 1px solid var(--border-sidebar);
+    text-align: center;
+}
+
+.paper-venue {
+    font-family: "Inter", sans-serif;
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 1.4px;
+    text-transform: uppercase;
+    color: var(--text-subtle);
+    margin-bottom: 18px;
+}
+
+.paper-title {
+    font-family: "DM Serif Display", Georgia, serif;
+    font-size: 34px;
+    font-weight: 400;
+    line-height: 1.2;
+    color: var(--text-heading);
+    margin: 0 0 10px;
+    letter-spacing: 0.2px;
+}
+
+.paper-subtitle {
+    font-family: "Crimson Pro", Georgia, serif;
+    font-size: 19px;
+    font-style: italic;
+    font-weight: 400;
+    color: var(--text-muted);
+    margin: 0 0 28px;
+}
+
+.paper-authors {
+    font-family: "Inter", sans-serif;
+    font-size: 14.5px;
+    color: var(--text-strong);
+    margin-bottom: 6px;
+}
+
+.paper-authors .author {
+    font-weight: 500;
+}
+
+.paper-authors sup,
+.paper-affiliations sup {
+    font-size: 10px;
+    color: var(--text-muted);
+    font-weight: 600;
+    vertical-align: super;
+    margin-left: 1px;
+}
+
+.paper-affiliations {
+    font-family: "Inter", sans-serif;
+    font-size: 12.5px;
+    color: var(--text-muted);
+    font-style: italic;
+    margin-bottom: 18px;
+}
+
+.paper-meta {
+    font-family: "Inter", sans-serif;
+    font-size: 11.5px;
+    color: var(--text-faint);
+    letter-spacing: 0.2px;
+    display: inline-flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+/* ===== Abstract ===== */
+.paper-abstract {
+    margin: 0 0 48px;
+    padding: 24px 28px;
+    border-left: 3px solid var(--border-card-left);
+    background: rgba(77, 138, 173, 0.04);
+}
+
+.paper-abstract h2 {
+    font-family: "Inter", sans-serif;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 1.6px;
+    text-transform: uppercase;
+    color: var(--text-subtle);
+    margin: 0 0 10px;
+    padding: 0;
+    border: none;
+    -webkit-background-clip: initial;
+    -webkit-text-fill-color: var(--text-subtle);
+    background: none;
+}
+
+.paper-abstract p {
+    font-size: 15.5px;
+    margin-bottom: 0;
+    line-height: 1.7;
+}
+
+/* ===== Section headings ===== */
+.paper h2 {
+    font-family: "DM Serif Display", Georgia, serif;
+    font-size: 26px;
+    font-weight: 400;
+    color: var(--text-heading);
+    margin: 52px 0 18px;
+    letter-spacing: 0.2px;
+    scroll-margin-top: 80px;
+}
+
+.paper h3 {
+    font-family: "Inter", sans-serif;
+    font-size: 16.5px;
+    font-weight: 600;
+    color: var(--text-strong);
+    margin: 36px 0 12px;
+    letter-spacing: 0.1px;
+}
+
+/* ===== Body text elements ===== */
+.paper strong {
+    color: var(--text-strong);
+    font-weight: 600;
+}
+
+.paper em {
+    color: var(--text-degree);
+    font-style: italic;
+}
+
+.paper code {
+    font-family: "JetBrains Mono", "SF Mono", monospace;
+    font-size: 13px;
+    background: rgba(77, 138, 173, 0.1);
+    padding: 1px 6px;
+    border-radius: 3px;
+    color: #686258;
+    border: 1px solid var(--border-main);
+    font-weight: 500;
+}
+
+[data-theme="dark"] .paper code {
+    background: rgba(144, 168, 192, 0.14);
+    color: #c0d0e0;
+    border-color: rgba(144, 168, 192, 0.3);
+}
+
+.paper ul, .paper ol {
+    padding-left: 22px;
+    margin-bottom: 14px;
+}
+
+.paper li {
+    margin-bottom: 6px;
+    line-height: 1.7;
+}
+
+/* ===== Inline links ===== */
+.paper-inline-link {
+    color: var(--accent-blue);
+    text-decoration: none;
+    border-bottom: 1px dotted var(--accent-blue-deep);
+    transition: color 0.2s, border-color 0.2s;
+}
+
+.paper-inline-link:hover {
+    color: var(--accent-blue-deep);
+    border-bottom-color: var(--accent-blue);
+}
+
+/* ===== Card-concept reuse for inline emphasis ===== */
+.paper .card-concept {
+    margin: 22px 0;
+    padding: 14px 18px;
+    border-left: 3px solid #7a8aad;
+    background: rgba(122, 138, 173, 0.04);
+    border-radius: 0 6px 6px 0;
+    font-size: 15px;
+    color: var(--text-muted);
+    line-height: 1.7;
+    font-family: "Crimson Pro", Georgia, serif;
+}
+
+.paper .card-concept::before {
+    content: 'REMARK';
+    display: block;
+    font-family: "Inter", sans-serif;
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: 1.4px;
+    text-transform: uppercase;
+    color: #7a8aad;
+    margin-bottom: 6px;
+    opacity: 0.8;
+}
+
+.paper .card-concept strong {
+    color: #a0b0cc;
+    font-weight: 600;
+}
+
+/* ===== Code blocks ===== */
+.paper pre {
+    font-family: "JetBrains Mono", "SF Mono", monospace;
+    font-size: 12.5px;
+    line-height: 1.6;
+    background: #0c1018;
+    border: 1px solid #1a2230;
+    border-radius: 6px;
+    padding: 16px 20px;
+    margin: 18px 0;
+    overflow-x: auto;
+    color: #c8d1db;
+}
+
+.paper pre code {
+    background: none;
+    padding: 0;
+    border: none;
+    color: inherit;
+    font-size: 12.5px;
+    font-family: inherit;
+}
+
+/* ===== Figures ===== */
+.fig {
+    margin: 28px 0;
+    padding: 20px 12px 16px;
+    background: rgba(0, 0, 0, 0.12);
+    border: 1px solid var(--border-main);
+    border-radius: 8px;
+    text-align: center;
+}
+
+.fig svg {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+}
+
+figure.fig {
+    display: block;
+}
+
+figcaption {
+    font-family: "Inter", sans-serif;
+    font-size: 11.5px;
+    line-height: 1.55;
+    color: var(--text-muted);
+    text-align: left;
+    padding: 12px 8px 0;
+    max-width: 100%;
+}
+
+/* ===== Tables ===== */
+.paper-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 22px 0 8px;
+    font-family: "Inter", sans-serif;
+    font-size: 13px;
+}
+
+.paper-table thead th {
+    font-weight: 600;
+    color: var(--text-strong);
+    text-align: left;
+    padding: 10px 12px;
+    border-bottom: 2px solid var(--border-main);
+    background: rgba(77, 138, 173, 0.05);
+    letter-spacing: 0.2px;
+    font-size: 12px;
+}
+
+.paper-table tbody td {
+    padding: 9px 12px;
+    border-bottom: 1px solid var(--border-main);
+    color: var(--text-body);
+    font-variant-numeric: tabular-nums;
+}
+
+.paper-table tbody tr:last-child td {
+    border-bottom: 1px solid var(--border-main);
+}
+
+.paper-table tbody tr:hover {
+    background: rgba(77, 138, 173, 0.03);
+}
+
+.paper-caption {
+    font-family: "Inter", sans-serif;
+    font-size: 11.5px;
+    line-height: 1.55;
+    color: var(--text-muted);
+    margin: 4px 0 22px;
+}
+
+/* Status pills inside tables */
+.pill-good, .pill-bad {
+    display: inline-block;
+    font-size: 10.5px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 10px;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+}
+
+.pill-good {
+    color: #5a8a70;
+    background: rgba(90, 138, 112, 0.1);
+    border: 1px solid rgba(90, 138, 112, 0.3);
+}
+
+.pill-bad {
+    color: #a06060;
+    background: rgba(160, 96, 96, 0.08);
+    border: 1px solid rgba(160, 96, 96, 0.25);
+}
+
+[data-theme="dark"] .pill-good {
+    color: #90c0a0;
+    background: rgba(120, 180, 140, 0.12);
+    border-color: rgba(120, 180, 140, 0.3);
+}
+
+[data-theme="dark"] .pill-bad {
+    color: #c08080;
+    background: rgba(180, 100, 100, 0.12);
+    border-color: rgba(180, 100, 100, 0.3);
+}
+
+/* ===== MathJax display equations ===== */
+.paper mjx-container[display="true"] {
+    margin: 14px 0 !important;
+    text-align: center;
+}
+
+/* ===== References ===== */
+.paper-refs h2 {
+    font-size: 20px;
+    margin-top: 48px;
+}
+
+.paper-refs ol {
+    font-family: "Inter", sans-serif;
+    font-size: 13px;
+    line-height: 1.65;
+    padding-left: 22px;
+    color: var(--text-muted);
+}
+
+.paper-refs li {
+    margin-bottom: 8px;
+}
+
+.paper-refs em {
+    color: var(--text-strong);
+}
+
+/* ===== Footer ===== */
+.paper-footer {
+    margin-top: 64px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border-sidebar);
+    font-family: "Inter", sans-serif;
+    font-size: 11.5px;
+    color: var(--text-faint);
+    text-align: center;
+    line-height: 1.6;
+}
+
+.paper-footer p {
+    margin-bottom: 4px;
+    text-align: center;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 768px) {
+    .paper { padding: 40px 20px 64px; font-size: 16px; }
+    .paper-title { font-size: 26px; }
+    .paper-subtitle { font-size: 17px; }
+    .paper h2 { font-size: 22px; margin: 36px 0 14px; }
+    .paper h3 { font-size: 15px; }
+    .paper-abstract { padding: 18px 20px; }
+    .paper-nav { padding: 10px 16px; }
+    .paper-table { font-size: 11.5px; display: block; overflow-x: auto; }
+    .fig { padding: 16px 8px 12px; }
+}
+
+/* ===== Print / PDF ===== */
+@media print {
+    .paper-nav { display: none; }
+    .paper { padding: 0; max-width: 100%; color: #1a1a1a; background: #fff; }
+    .paper-title { color: #1a1a1a; }
+    .fig { background: #f8f8f8; border-color: #ccc; page-break-inside: avoid; }
+    .paper-table { page-break-inside: avoid; }
+    .paper h2, .paper h3 { page-break-after: avoid; }
+    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+}
