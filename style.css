@@ -1079,6 +1079,16 @@ section h2 {
     letter-spacing: 0.2px;
     white-space: nowrap;
     flex-shrink: 0;
+    vertical-align: middle;
+}
+
+/* When the rank-badge is rendered inline with the card title, give it
+   a bit of left-margin and drop it from baseline to optical centre so
+   it doesn't sit too low next to the larger h3 text. */
+.project-card h3 .rank-badge {
+    margin-left: 10px;
+    position: relative;
+    top: -1px;
 }
 
 .inline-link {
