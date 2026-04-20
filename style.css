@@ -1077,6 +1077,8 @@ section h2 {
     padding: 3px 10px;
     border-radius: 20px;
     letter-spacing: 0.2px;
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .inline-link {
@@ -1366,8 +1368,20 @@ footer::before {
     visibility: hidden;
     pointer-events: none;
     transition: opacity 0.2s, transform 0.2s, visibility 0s linear 0.2s;
-    margin-left: auto;
     line-height: 1;
+    position: absolute;
+    right: 20px;
+}
+
+/* Benchmark cards: arrow at bottom-right (rank badge now lives in top-right) */
+.project-card[data-href] .card-arrow {
+    bottom: 20px;
+}
+
+/* Note cards (column-flex): arrow at top-right (no competing element there) */
+.note-card .card-arrow {
+    top: 22px;
+    right: 22px;
 }
 
 .project-card[data-href]:hover .card-arrow,
@@ -1376,15 +1390,6 @@ footer::before {
     visibility: visible;
     transform: translateX(3px);
     transition: opacity 0.2s, transform 0.2s, visibility 0s linear 0s;
-}
-
-/* Note cards are column-flex, so the arrow needs to be absolutely pinned to
-   the top-right instead of relying on margin-left:auto in a flex row. */
-.note-card .card-arrow {
-    position: absolute;
-    top: 22px;
-    right: 22px;
-    margin-left: 0;
 }
 
 /* ===== Subtle Card Hover ===== */
