@@ -763,6 +763,15 @@ section h2 {
     padding: 0;
 }
 
+/* Single-line description inside a card (used for experience + benchmark
+   cards to keep content compact, no bullet markers). */
+.card-line {
+    font-size: 13.5px;
+    color: var(--text-muted);
+    line-height: 1.65;
+    margin-top: 12px;
+}
+
 .card ul li {
     position: relative;
     padding-left: 16px;
