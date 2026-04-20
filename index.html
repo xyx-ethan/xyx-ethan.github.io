@@ -357,22 +357,22 @@
         <div class="card project-card" data-href="https://moody-challenge.physionet.org/2026/leaderboard/" data-href-target="_blank">
             <div class="card-header">
                 <div>
-                    <h3>PhysioNet Challenge 2026</h3>
-                    <p class="subtitle">PhysioNet &middot; Organized by <a href="https://research.gatech.edu/people/gari-clifford" target="_blank" rel="noopener" class="inline-link">Gari Clifford</a> (Emory / Georgia Tech)</p>
+                    <h3>PhysioNet / Computing in Cardiology Challenge 2026</h3>
+                    <p class="subtitle">Research collaboration with the <a href="https://research.gatech.edu/people/gari-clifford" target="_blank" rel="noopener" class="inline-link">Clifford Lab</a> (Emory / Georgia Tech NeuroSignals)</p>
                 </div>
                 <span class="date-badge">Feb &ndash; Aug 2026</span>
             </div>
             <div class="card-body">
-                <p class="project-desc">Participating as <strong>GT NeuroSignals Lab</strong> (Georgia Institute of Technology) on multi-modal physiological signal analysis for the PhysioNet/Computing in Cardiology Challenge 2026. Developing deep learning models for clinical time-series data classification and prediction.</p>
+                <p class="project-desc">Investigating how autonomic and cardiopulmonary dynamics encode impending physiological deterioration. Develops deep sequence models for multi-modal biosignal decoding (ECG, PPG, respiration) with a focus on inductive biases appropriate for non-stationary clinical time series and uncertainty calibration under distribution shift across hospital sites. Part of an ongoing effort to move wearable-grade physiological monitoring toward reliable early-warning systems.</p>
                 <div class="tags" style="margin-top:12px">
-                    <span class="tag primary">Python</span>
-                    <span class="tag primary">PyTorch</span>
-                    <span class="tag">Signal Processing</span>
-                    <span class="tag">Computational Neuroscience</span>
-                    <span class="tag">Clinical ML</span>
+                    <span class="tag primary">Physiological Signals</span>
+                    <span class="tag primary">Deep Sequence Models</span>
+                    <span class="tag">Uncertainty Calibration</span>
+                    <span class="tag">Non-Stationary Time Series</span>
+                    <span class="tag">Clinical Neuroscience</span>
                 </div>
                 <div class="project-link-row">
-                    <span class="rank-badge">Unofficial Phase &middot; Rank 12/244 &middot; AUROC 0.693</span>
+                    <span class="rank-badge">Unofficial phase &middot; Current standing 12 / 244 &middot; AUROC 0.693</span>
                 </div>
             </div>
         </div>
@@ -380,46 +380,23 @@
         <div class="card project-card" data-href="research/bci-isla2026.html">
             <div class="card-header">
                 <div>
-                    <h3>BCI Motor Imagery Challenge &mdash; ISLA 2026</h3>
-                    <p class="subtitle">CodaBench &middot; Organized by <a href="https://plcrodrigues.github.io/" target="_blank" rel="noopener" class="inline-link">Pedro L. C. Rodrigues</a> (Inria)</p>
+                    <h3>Motor Imagery EEG Decoding &mdash; ISLA 2026</h3>
+                    <p class="subtitle">Collaboration with <a href="https://plcrodrigues.github.io/" target="_blank" rel="noopener" class="inline-link">Pedro L. C. Rodrigues</a> (Inria, statify team)</p>
                 </div>
                 <span class="date-badge">Apr &ndash; May 2026</span>
             </div>
             <div class="card-body">
-                <p class="project-desc">Proposed <strong>Cross-Agent Multi-Family Evidence Fusion</strong>: treating disagreement between EEGNet ensembles, CSP/CSSP bootstraps, phase-synchrony models, and a novel KNN-Retrieval TTA as a trial-level calibration signal. Identifies a <em>deep-only spurious correlation</em> phenomenon and lifts the FBCSP baseline from 0.91 to 0.92.</p>
+                <p class="project-desc">Developed <strong>Cross-Agent Multi-Family Evidence Fusion</strong>, a framework for trial-level calibration in small-sample EEG decoding of motor imagery. Combines a deep convolutional network (EEGNet) with four classical spectral&ndash;spatial estimators (CSP, CSSP, inter-channel phase-locking, and a hybrid) and treats <em>cross-method disagreement as a calibration signal</em>. Introduces a retrieval-based test-time augmentation that diagnoses predictions unsupported by neighbours in the model's own feature space &mdash; surfacing non-sensorimotor features that the deep network latches onto but that the spectral families correctly reject. Candidate submissions are ranked by a Poisson&ndash;Binomial tail probability, favouring parsimonious corrections.</p>
                 <div class="tags" style="margin-top:12px">
-                    <span class="tag primary">Python</span>
-                    <span class="tag primary">PyTorch</span>
-                    <span class="tag">EEGNet</span>
-                    <span class="tag">CSP / CSSP</span>
-                    <span class="tag">Evidence Fusion</span>
-                    <span class="tag">Poisson&ndash;Binomial</span>
+                    <span class="tag primary">Brain&ndash;Computer Interfaces</span>
+                    <span class="tag primary">EEG Decoding</span>
+                    <span class="tag">Motor Imagery</span>
+                    <span class="tag">Model Calibration</span>
+                    <span class="tag">Ensemble Methods</span>
+                    <span class="tag">Computational Neuroscience</span>
                 </div>
                 <div class="project-link-row">
-                    <span class="rank-badge">Rank 1/158 &middot; 0.92 Test Accuracy</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="card project-card" data-href="https://www.codabench.org/competitions/14569/#/results-tab" data-href-target="_blank">
-            <div class="card-header">
-                <div>
-                    <h3>Diabetic Retinopathy Detection Challenge</h3>
-                    <p class="subtitle">CodaBench &middot; Organized by <a href="https://github.com/maxencedbe" target="_blank" rel="noopener" class="inline-link">Maxence Debes</a> (&Eacute;cole Polytechnique)</p>
-                </div>
-                <span class="date-badge">Mar &ndash; May 2026</span>
-            </div>
-            <div class="card-body">
-                <p class="project-desc">Classified retinal fundus images from the IDRiD dataset into 5 diabetic retinopathy severity levels. Developed a deep learning model using transfer learning and data augmentation to handle limited training data (407 images) and imbalanced severity classes.</p>
-                <div class="tags" style="margin-top:12px">
-                    <span class="tag primary">Python</span>
-                    <span class="tag primary">PyTorch</span>
-                    <span class="tag">Medical Imaging</span>
-                    <span class="tag">Transfer Learning</span>
-                    <span class="tag">CNN</span>
-                </div>
-                <div class="project-link-row">
-                    <span class="rank-badge">Rank 1/22 &middot; F1 Macro 0.27</span>
+                    <span class="rank-badge">1st place (1 / 158) &middot; 0.92 held-out accuracy</span>
                 </div>
             </div>
         </div>

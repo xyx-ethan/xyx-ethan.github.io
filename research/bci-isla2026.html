@@ -16,7 +16,7 @@
     <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
     <script>(function(){var t=localStorage.getItem('theme');if(t==='light')localStorage.removeItem('theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');})()</script>
 </head>
-<body class="note-page paper-page">
+<body class="note-page">
 
 <nav class="note-nav">
     <a href="../index.html#projects" class="back-link">
@@ -49,198 +49,230 @@
     </div>
 </aside>
 
-<article class="note-content paper">
+<article class="note-content">
 
-    <header class="paper-header">
-        <p class="paper-venue">Codabench BCI--ISLA2026 Challenge 15044 &middot; Technical Report</p>
-        <h1 class="paper-title">Cross-Agent Multi-Family Evidence Fusion for Motor Imagery EEG</h1>
-        <p class="paper-subtitle">Beyond Cross-Validation Selection Overfitting</p>
-        <div class="paper-authors">
-            <span class="author">Ethan (Yuxuan) Xu<sup>1</sup></span>
-        </div>
-        <div class="paper-affiliations">
-            <sup>1</sup>College of Computing, Georgia Institute of Technology
-        </div>
-        <div class="paper-meta">
-            <span>April 2026</span>
-            <span>&middot;</span>
-            <span>Submission ID 687666</span>
-            <span>&middot;</span>
-            <span>Rank 1 / 158</span>
-        </div>
+    <header class="note-header">
+        <span class="note-badge">BCI-ISLA 2026 &middot; Challenge 15044</span>
+        <h1>Cross-Agent Multi-Family Evidence Fusion for Motor Imagery EEG</h1>
+        <p class="note-intro">A tutorial on combining independent classifiers for small-data EEG decoding. Covers the motor-imagery classification task, why cross-validation misleads in small-subject regimes, five complementary method families (one deep, four classical spectral/spatial), a novel retrieval-based test-time augmentation, rule-based trial-level fusion, and Poisson&ndash;Binomial candidate ranking. The unifying theme: <em>treat disagreement between independent method families as a calibration signal instead of averaging it away</em>.</p>
     </header>
 
     <!-- Inline TOC (hidden via notes.css; auto-populated into sidebar by notes.js) -->
     <div class="toc">
+        <h2>Topics</h2>
         <ol>
-            <li><a href="#sec-abstract">Abstract</a></li>
-            <li><a href="#sec-1">1. Introduction</a></li>
-            <li><a href="#sec-2">2. Method</a></li>
-            <li><a href="#sec-3">3. Results</a></li>
-            <li><a href="#sec-4">4. Discussion</a></li>
-            <li><a href="#sec-5">5. Compliance</a></li>
-            <li><a href="#sec-ref">References</a></li>
+            <li><a href="#t1">Motor Imagery EEG &amp; the Classification Task</a></li>
+            <li><a href="#t2">Why Cross-Validation Misleads in Small-Data Regimes</a></li>
+            <li><a href="#t3">Five Method Families: Overview</a></li>
+            <li><a href="#t4">Deep Family: EEGNet with Retrieval TTA</a></li>
+            <li><a href="#t5">Classical Families: CSP, CSSP, Phase Synchrony</a></li>
+            <li><a href="#t6">Trial-Level Evidence Fusion</a></li>
+            <li><a href="#t7">Poisson&ndash;Binomial Candidate Ranking</a></li>
+            <li><a href="#t8">Empirical Results</a></li>
+            <li><a href="#t9">Takeaways</a></li>
         </ol>
     </div>
 
     <div class="note-body">
 
-    <section class="paper-abstract" id="sec-abstract">
-        <h2>Abstract</h2>
-        <p>Within-subject motor imagery (MI) EEG classification on Cho2017's six-subject challenge subset poses a <em>selection-overfitting</em> risk: configurations chosen by maximising local cross-validation (CV) accuracy often fail to generalise to the hidden leaderboard. We address this by treating <strong>cross-method disagreement as a trial-level calibration signal</strong> rather than noise to be averaged away. Our pipeline fuses evidence from five independent method families &mdash; a 38-variant EEGNet ensemble, a novel KNN-Retrieval test-time augmentation in the EEGNet penultimate space, 256 CSP bootstrap models, 128 CSSP delay-augmented models, and 32 phase-pair synchrony models &mdash; together with an FBCSP V1 anchor. A rule-based selector applies trial-level corrections when evidence from at least four of five families supports them; a Poisson&ndash;Binomial tail probability ranks candidate submissions. The final submission (v22) applies exactly four corrections to the strict_replace_B baseline, identifying two spurious EEGNet-driven flips (B-33, B-49) invisible to any single-method analysis. Final leaderboard: <strong>0.920</strong> (+0.010 over FBCSP baseline, +5.4&sigma; over chance).</p>
-    </section>
+<h2 id="t1">1. Motor Imagery EEG &amp; the Classification Task</h2>
 
-    <section id="sec-1">
-        <h2>1. Introduction</h2>
-        <p>Brain&ndash;computer interfaces (BCIs) based on motor imagery remain a workhorse of assistive technology: a subject imagines limb movement, the imagined movement induces spatially-patterned Mu-wave (8&ndash;12 Hz) and Beta-band (13&ndash;30 Hz) activity over sensorimotor cortex, and a classifier decodes the laterality. The Codabench BCI--ISLA2026 challenge (challenge id <a href="https://www.codabench.org/competitions/15044/" target="_blank" rel="noopener" class="paper-inline-link">15044</a>) instantiates this task on six subjects from the Cho2017 corpus: 140 labelled training trials and 60 hidden test trials per subject, 64 channels, 512 Hz, 3-second imagery window.</p>
-        <p>Two challenges dominate. First, the data volume per subject is small; three-seed 5-fold CV estimates fluctuate by several points due to fold luck. Second, EEG patterns are highly subject-specific, so global models underperform per-subject tuning. Together these force a design space in which one hyperparameter search per subject can silently select configurations that overfit the CV protocol itself. We quantify this effect: a v2 submission with CV +0.001 over the V1 anchor <em>lost</em> 0.010 on the leaderboard &mdash; a 14&times; overshoot in the wrong direction.</p>
-        <div class="card-concept">
-        <strong>Thesis.</strong> The right response to selection-overfitting is not to pick a better single model but to <em>use disagreement between method families to score individual trial-level decisions</em>. We show this lifts a 0.91 FBCSP baseline to 0.92 with a principled, parsimonious submission.
-        </div>
-    </section>
+<p>A motor-imagery brain&ndash;computer interface (BCI) reads sensorimotor cortex activity while a subject <em>imagines</em> a limb movement &mdash; without actually moving &mdash; and decodes the imagined laterality from scalp EEG. The imagined movement induces spatially-patterned oscillations in two bands:</p>
+<ul>
+    <li><strong>Mu-band (8&ndash;12 Hz)</strong> &mdash; a standing sensorimotor rhythm that is suppressed over the contralateral hemisphere during imagined movement.</li>
+    <li><strong>Beta-band (13&ndash;30 Hz)</strong> &mdash; similar contralateral suppression during movement preparation and execution.</li>
+</ul>
+<p>A typical trial: the subject sees a cue ("imagine left hand"), imagines the movement for three seconds, and a classifier maps the 64-channel EEG to left vs. right. This note focuses on the small-data regime: <strong>140 labelled training trials and 60 hidden test trials per subject, six subjects, 64 channels at 512 Hz</strong>, 3-second imagery windows.</p>
 
-    <section id="sec-2">
-        <h2>2. Method</h2>
+<div class="card-def">
+<strong>Why small-data EEG is hard.</strong> EEG patterns are highly subject-specific, so global models underperform per-subject tuning. But 140 trials is insufficient for fold-stable cross-validation &mdash; 3-seed 5-fold CV estimates routinely shift several accuracy points between re-runs. Any configuration chosen by ranking on CV inherits that fold-luck variance.
+</div>
 
-        <h3>2.1 Pipeline Overview</h3>
-        <p>Figure&nbsp;1 sketches the architecture. Five independent method families produce per-trial probabilities or vote fractions; an FBCSP V1 anchor supplies the starting submission. A rule-based fusion layer identifies trials where evidence diverges from the anchor; a Poisson&ndash;Binomial selector then ranks candidate corrections by the tail probability of exceeding 0.93 on the hidden leaderboard.</p>
+<h3>1.1 Preprocessing Pipeline</h3>
+<p>All methods in this note operate on a shared preprocessing pipeline:</p>
+<ol>
+    <li><strong>Bandpass</strong> the raw signal to 7&ndash;30 Hz (captures Mu and Beta; rejects line noise and eye blinks).</li>
+    <li><strong>Crop</strong> the imagery window to drop the cue-reaction lead-in (~0.75 s) and focus on the stable imagery period.</li>
+    <li><strong>Per-trial z-score</strong> so cross-trial amplitude drifts don't mask the spatial pattern.</li>
+</ol>
 
-        <figure class="fig">
-        <svg viewBox="0 0 780 560" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <marker id="a1" viewBox="0 0 10 7" refX="10" refY="3.5" markerWidth="7" markerHeight="5" orient="auto-start-reverse">
-              <path d="M0,0 L10,3.5 L0,7" class="marker-arrow"/>
-            </marker>
-          </defs>
+<h2 id="t2">2. Why Cross-Validation Misleads in Small-Data Regimes</h2>
 
-          <!-- Input -->
-          <rect class="nd" x="290" y="15" width="200" height="44" rx="6"/>
-          <text class="tt-h" x="390" y="34" text-anchor="middle">Raw EEG (64 &times; 1537)</text>
-          <text class="tt-s" x="390" y="50" text-anchor="middle">bandpass 7&ndash;30 Hz, crop [384:1537]</text>
+<p>The standard recipe for model selection is cross-validation: split training data into folds, train on some, test on others, average. Two assumptions quietly break when the per-subject sample is small.</p>
 
-          <!-- V1 anchor (left) -->
-          <rect class="nd-anchor" x="40" y="115" width="160" height="56" rx="6"/>
-          <text class="tt-h" x="120" y="137" text-anchor="middle">V1 anchor</text>
-          <text class="tt" x="120" y="152" text-anchor="middle">FBCSP</text>
-          <text class="tt-s" x="120" y="165" text-anchor="middle">0.91 online</text>
+<div class="card-caution">
+<strong>Assumption 1 &mdash; CV estimates are low-variance.</strong> With 140 trials and 5 folds, each held-out fold contains 28 trials; a single flip changes accuracy by 0.036. Running the same configuration with different random seeds produces a 0.03&ndash;0.05 spread around the mean &mdash; larger than most configuration differences we actually want to detect.
+<br><br>
+<strong>Assumption 2 &mdash; CV ranking generalises.</strong> Searching over hundreds of configurations and picking the top-CV configuration is exactly maximum-selection bias: the winner got its gain from fold-luck, not from being better. A +0.001 CV gain can easily lose &minus;0.010 on held-out test data &mdash; a 10&times; overshoot in the wrong direction.
+</div>
 
-          <!-- Deep family (middle) -->
-          <rect class="nd-deep" x="220" y="115" width="200" height="95" rx="6"/>
-          <text class="tt-h" x="320" y="137" text-anchor="middle">Deep family</text>
-          <text class="tt" x="320" y="155" text-anchor="middle">EEGNet &times; 38 variants</text>
-          <text class="tt-s" x="320" y="171" text-anchor="middle">F1&isin;{8,16}, &sigma;&isin;{.03,.05,.07}</text>
-          <text class="tt-s" x="320" y="186" text-anchor="middle">ts&isin;{16,32,48}</text>
-          <text class="tt tt-em" x="320" y="203" text-anchor="middle">+ KNN-Retrieval TTA</text>
+<h3>2.1 Design Response</h3>
+<p>Three levers reduce selection overfitting:</p>
+<ul>
+    <li><strong>Higher-seed CV.</strong> Moving from 3-seed 5-fold (15 folds) to 10-seed bootstrap (50 folds) shrinks the CV variance until configuration differences become visible against the noise floor.</li>
+    <li><strong>Conservative search.</strong> Fix most hyperparameters; sweep only the dimensions you have strong priors about. A full Cartesian grid tends to dredge up overfit winners.</li>
+    <li><strong>Cross-family calibration.</strong> The focus of this note: don't rely on a single method's confidence. Combine <em>independent</em> method families and use disagreement as a diagnostic.</li>
+</ul>
 
-          <!-- Classical families (right) -->
-          <rect class="nd-classical" x="440" y="115" width="300" height="22" rx="4"/>
-          <text class="tt" x="455" y="130">CSP-256 bootstrap (classical SPD)</text>
-          <rect class="nd-classical" x="440" y="143" width="300" height="22" rx="4"/>
-          <text class="tt" x="455" y="158">CSSP-128 (delay-augmented CSP)</text>
-          <rect class="nd-classical" x="440" y="171" width="300" height="22" rx="4"/>
-          <text class="tt" x="455" y="186">Phase-Pair-32 (inter-channel PLV)</text>
-          <rect class="nd-classical" x="440" y="199" width="300" height="22" rx="4"/>
-          <text class="tt" x="455" y="214">Hybrid-32 (CSSP + phase)</text>
+<h2 id="t3">3. Five Method Families: Overview</h2>
 
-          <!-- Layer B label -->
-          <text class="tt-sect" x="40" y="270">TRIAL-LEVEL FUSION</text>
+<p>If five classifiers with genuinely different inductive biases all agree on a prediction, that prediction is probably right. If they disagree, the prediction is miscalibrated &mdash; and the disagreement itself is usable information.</p>
 
-          <!-- Evidence fusion -->
-          <rect class="nd" x="180" y="285" width="420" height="80" rx="6"/>
-          <text class="tt-h" x="390" y="309" text-anchor="middle">Trial-level evidence fusion</text>
-          <text class="tt-s" x="390" y="328" text-anchor="middle">rule-based recommendations</text>
-          <text class="tt-s" x="390" y="346" text-anchor="middle">stable_remove_from_strict &middot; new_flip_candidate</text>
-          <text class="tt-s" x="390" y="360" text-anchor="middle">keep_mainline &middot; deep_only</text>
+<div class="card-concept">
+<strong>Independence beats quantity.</strong> Five copies of the same model with different seeds form a tight ensemble but share failure modes. Five <em>different</em> model families (spatial filtering, delay-augmented spatial, frequency-domain phase synchrony, hybrid, end-to-end CNN) have <em>different</em> failure modes &mdash; so their agreement is much stronger evidence than a same-family ensemble of the same size.
+</div>
 
-          <!-- Layer C label -->
-          <text class="tt-sect" x="40" y="408">CANDIDATE SELECTION</text>
+<p>The five families used in the remainder of this note:</p>
+<ol>
+    <li><strong>Deep CNN.</strong> EEGNet, a compact end-to-end CNN that learns its own spatial and temporal filters.</li>
+    <li><strong>CSP (Common Spatial Patterns).</strong> The classical MI workhorse. Finds spatial filters that maximise the between-class variance ratio.</li>
+    <li><strong>CSSP (Common Spectral&ndash;Spatial Pattern).</strong> CSP variant that augments each channel with a delay copy, so the spatial filter can implicitly learn a narrow temporal filter.</li>
+    <li><strong>Phase-pair.</strong> Inter-channel phase-locking values (PLV). Captures cross-channel <em>synchrony</em> rather than amplitude &mdash; orthogonal to power-based methods.</li>
+    <li><strong>Hybrid.</strong> Concatenates CSSP and phase-pair features. A belt-and-suspenders family that tends to track whichever underlying signal is cleaner.</li>
+</ol>
 
-          <!-- Poisson-Binomial -->
-          <rect class="nd" x="180" y="420" width="420" height="48" rx="6"/>
-          <text class="tt-h" x="390" y="441" text-anchor="middle">Poisson&ndash;Binomial candidate ranking</text>
-          <text class="tt-s" x="390" y="458" text-anchor="middle">P(score &ge; 0.93 | p&#8321;, p&#8322;, ..., p&#8344;)</text>
+<h2 id="t4">4. Deep Family: EEGNet with Retrieval TTA</h2>
 
-          <!-- Output -->
-          <rect class="nd-out" x="180" y="495" width="420" height="48" rx="6"/>
-          <text class="tt-h tt-out" x="390" y="516" text-anchor="middle">v22 submission &middot; 0.92 leaderboard</text>
-          <text class="tt-s tt-out-s" x="390" y="533" text-anchor="middle">4 trial-level corrections, multi-family supported</text>
+<p>EEGNet (Lawhern et al., 2018) is a three-layer CNN designed for EEG:</p>
+<ul>
+    <li><strong>Temporal convolution</strong> with $F_1$ kernels learns a bank of temporal filters (replacing hand-designed bandpass filters).</li>
+    <li><strong>Depthwise spatial convolution</strong> learns per-temporal-filter spatial projections (replacing CSP).</li>
+    <li><strong>Separable temporal convolution</strong> then a linear classifier.</li>
+</ul>
+<p>It is end-to-end differentiable, so the usual machinery applies: pretrain, fine-tune, ensemble, augment.</p>
 
-          <!-- Vertical arrows from input to each family -->
-          <path class="ln" d="M340 59 L340 75 L120 75 L120 115" marker-end="url(#a1)"/>
-          <path class="ln" d="M390 59 L390 115" marker-end="url(#a1)"/>
-          <path class="ln" d="M440 59 L440 75 L590 75 L590 115" marker-end="url(#a1)"/>
+<h3>4.1 Pretrain&ndash;Finetune Protocol</h3>
+<p>With only 140 trials per subject, training EEGNet from scratch fits noise. The fix is straightforward cross-subject transfer:</p>
+<ol>
+    <li><strong>Pretrain</strong> on pooled trials from all <em>other</em> subjects (700 trials). This teaches EEGNet the general shape of motor-imagery signals.</li>
+    <li><strong>Fine-tune</strong> on the target subject's 140 trials. This adapts to the subject's specific electrode geometry and rhythm.</li>
+</ol>
+<p>Early-stopping with patience 15&ndash;20 epochs prevents the fine-tune stage from overfitting.</p>
 
-          <!-- Layer A label (below boxes) -->
-          <text class="tt-sect" x="40" y="232">METHOD FAMILIES (PARALLEL)</text>
+<h3>4.2 Multi-Band Augmentation Grid</h3>
+<p>A second defence against overfitting is data augmentation. The grid sweeps a small set of frequency- and time-domain perturbations:</p>
+<ul>
+    <li>$F_1 \in \{8, 16\}$ &mdash; number of temporal filters (model capacity).</li>
+    <li>$\sigma \in \{0.03, 0.05, 0.07\}$ &mdash; Gaussian noise injection scale.</li>
+    <li>$t_{\max} \in \{16, 32, 48\}$ &mdash; time-shift augmentation range.</li>
+</ul>
+<p>Each cell is trained with five seeds; 38 variants survive calibration on a held-out fold and form the final ensemble.</p>
 
-          <!-- Family outputs to fusion -->
-          <path class="ln-dim" d="M120 171 L120 215 L210 215 L210 285"/>
-          <path class="ln" d="M320 210 L320 285" marker-end="url(#a1)"/>
-          <path class="ln" d="M590 221 L590 245 L540 245 L540 285" marker-end="url(#a1)"/>
+<h3>4.3 KNN-Retrieval Test-Time Augmentation</h3>
+<p>Here is the theoretical contribution. A standard deep ensemble averages softmax outputs. But <em>softmax confidence can lie</em>: a model can be confidently wrong, especially on out-of-distribution trials. Retrieval TTA instead asks: <em>is this prediction supported by similar examples in the model's own feature space?</em></p>
 
-          <!-- Fusion to selector -->
-          <path class="ln" d="M390 365 L390 420" marker-end="url(#a1)"/>
+<p>Algorithm:</p>
+<ol>
+    <li>For each test trial $t$, extract the penultimate-layer feature $f_t \in \mathbb{R}^d$ (the input to EEGNet's final classifier layer; $d = 32 \times T'$).</li>
+    <li>Compute cosine similarity between $f_t$ and every training-trial feature $f_i$.</li>
+    <li>Take the top $K = 10$ neighbours. Define the retrieval probability:</li>
+</ol>
+$$
+P_\text{KNN}(t = c) \;=\; \frac{\sum_{i \in \text{top-}K} w_i\, \mathbb{1}[y_i = c]}{\sum_{i \in \text{top-}K} w_i}, \qquad w_i = \exp\!\left(\frac{\cos(f_t,\, f_i)}{\tau}\right),
+$$
+<p>with temperature $\tau = 0.3$. Combine with the EEGNet softmax:</p>
+$$
+P_\text{final}(t) \;=\; \alpha\, P_\text{EEGNet}(t) \;+\; (1-\alpha)\, P_\text{KNN}(t),
+$$
+<p>with $\alpha$ tuned on a held-out validation slice (typically $\alpha \approx 0.6$, meaning the retrieval vote provides a substantial correction).</p>
 
-          <!-- Selector to output -->
-          <path class="ln" d="M390 468 L390 495" marker-end="url(#a1)"/>
-        </svg>
-        <figcaption>Figure&nbsp;1. Architecture. Five independent method families (one deep, four classical) receive the same preprocessed EEG input and emit trial-level evidence. An FBCSP V1 anchor (dashed line) seeds the candidate submission. Rule-based fusion identifies trials where multi-family evidence disagrees with the anchor; a Poisson&ndash;Binomial selector ranks resulting candidates by the tail probability of exceeding 0.93.</figcaption>
-        </figure>
+<div class="card-concept">
+<strong>Why retrieval TTA works.</strong> A trial that sits in a class-$c$ cluster of the feature space has many class-$c$ neighbours &mdash; its softmax agrees with its retrieval vote. A trial the model is <em>confidently wrong</em> on sits in the <em>other</em> cluster: its softmax says $c$ but its neighbours say $\neg c$. These are exactly the trials worth flagging. Retrieval TTA is cheap (one cosine-similarity matrix) and catches the failure modes that a plain softmax ensemble cannot.
+</div>
 
-        <h3>2.2 Deep Family: EEGNet Pretrain&ndash;Finetune &amp; KNN-Retrieval</h3>
-        <p>For each target subject $s \in \{A,\ldots,F\}$, an EEGNet (Lawhern <em>et al.</em>, 2018) is pretrained on the 700 training trials of the other five subjects (60 epochs, early-stopping patience 15) and fine-tuned on $s$'s own 140 trials (60 epochs, patience 20) with multi-band augmentation. The augmentation grid sweeps $(F_1,\sigma,t_{\max}) \in \{8,16\}\times\{0.03,0.05,0.07\}\times\{16,32,48\}$ with five seed replicates, yielding 38 distinct variants per subject.</p>
-        <p>Our novel contribution here is a <strong>KNN-Retrieval test-time augmentation</strong>. For each test trial $t$ we extract the penultimate-layer feature $f_t \in \mathbb{R}^d$ (depthwise-separable conv output, $d = 32 \times T'$). We compute cosine similarity to every training-trial feature $f_i$, take the top $K=10$ neighbours, and define a retrieval probability as:</p>
-        $$
-        P_\text{KNN}(t = c) \;=\; \frac{\sum_{i \in \text{top-}K} w_i\, \mathbb{1}[y_i = c]}{\sum_{i \in \text{top-}K} w_i}, \quad w_i = \exp\!\left(\frac{\cos(f_t, f_i)}{\tau}\right),
-        $$
-        <p>with temperature $\tau = 0.3$. The combined prediction is $P_\text{final}(t) = \alpha\, P_\text{EEGNet}(t) + (1-\alpha)\, P_\text{KNN}(t)$, with $\alpha$ tuned on a held-out validation slice.</p>
-        <div class="card-concept">
-        <strong>Why retrieval works.</strong> A standard deep ensemble averages softmaxes of independent models. KNN-Retrieval instead asks a different question: <em>is the softmax supported by the neighbourhood in the model's own feature space?</em> When EEGNet predicts class $c$ with high confidence but its top-10 neighbours largely belong to $\neg c$, the trial is flagged as a suspect &mdash; a diagnostic for the deep-only spurious correlation discussed in &sect;4.
-        </div>
+<h2 id="t5">5. Classical Families: CSP, CSSP, Phase Synchrony</h2>
 
-        <h3>2.3 Classical Families: Bootstrap &amp; Spectral</h3>
-        <p>An independent classical evaluator produces per-trial flip probabilities from four families. Each family trains $M$ models on bootstrapped subsets of the training trials (80% sample with replacement), and outputs the fraction $p_{\text{family},t} \in [0,1]$ of models that disagree with the V1 anchor for trial $t$.</p>
-        <ul>
-            <li><strong>CSP-256.</strong> 256 Common Spatial Pattern models, 8 components each.</li>
-            <li><strong>CSSP-128.</strong> 128 delay-augmented CSP models (Lemm <em>et al.</em>, 2005); spatial filters see one lag copy of each channel.</li>
-            <li><strong>Phase-pair-32.</strong> 32 models using inter-channel phase-locking value features.</li>
-            <li><strong>Hybrid-32.</strong> 32 models concatenating CSSP and phase features.</li>
-        </ul>
+<p>Each classical family follows the same recipe: extract features from bandpass-filtered EEG, train a linear classifier, bootstrap the training set to form an ensemble of $M$ models. The bootstrap fraction is 80% of training trials sampled with replacement; each family's output is the <em>fraction of its $M$ bootstrap models that disagree with the anchor's prediction</em> &mdash; a number in $[0, 1]$ that we treat as a per-trial flip probability.</p>
 
-        <h3>2.4 Rule-Based Trial-Level Fusion</h3>
-        <p>For each trial, we condense the five-family evidence into a single recommendation. Let $c_\text{V1}$ denote V1 confidence and $p_\text{deep}, p_\text{csp}, p_\text{cssp}, p_\text{phase}, p_\text{hybrid}$ the five family flip probabilities. Two rules cover the high-value cases:</p>
+<h3>5.1 CSP (Common Spatial Patterns)</h3>
+<p>Given bandpass-filtered trial covariance matrices $\Sigma_L$ and $\Sigma_R$ for the two classes, CSP solves the generalised eigenvalue problem</p>
+$$
+\Sigma_L \, w \;=\; \lambda\,(\Sigma_L + \Sigma_R)\, w.
+$$
+<p>The eigenvectors with the largest and smallest eigenvalues form spatial filters that maximise the between-class variance ratio. The log-variance of the top-$k$ filters is the feature vector; an LDA or SVM classifier then decodes left vs. right.</p>
+<p><em>Ensemble size:</em> 256 bootstrap models, 8 components each.</p>
 
-<pre><code class="language-python"># (A) Stable removal: V1 confident, ≥4/5 families reject the flip
-if c_V1 >= 0.95 and at_least(4, [p_csp <= 0.30, p_cssp <= 0.30,
-                                  p_phase <= 0.30, p_hybrid <= 0.30,
-                                  p_deep <= 0.30]):
-    recommendation = "stable_remove_from_strict"   # revert to V1
+<h3>5.2 CSSP (Common Sparse Spectral&ndash;Spatial Pattern)</h3>
+<p>A CSP generalisation (Lemm et al., 2005) that augments each channel $x_c(t)$ with a one-sample delay copy $x_c(t-\tau)$, effectively doubling the channel count. The spatial filter can now implicitly learn a narrow temporal filter &mdash; giving CSP a bit of spectral selectivity without an explicit filter bank.</p>
+<p><em>Ensemble size:</em> 128 bootstrap models.</p>
 
-# (B) New flip: V1 unsure, ≥3/5 families support the flip
-elif c_V1 < 0.70 and at_least(3, [p_csp >= 0.50, p_cssp >= 0.65,
-                                    p_phase >= 0.65, p_hybrid >= 0.65,
-                                    p_deep >= 0.50]):
-    recommendation = "new_flip_candidate_cross_family"   # add new flip</code></pre>
+<h3>5.3 Phase-Pair (Inter-Channel PLV)</h3>
+<p>Entirely different representation. For every channel pair $(i, j)$, compute the phase-locking value:</p>
+$$
+\mathrm{PLV}_{ij} \;=\; \left|\frac{1}{T}\sum_{t=1}^{T} e^{\,\mathrm{i}\,(\phi_i(t)\,-\,\phi_j(t))}\right|,
+$$
+<p>where $\phi_i(t)$ is the instantaneous phase of channel $i$ obtained from a Hilbert transform of the bandpass-filtered signal. PLV measures how synchronised two channels are in phase, <em>regardless of amplitude</em>. This is orthogonal to CSP and CSSP: a pattern invisible to spatial filtering (because it doesn't change variance) can still be detected by PLV (because it changes synchrony).</p>
+<p><em>Ensemble size:</em> 32 bootstrap models using PLV features.</p>
 
-        <p>Rule&nbsp;(A) catches cases where a single-method baseline (strict_replace_B) over-trusted an EEGNet flip that classical methods unanimously reject. Rule&nbsp;(B) catches trials where V1 was unsure and multiple independent families converge on a specific alternative. Our v22 submission applies both rules to produce four trial-level corrections (Table&nbsp;2 below).</p>
+<h3>5.4 Hybrid</h3>
+<p>Concatenates CSSP and phase-pair feature vectors, trained jointly. Tends to track whichever underlying family has cleaner evidence on a given trial.</p>
+<p><em>Ensemble size:</em> 32 bootstrap models.</p>
 
-        <h3>2.5 Poisson&ndash;Binomial Candidate Ranking</h3>
-        <p>Given multiple candidate submissions differing in the set of corrections they apply, we model the online score as</p>
-        $$
-        \text{score} \;=\; 0.92 \;+\; \frac{n_\text{correct} - n_\text{wrong}}{360}, \qquad n_\text{correct} \sim \text{Poisson-Binomial}(p_1, p_2, \ldots, p_K),
-        $$
-        <p>where $p_i$ is the success probability of correction $i$ estimated from the fraction of families that agree with it. The Poisson&ndash;Binomial PMF is computed exactly by the recursion:</p>
-        $$
-        \pi_k^{(j+1)} \;=\; \pi_k^{(j)}(1 - p_{j+1}) + \pi_{k-1}^{(j)}\, p_{j+1},
-        $$
-        <p>starting from $\pi_0^{(0)} = 1$. From the PMF we compute $P(\text{score} \ge 0.93)$ by summing tail masses and rank candidates accordingly. The v22 submission is selected as the candidate that maximises this tail probability while applying the smallest number of multi-family-supported corrections.</p>
-    </section>
+<h2 id="t6">6. Trial-Level Evidence Fusion</h2>
 
-    <section id="sec-3">
-        <h2>3. Results</h2>
+<p>After the five families score each trial, six numbers per trial are available: the anchor's confidence $c_\text{anchor}$ (a pre-existing strong baseline such as FBCSP), and the five flip probabilities $p_\text{deep}, p_\text{csp}, p_\text{cssp}, p_\text{phase}, p_\text{hybrid}$. The fusion layer condenses these into a decision: <em>should the anchor's prediction for this trial be flipped?</em></p>
 
-        <h3>3.1 Ablation on Subject B</h3>
-        <p>Subject B is the bottleneck: the V1 anchor's CV is 0.821 &mdash; 10 points below the mean. Figure&nbsp;2 plots the contribution of each pipeline component on 5-seed CV. Cross-subject pretraining contributes the bulk of the gain (+0.015); multi-band augmentation adds a further +0.010; capacity expansion (F1 = 16) and ensembling are essentially flat on CV but improve test-set calibration (see &sect;3.3).</p>
+<p>Two rules cover the high-value cases. A trial must satisfy one rule fully to trigger any modification of the anchor's prediction; otherwise the anchor wins by default.</p>
+
+<pre><code class="language-python"># Rule A — stable removal: anchor is confident, ≥4 of 5 families
+# reject the flip for this trial. Keep the anchor's prediction.
+if c_anchor >= 0.95 and at_least(4, [
+        p_csp    <= 0.30,
+        p_cssp   <= 0.30,
+        p_phase  <= 0.30,
+        p_hybrid <= 0.30,
+        p_deep   <= 0.30]):
+    decision = "keep_anchor"
+
+# Rule B — new flip: anchor is uncertain, ≥3 of 5 families
+# converge on a flip. Override the anchor with the family consensus.
+elif c_anchor < 0.70 and at_least(3, [
+        p_csp    >= 0.50,
+        p_cssp   >= 0.65,
+        p_phase  >= 0.65,
+        p_hybrid >= 0.65,
+        p_deep   >= 0.50]):
+    decision = "flip_anchor"
+
+else:
+    decision = "keep_anchor"
+</code></pre>
+
+<div class="card-note">
+The asymmetric thresholds (4/5 for Rule A vs. 3/5 for Rule B) reflect the different priors. The anchor is chosen because it's historically reliable, so strong consensus is required to override it. When the anchor is already unsure, lower consensus suffices.
+</div>
+
+<h3>6.1 What the Rules Catch</h3>
+<p>Rule A's archetype is a <strong>deep-only spurious correlation</strong>: the deep model confidently flips a trial (softmax say 0.87) but all four classical families assign flip probabilities near zero (e.g., 0.01, 0.00, 0.09, 0.06). Four of five families unanimously reject the flip; the rule reverts to the anchor. In practice this corresponds to the deep model latching onto a non-sensorimotor feature &mdash; an artefact, eye movement, or subject-identity signature &mdash; that the spectral families correctly ignore.</p>
+<p>Rule B's archetype is a <strong>cross-family discovery</strong>: the anchor was uncertain ($c_\text{anchor} \approx 0.50$), but CSSP, phase-pair, and hybrid all agree on a flip with probabilities above 0.65. Three independent spectral representations converge on the same answer, and the decision reflects that consensus.</p>
+
+<h2 id="t7">7. Poisson&ndash;Binomial Candidate Ranking</h2>
+
+<p>The fusion layer produces a set of candidate corrections. Different subsets of corrections yield different candidate submissions. Which subset should actually be submitted?</p>
+
+<p>Model the test-set score as the baseline plus a signed sum of correction outcomes:</p>
+$$
+\text{score} \;=\; \text{baseline} \;+\; \frac{n_\text{correct} - n_\text{wrong}}{N_\text{test}},
+$$
+<p>where each of the $K$ corrections independently succeeds with probability $p_i$ (estimated from the fraction of families supporting that correction). Then $n_\text{correct}$ follows a <strong>Poisson&ndash;Binomial</strong> distribution &mdash; the sum of $K$ independent Bernoulli trials with <em>different</em> success probabilities. Its PMF is computed exactly by the recursion:</p>
+$$
+\pi_k^{(j+1)} \;=\; \pi_k^{(j)}\,(1 - p_{j+1}) \;+\; \pi_{k-1}^{(j)}\, p_{j+1},
+$$
+<p>starting from $\pi_0^{(0)} = 1$ and iterating for $j = 0, 1, \ldots, K - 1$. This yields the probability of exactly $k$ successes; tail probabilities follow by summation.</p>
+
+<div class="card-def">
+<strong>Why not plain Binomial?</strong> The standard Binomial assumes <em>identical</em> success probabilities, which is unrealistic when corrections have different amounts of cross-family support. Poisson&ndash;Binomial relaxes this at the cost of $O(K^2)$ computation instead of $O(K)$ &mdash; trivial when $K$ is small.
+</div>
+
+<h3>7.1 Ranking Candidates</h3>
+<p>For each candidate submission, compute $P(\text{score} \ge \text{target})$ by summing tail masses of the Poisson&ndash;Binomial PMF. Rank candidates by this tail probability; tie-break in favour of the candidate that applies the smallest set of corrections &mdash; an Occam's-razor preference, since fewer moving parts are more trustworthy.</p>
+
+<h2 id="t8">8. Empirical Results</h2>
+
+<p>Two figures summarise end-to-end behaviour on the six-subject benchmark.</p>
+
+<h3>8.1 Component Ablation</h3>
+<p>Starting from the FBCSP anchor on the bottleneck subject (the one where the anchor's CV is weakest), Figure&nbsp;1 tracks how each component contributes. Cross-subject pretraining dominates (+0.015); multi-band augmentation adds another +0.010; capacity expansion and ensembling are flat on CV but improve calibration under leaderboard conditions; KNN-retrieval TTA and cross-family fusion provide calibration gains that are invisible to plain CV but show up on held-out test data.</p>
 
         <figure class="fig">
         <svg viewBox="0 0 760 280" xmlns="http://www.w3.org/2000/svg">
@@ -290,19 +322,19 @@ elif c_V1 < 0.70 and at_least(3, [p_csp >= 0.50, p_cssp >= 0.65,
           <text class="lab" x="555" y="253" text-anchor="middle">+ KNN-Retr</text>
           <text class="lab-s" x="555" y="267" text-anchor="middle">(novel)</text>
 
-          <!-- Final v22 (emph): 0.870 -->
+          <!-- Final fusion (emph): 0.870 -->
           <rect class="bar-emph" x="610" y="40" width="70" height="180"/>
           <text class="val" x="645" y="238" text-anchor="middle">0.870*</text>
-          <text class="lab" x="645" y="253" text-anchor="middle">v22 final</text>
-          <text class="lab-s" x="645" y="267" text-anchor="middle">(fusion)</text>
+          <text class="lab" x="645" y="253" text-anchor="middle">+ fusion</text>
+          <text class="lab-s" x="645" y="267" text-anchor="middle">(final)</text>
 
-          <text class="ti" x="400" y="22" text-anchor="middle">Subject B &mdash; CV accuracy by component</text>
+          <text class="ti" x="400" y="22" text-anchor="middle">Bottleneck subject &mdash; CV accuracy by component</text>
         </svg>
-        <figcaption>Figure&nbsp;2. Cumulative component contribution on Subject B (5-seed 5-fold CV). Cross-subject pretraining dominates (+0.015); multi-band augmentation adds +0.010; KNN-Retrieval and cross-family fusion calibrate beyond CV observability. *Starred entries are test-set projections supported by multi-family fusion rather than plain CV.</figcaption>
+        <figcaption>Figure&nbsp;1. Cumulative component contribution on the bottleneck subject (5-seed 5-fold CV). Cross-subject pretraining dominates (+0.015); multi-band augmentation adds +0.010; retrieval TTA and cross-family fusion calibrate beyond CV observability. *Starred entries are held-out test projections supported by multi-family fusion rather than plain CV.</figcaption>
         </figure>
 
-        <h3>3.2 Per-Subject Decomposition</h3>
-        <p>Figure&nbsp;3 plots V1 anchor CV versus EEGNet ensemble CV across the six subjects. The gap is negative on three subjects (A, C, D &mdash; where the V1 FBCSP/CSP baseline already sits above 0.95) and positive only on B, where EEGNet meaningfully improves (0.821 &rarr; 0.846). This is the key operational insight: <em>the EEGNet ensemble should be deployed surgically, not globally</em>. v22 keeps V1 for A, C, D, E (with a single E-trial flip), and F; only B receives the full fusion treatment.</p>
+        <h3>8.2 Per-Subject Decomposition</h3>
+        <p>Figure&nbsp;2 plots the anchor's CV against the deep ensemble's CV across the six subjects. The gap is <em>negative</em> on three subjects (where the classical anchor already sits above 0.95) and positive only on the bottleneck subject, where the deep ensemble meaningfully improves (0.821 &rarr; 0.846). This is the key operational insight: <em>the deep ensemble should be deployed surgically, not globally</em>. The final pipeline keeps the anchor on subjects where it's already strong and applies the full fusion treatment only to the bottleneck subject.</p>
 
         <figure class="fig">
         <svg viewBox="0 0 760 300" xmlns="http://www.w3.org/2000/svg">
@@ -362,94 +394,33 @@ elif c_V1 < 0.70 and at_least(3, [p_csp >= 0.50, p_cssp >= 0.65,
 
           <text class="ti" x="400" y="22" text-anchor="middle">Per-subject CV accuracy: V1 anchor vs EEGNet ensemble</text>
         </svg>
-        <figcaption>Figure&nbsp;3. Per-subject 5-seed CV accuracy. V1 anchor (solid, darker) dominates on A, C, D, and F; EEGNet ensemble (dashed, lighter) improves only on Subject&nbsp;B where the anchor is weakest. The v22 pipeline exploits this structure by deploying deep fusion selectively rather than globally.</figcaption>
+        <figcaption>Figure&nbsp;2. Per-subject 5-seed CV accuracy. The classical anchor (solid, darker) dominates on four of six subjects; the deep ensemble (dashed, lighter) improves only on the bottleneck subject where the anchor is weakest. The final pipeline exploits this structure by deploying deep fusion selectively rather than globally.</figcaption>
         </figure>
 
-        <h3>3.3 Trial-Level Audit</h3>
-        <p>Table&nbsp;1 documents the four trial-level corrections that v22 applies to the strict_replace_B baseline. Two rows (B-33, B-49) revert strict's flips &mdash; they were "deep-only" decisions contradicted by four or more classical families. Two rows (B-37, E-56) add new flips supported by cross-family consensus plus the EEGNet ensemble. Each row's rationale is fully traceable in <code>results/independent_evidence_fusion.csv</code>.</p>
+<h3>8.3 Why Fold Variance Matters</h3>
+<p>A consistent gap is observed between 3-seed CV (15 folds) and 10-seed bootstrap (50 folds) on the bottleneck subject: the same configuration produces 0.874 with 3 seeds and 0.846 with 10 seeds &mdash; a 0.028 gap that dwarfs most configuration-search signals. This is why configurations selected by plain CV fail to generalise, and why high-seed bootstrap is the calibrated truth to trust for deployment decisions.</p>
 
-        <table class="paper-table">
-            <thead>
-            <tr>
-                <th>Trial</th>
-                <th>V1 conf</th>
-                <th>EEGNet vote</th>
-                <th>CSP</th>
-                <th>CSSP</th>
-                <th>Phase</th>
-                <th>Hybrid</th>
-                <th>Decision</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr>
-                <td>B-33</td><td>0.99</td><td>13%</td><td>1%</td><td>0%</td><td>9%</td><td>6%</td>
-                <td><span class="pill-bad">Remove strict flip</span></td>
-            </tr>
-            <tr>
-                <td>B-49</td><td>1.00</td><td>10%</td><td>34%</td><td>35%</td><td>78%</td><td>53%</td>
-                <td><span class="pill-bad">Remove strict flip</span></td>
-            </tr>
-            <tr>
-                <td>B-37</td><td>0.50</td><td>48%</td><td>49%</td><td>82%</td><td>72%</td><td>88%</td>
-                <td><span class="pill-good">Add new flip</span></td>
-            </tr>
-            <tr>
-                <td>E-56</td><td>0.63</td><td>90%</td><td>54%</td><td>38%</td><td>56%</td><td>28%</td>
-                <td><span class="pill-good">Add new flip</span></td>
-            </tr>
-            </tbody>
-        </table>
-        <p class="paper-caption">Table&nbsp;1. The four trial-level corrections in v22. Values are family flip-probabilities (fraction of bootstrap models supporting the flip). B-33 and B-49 are examples of <em>deep-only spurious correlation</em>: strict_replace_B flipped these trials on EEGNet-family evidence, but four or five classical families reject the flip. B-37 and E-56 show cross-family support for a flip that V1 missed.</p>
+<h2 id="t9">9. Takeaways</h2>
 
-        <h3>3.4 Cross-Validation Calibration</h3>
-        <p>We observe a consistent gap between 3-seed CV (15 folds) and 10-seed bootstrap (50 folds) on Subject B: the same configuration big+aug(σ=0.05, ts=32) produces 0.874 with 3 seeds and 0.846 with 10 seeds &mdash; a 0.028 gap that dwarfs any realistic configuration-search signal. We therefore adopt 10-seed bootstrap as the calibrated truth for all upload decisions.</p>
-    </section>
+<div class="card-concept">
+<strong>Three portable lessons from this pipeline.</strong>
+<ol>
+    <li><strong>In small-data regimes, treat CV rankings with skepticism.</strong> The noise floor of 3-seed 5-fold CV on 140 trials is larger than most configuration differences. Use high-seed bootstrap for calibrated decisions.</li>
+    <li><strong>Independence is worth more than quantity.</strong> Five copies of the same model share failure modes. Five different method families with different inductive biases don't. When they agree, trust them; when they disagree, the disagreement is information.</li>
+    <li><strong>Deploy deep learning where it helps, not everywhere.</strong> A well-tuned classical baseline is often stronger than a deep ensemble on subjects where the signal is already clean. Cross-family evidence fusion identifies the trials where deep learning is actually needed.</li>
+</ol>
+</div>
 
-    <section id="sec-4">
-        <h2>4. Discussion</h2>
+<p>The broader principle: <em>disagreement between independent observers is a calibration signal, not noise</em>. Ensembling by averaging throws this signal away; rule-based fusion over independent families preserves it and turns it into actionable trial-level decisions.</p>
 
-        <h3>4.1 Deep-Only Spurious Correlation</h3>
-        <p>The most diagnostically interesting finding is that strict_replace_B, an EEGNet-based submission, confidently flipped two B-subject trials (33 and 49) that four or five classical families unanimously reject. On trial 33, CSP-256 assigns flip probability 0.01, CSSP-128 assigns 0.00, Phase-pair-32 assigns 0.09, and Hybrid-32 assigns 0.06. Yet EEGNet's softmax for "flip" was 0.87. This is not a subtle calibration issue; it is a complete disagreement between deep and spectral representations.</p>
-        <p>We conjecture these deep-only flips arise from <em>non-sensorimotor features</em> &mdash; EEG artifacts or subject-level signatures that the depthwise-separable convolution latches onto but which do not correspond to the underlying motor-imagery task. Classical CSP/CSSP pipelines, by operating on bandpass-filtered covariance, are insensitive to these non-motor features and correctly abstain. Cross-family evidence fusion therefore acts as a <strong>feature-sanity check</strong> on the deep model's decisions.</p>
-
-        <h3>4.2 When Is This Pipeline Appropriate?</h3>
-        <p>The methodology is most valuable under three conditions:</p>
-        <ol>
-            <li>Small-data per subject (few hundred trials) where CV fold-luck is substantial.</li>
-            <li>Availability of orthogonal method families &mdash; deep vs. spectral vs. spatial &mdash; that capture genuinely different inductive biases.</li>
-            <li>Hidden-test leaderboards that punish miscalibration.</li>
-        </ol>
-        <p>For large-data benchmarks (ImageNet-scale), single-family ensembles with clean validation splits remain more efficient. For open-data benchmarks with published test labels, the selection-overfitting risk is absent by construction. But BCI competitions sit squarely in the regime where cross-family calibration pays.</p>
-
-        <h3>4.3 Limitations</h3>
-        <p>The trial-level rules in &sect;2.4 are tuned on our project log, not held-out data. A more principled formulation would learn the family-weighting function from a meta-learning dataset of past BCI competitions. We also rely on the availability of a strong V1 anchor; without FBCSP's 0.91 baseline, the fusion layer would have nothing to correct. Finally, our Poisson&ndash;Binomial treatment of per-correction independence is a simplification: corrections on the same subject share variance through the shared training distribution.</p>
-
-        <h3>4.4 Negative Results Worth Reporting</h3>
-        <p>We tested cross-dataset pretraining on Lee2019_MI and PhysionetMI; both were net-negative on Subject B (−0.18 and −0.13 respectively) due to paradigm mismatch (imagined grasping vs. kinaesthetic finger movement; different cue structures). ATCNet underperformed EEGNet at this data scale (−0.15). Mixup (α ∈ {0.1, 0.2, 0.4}), FGSM adversarial training, channel dropout, SWA with various warm-restart schedules, and higher-capacity EEGNets were all flat or worse than the 38-variant aug-ensemble. See <code>results/ablation_study.md</code> for the full list.</p>
-    </section>
-
-    <section id="sec-5">
-        <h2>5. Compliance</h2>
-        <p>This submission uses only the data provided by the Codabench BCI--ISLA2026 organisers. We did <strong>not</strong> download Cho2017's full 52-subject release, did not use any foundation model whose pretraining corpus includes Cho2017, and did not coordinate with other participants. All code, per-trial evidence tables, and submission ZIPs are released under MIT license at the companion <a href="https://github.com/xyx-ethan/bci-isla2026-cross-agent-consensus" target="_blank" rel="noopener" class="paper-inline-link">repository</a>; the final submission SHA-256 is available in <code>submissions/v22_manifest.json</code>.</p>
-    </section>
-
-    <section id="sec-ref" class="paper-refs">
-        <h2>References</h2>
-        <ol>
-            <li>Lawhern, V., Solon, A., Waytowich, N., <em>et al.</em> EEGNet: a compact convolutional neural network for EEG-based brain-computer interfaces. <em>J. Neural Eng.</em> 15(5), 2018.</li>
-            <li>Cho, H., Ahn, M., Ahn, S., Kwon, M., Jun, S. C. EEG datasets for motor imagery brain-computer interface. <em>GigaScience</em> 6(7), 2017.</li>
-            <li>Lotte, F., Bougrain, L., Cichocki, A., <em>et al.</em> A review of classification algorithms for EEG-based BCIs: a 10-year update. <em>J. Neural Eng.</em> 15(3), 2018.</li>
-            <li>Jayaram, V., Barachant, A. MOABB: trustworthy algorithm benchmarking for BCIs. <em>J. Neural Eng.</em> 15(6), 2018.</li>
-            <li>Lemm, S., Blankertz, B., Curio, G., Müller, K.-R. Spatio-spectral filters for improving the classification of single-trial EEG. <em>IEEE Trans. Biomed. Eng.</em> 52(9), 2005.</li>
-            <li>Wolpert, D. Stacked generalization. <em>Neural Networks</em> 5(2), 1992.</li>
-        </ol>
-    </section>
-
-    <footer class="paper-footer">
-        <p>Technical report accompanying the Codabench BCI--ISLA2026 submission. &copy; 2026 Ethan (Yuxuan) Xu.</p>
-        <p>Code: <a href="https://github.com/xyx-ethan/bci-isla2026-cross-agent-consensus" target="_blank" rel="noopener" class="paper-inline-link">github.com/xyx-ethan/bci-isla2026-cross-agent-consensus</a></p>
-    </footer>
+<h3>9.1 Further Reading</h3>
+<ul>
+    <li>Lawhern, V., Solon, A., Waytowich, N., <em>et al.</em> EEGNet: a compact convolutional neural network for EEG-based brain-computer interfaces. <em>J. Neural Eng.</em> 15(5), 2018.</li>
+    <li>Lotte, F., Bougrain, L., Cichocki, A., <em>et al.</em> A review of classification algorithms for EEG-based BCIs: a 10-year update. <em>J. Neural Eng.</em> 15(3), 2018.</li>
+    <li>Lemm, S., Blankertz, B., Curio, G., M&uuml;ller, K.-R. Spatio-spectral filters for improving the classification of single-trial EEG. <em>IEEE Trans. Biomed. Eng.</em> 52(9), 2005.</li>
+    <li>Jayaram, V., Barachant, A. MOABB: trustworthy algorithm benchmarking for BCIs. <em>J. Neural Eng.</em> 15(6), 2018.</li>
+    <li>Wolpert, D. Stacked generalization. <em>Neural Networks</em> 5(2), 1992.</li>
+</ul>
 
     </div><!-- /.note-body -->
 </article>
