@@ -1370,6 +1370,7 @@ footer::before {
 }
 
 /* ===== Hover arrow: affordance for clickable cards (same idiom as .cert-arrow) ===== */
+/* Both benchmark and note cards share the same bottom-right arrow position. */
 .card-arrow {
     font-size: 15px;
     font-weight: 500;
@@ -1380,18 +1381,8 @@ footer::before {
     transition: opacity 0.2s, transform 0.2s, visibility 0s linear 0.2s;
     line-height: 1;
     position: absolute;
-    right: 20px;
-}
-
-/* Benchmark cards: arrow at bottom-right (rank badge now lives in top-right) */
-.project-card[data-href] .card-arrow {
     bottom: 20px;
-}
-
-/* Note cards (column-flex): arrow at top-right (no competing element there) */
-.note-card .card-arrow {
-    top: 22px;
-    right: 22px;
+    right: 20px;
 }
 
 .project-card[data-href]:hover .card-arrow,
