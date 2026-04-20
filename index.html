@@ -354,10 +354,10 @@
     <section id="projects">
         <h2>Benchmarks</h2>
 
-        <div class="card project-card">
+        <div class="card project-card" data-href="https://moody-challenge.physionet.org/2026/leaderboard/" data-href-target="_blank">
             <div class="card-header">
                 <div>
-                    <h3>PhysioNet Challenge 2026 <a href="https://moody-challenge.physionet.org/2026/leaderboard/" target="_blank" rel="noopener" class="title-link" aria-label="Leaderboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a></h3>
+                    <h3>PhysioNet Challenge 2026</h3>
                     <p class="subtitle">PhysioNet &middot; Organized by <a href="https://research.gatech.edu/people/gari-clifford" target="_blank" rel="noopener" class="inline-link">Gari Clifford</a> (Emory / Georgia Tech)</p>
                 </div>
                 <span class="date-badge">Feb &ndash; Aug 2026</span>
@@ -377,10 +377,10 @@
             </div>
         </div>
 
-        <div class="card project-card">
+        <div class="card project-card" data-href="research/bci-isla2026.html">
             <div class="card-header">
                 <div>
-                    <h3>BCI Motor Imagery Challenge &mdash; ISLA 2026 <a href="research/bci-isla2026.html" class="title-link" aria-label="Read paper"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a></h3>
+                    <h3>BCI Motor Imagery Challenge &mdash; ISLA 2026</h3>
                     <p class="subtitle">CodaBench &middot; Organized by <a href="https://plcrodrigues.github.io/" target="_blank" rel="noopener" class="inline-link">Pedro L. C. Rodrigues</a> (Inria)</p>
                 </div>
                 <span class="date-badge">Apr &ndash; May 2026</span>
@@ -401,10 +401,10 @@
             </div>
         </div>
 
-        <div class="card project-card">
+        <div class="card project-card" data-href="https://www.codabench.org/competitions/14569/#/results-tab" data-href-target="_blank">
             <div class="card-header">
                 <div>
-                    <h3>Diabetic Retinopathy Detection Challenge <a href="https://www.codabench.org/competitions/14569/#/results-tab" target="_blank" rel="noopener" class="title-link" aria-label="Leaderboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a></h3>
+                    <h3>Diabetic Retinopathy Detection Challenge</h3>
                     <p class="subtitle">CodaBench &middot; Organized by <a href="https://github.com/maxencedbe" target="_blank" rel="noopener" class="inline-link">Maxence Debes</a> (&Eacute;cole Polytechnique)</p>
                 </div>
                 <span class="date-badge">Mar &ndash; May 2026</span>
@@ -517,6 +517,26 @@ function toggleTheme() {
 }
 document.getElementById('themeToggle').addEventListener('click', toggleTheme);
 document.getElementById('mobileThemeToggle').addEventListener('click', toggleTheme);
+
+// Clickable cards — whole card navigates to data-href, but nested links (subtitle author)
+// still work because we bail out if the click landed inside an <a>.
+document.querySelectorAll('.project-card[data-href]').forEach(card => {
+    card.addEventListener('click', e => {
+        if (e.target.closest('a')) return;
+        const href = card.getAttribute('data-href');
+        const target = card.getAttribute('data-href-target');
+        if (target === '_blank') window.open(href, '_blank', 'noopener');
+        else window.location.href = href;
+    });
+    card.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            card.click();
+        }
+    });
+    card.setAttribute('tabindex', '0');
+    card.setAttribute('role', 'link');
+});
 
 // Mobile menu
 const toggle = document.getElementById('menuToggle');

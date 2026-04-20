@@ -984,8 +984,26 @@ section h2 {
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+.project-card[data-href] {
+    cursor: pointer;
+}
+
+.project-card[data-href]:focus-visible {
+    outline: 2px solid var(--accent-blue);
+    outline-offset: 2px;
+}
+
 .project-card:hover {
     border-left-color: var(--accent-blue-deep);
+}
+
+.project-card[data-href]:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="dark"] .project-card[data-href]:hover {
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
 }
 
 .project-card .tags {

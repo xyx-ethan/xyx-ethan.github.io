@@ -118,9 +118,6 @@
           <text class="tt-h" x="390" y="34" text-anchor="middle">Raw EEG (64 &times; 1537)</text>
           <text class="tt-s" x="390" y="50" text-anchor="middle">bandpass 7&ndash;30 Hz, crop [384:1537]</text>
 
-          <!-- Layer A label -->
-          <text class="tt-sect" x="40" y="100">METHOD FAMILIES (PARALLEL)</text>
-
           <!-- V1 anchor (left) -->
           <rect class="nd-anchor" x="40" y="115" width="160" height="56" rx="6"/>
           <text class="tt-h" x="120" y="137" text-anchor="middle">V1 anchor</text>
@@ -173,8 +170,11 @@
           <path class="ln" d="M390 59 L390 115" marker-end="url(#a1)"/>
           <path class="ln" d="M440 59 L440 75 L590 75 L590 115" marker-end="url(#a1)"/>
 
+          <!-- Layer A label (below boxes) -->
+          <text class="tt-sect" x="40" y="232">METHOD FAMILIES (PARALLEL)</text>
+
           <!-- Family outputs to fusion -->
-          <path class="ln-dim" d="M120 171 L120 245 L210 245 L210 285"/>
+          <path class="ln-dim" d="M120 171 L120 215 L210 215 L210 285"/>
           <path class="ln" d="M320 210 L320 285" marker-end="url(#a1)"/>
           <path class="ln" d="M590 221 L590 245 L540 245 L540 285" marker-end="url(#a1)"/>
 
@@ -332,7 +332,7 @@ elif c_V1 < 0.70 and at_least(3, [p_csp >= 0.50, p_cssp >= 0.65,
           <text class="val" x="240" y="208" text-anchor="middle">0.821</text>
           <text class="val" x="340" y="74" text-anchor="middle">0.993</text>
           <text class="val" x="440" y="74" text-anchor="middle">0.993</text>
-          <text class="val" x="540" y="200" text-anchor="middle">0.871</text>
+          <text class="val" x="540" y="158" text-anchor="middle">0.871</text>
           <text class="val" x="640" y="132" text-anchor="middle">0.914</text>
 
           <!-- EEGNet: A 0.829, B 0.846, C 0.971, D 0.921, E 0.850, F 0.750 -->
