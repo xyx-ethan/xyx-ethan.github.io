@@ -1348,51 +1348,30 @@ footer::before {
     overflow: hidden;
 }
 
-/* ===== Hover arrow: affordance for clickable cards ===== */
-/* Benchmark cards: arrow in bottom-right (keeps date-badge in top-right unobscured) */
-.project-card[data-href]::before {
-    content: "";
-    position: absolute;
-    bottom: 18px;
-    right: 22px;
-    width: 18px;
-    height: 18px;
-    background-color: var(--accent-blue-deep);
-    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='5' y1='12' x2='19' y2='12'/%3E%3Cpolyline points='12 5 19 12 12 19'/%3E%3C/svg%3E") center/contain no-repeat;
-    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='5' y1='12' x2='19' y2='12'/%3E%3Cpolyline points='12 5 19 12 12 19'/%3E%3C/svg%3E") center/contain no-repeat;
+/* ===== Hover arrow: affordance for clickable cards (same idiom as .cert-arrow) ===== */
+.card-arrow {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--accent-blue-deep);
     opacity: 0;
-    transform: translateX(-6px);
-    transition: opacity 0.25s ease, transform 0.25s ease;
-    pointer-events: none;
-    z-index: 3;
+    transition: opacity 0.2s, transform 0.2s;
+    margin-left: auto;
+    line-height: 1;
 }
 
-.project-card[data-href]:hover::before {
-    opacity: 0.9;
-    transform: translateX(0);
+.project-card[data-href]:hover .card-arrow,
+.note-card:hover .card-arrow {
+    opacity: 1;
+    transform: translateX(3px);
 }
 
-/* Note cards: arrow in top-right (no competing element there) */
-.note-card::before {
-    content: "";
+/* Note cards are column-flex, so the arrow needs to be absolutely pinned to
+   the top-right instead of relying on margin-left:auto in a flex row. */
+.note-card .card-arrow {
     position: absolute;
     top: 22px;
     right: 22px;
-    width: 16px;
-    height: 16px;
-    background-color: var(--accent-blue-deep);
-    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='5' y1='12' x2='19' y2='12'/%3E%3Cpolyline points='12 5 19 12 12 19'/%3E%3C/svg%3E") center/contain no-repeat;
-    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='5' y1='12' x2='19' y2='12'/%3E%3Cpolyline points='12 5 19 12 12 19'/%3E%3C/svg%3E") center/contain no-repeat;
-    opacity: 0;
-    transform: translateX(-6px);
-    transition: opacity 0.25s ease, transform 0.25s ease;
-    pointer-events: none;
-    z-index: 3;
-}
-
-.note-card:hover::before {
-    opacity: 0.85;
-    transform: translateX(0);
+    margin-left: 0;
 }
 
 /* ===== Subtle Card Hover ===== */
