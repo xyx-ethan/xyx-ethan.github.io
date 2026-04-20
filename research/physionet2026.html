@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Decoding Cognitive Impairment from Overnight Polysomnography &mdash; Ethan Xu</title>
+    <meta name="description" content="Research note on decoding cognitive impairment from overnight polysomnography (PSG): nonlinear EEG dynamics, sleep-stage-stratified features, brain–heart coupling, and EEG foundation models. George B. Moody PhysioNet Challenge 2026.">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%232a3a4a'/%3E%3Cstop offset='100%25' stop-color='%231a2636'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx='50' cy='50' r='50' fill='url(%23g)'/%3E%3Ctext x='50' y='56' text-anchor='middle' dominant-baseline='middle' font-family='Inter,sans-serif' font-size='34' font-weight='700' fill='%23d0d8e4'%3EXY%3C/text%3E%3C/svg%3E">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Crimson+Pro:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="../notes/notes.css">
+    <link rel="stylesheet" href="paper.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+    <script>MathJax={tex:{inlineMath:[['$','$']],displayMath:[['$$','$$']]},svg:{fontCache:'global'}};</script>
+    <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+    <script>(function(){var t=localStorage.getItem('theme');if(t==='light')localStorage.removeItem('theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');})()</script>
+</head>
+<body class="note-page">
+
+<nav class="note-nav">
+    <a href="../index.html#projects" class="back-link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+        Back to Home
+    </a>
+    <div class="note-nav-right">
+        <a href="https://github.com/xyx-ethan/gt-neurosignals-lab-physionet2026-submission" target="_blank" rel="noopener" class="note-theme-toggle" aria-label="Code" title="Source code on GitHub">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>
+        </a>
+        <a href="https://moody-challenge.physionet.org/2026/leaderboard/" target="_blank" rel="noopener" class="note-theme-toggle" aria-label="Leaderboard" title="PhysioNet Challenge leaderboard">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+        </a>
+        <button class="note-theme-toggle" id="noteThemeToggle" aria-label="Toggle theme">
+            <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+    </div>
+</nav>
+
+<aside class="note-sidebar">
+    <div class="note-sidebar-inner">
+        <div class="note-sidebar-header">
+            <span class="note-badge">PhysioNet 2026</span>
+            <h2>Sleep PSG &rarr; Cognitive Impairment</h2>
+            <p>GT NeuroSignals Lab &middot; In progress</p>
+        </div>
+        <div class="toc-title">Contents</div>
+        <ol class="toc-list"></ol>
+    </div>
+</aside>
+
+<article class="note-content">
+
+    <header class="note-header">
+        <span class="note-badge">George B. Moody PhysioNet Challenge 2026</span>
+        <h1>Decoding Cognitive Impairment from Overnight Polysomnography</h1>
+        <p class="note-intro">A research note (in progress) on decoding <strong>cognitive impairment from overnight polysomnography (PSG)</strong>. Will cover nonlinear EEG dynamics (recurrence quantification, multiscale and permutation entropy) stratified across N2, N3, and REM sleep; brain&ndash;heart coupling between HRV and EEG delta-band activity; slow-wave dissipation and REM-sleep muscle atonia as biomarkers of neurodegenerative decline; and integration of pretrained EEG foundation-model embeddings (BIOT, REVE) within a cross-site leak-free ensemble. Collaboration with the <a href="https://research.gatech.edu/people/gari-clifford" target="_blank" rel="noopener">Clifford Lab</a> (Emory / Georgia Tech NeuroSignals).</p>
+    </header>
+
+    <!-- Inline TOC (hidden via notes.css; auto-populated into sidebar by notes.js) -->
+    <div class="toc">
+        <h2>Topics</h2>
+        <ol>
+            <li><a href="#t1">Polysomnography &amp; the Cognitive-Impairment Task</a></li>
+            <li><a href="#t2">Sleep Architecture &amp; Why It Matters for Cognition</a></li>
+            <li><a href="#t3">Nonlinear EEG Dynamics (RQA, MSE, PE)</a></li>
+            <li><a href="#t4">Spectral &amp; Slow-Wave Features</a></li>
+            <li><a href="#t5">Brain&ndash;Heart Coupling</a></li>
+            <li><a href="#t6">REM-Sleep Muscle Atonia as a Prodromal Marker</a></li>
+            <li><a href="#t7">EEG Foundation Models (BIOT, REVE)</a></li>
+            <li><a href="#t8">Cross-Site Leak-Free Ensembling</a></li>
+            <li><a href="#t9">Empirical Results &amp; Takeaways</a></li>
+        </ol>
+    </div>
+
+    <div class="note-body">
+
+<div class="card-note">
+<strong>Note in progress.</strong> This page is a placeholder; the methodological write-up is being drafted in parallel with the ongoing submission phase (Feb&ndash;Aug 2026). Meanwhile, the source code for the current submission is available on <a href="https://github.com/xyx-ethan/gt-neurosignals-lab-physionet2026-submission" target="_blank" rel="noopener">GitHub</a>, and the live leaderboard is <a href="https://moody-challenge.physionet.org/2026/leaderboard/" target="_blank" rel="noopener">here</a>.
+</div>
+
+<h2 id="t1">1. Polysomnography &amp; the Cognitive-Impairment Task</h2>
+<p><em>Content pending.</em> Will cover the PSG recording setup (multi-channel EEG, EKG, EMG, EOG, respiration), the challenge's prediction target, and the clinical motivation for overnight-sleep biomarkers of cognitive decline.</p>
+
+<h2 id="t2">2. Sleep Architecture &amp; Why It Matters for Cognition</h2>
+<p><em>Content pending.</em> Will cover N2 (spindles, K-complexes), N3 (slow-wave sleep, memory consolidation, glymphatic clearance), REM (dreaming, synaptic homeostasis), and how each stage's neurophysiology relates to cognitive function.</p>
+
+<h2 id="t3">3. Nonlinear EEG Dynamics (RQA, MSE, PE)</h2>
+<p><em>Content pending.</em> Will cover Recurrence Quantification Analysis on phase-space embeddings, Multiscale Entropy slopes, and Permutation Entropy as measures of cortical complexity that degrade with neurodegeneration.</p>
+
+<h2 id="t4">4. Spectral &amp; Slow-Wave Features</h2>
+<p><em>Content pending.</em> Will cover spectral edge frequency, band-power ratios, and slow-wave dissipation dynamics across the night.</p>
+
+<h2 id="t5">5. Brain&ndash;Heart Coupling</h2>
+<p><em>Content pending.</em> Will cover HRV&#8596;EEG delta-band correlations during N3, LF-HRV&#8596;delta during REM, wake-decoupling, and hemispheric asymmetry as cross-system coupling markers.</p>
+
+<h2 id="t6">6. REM-Sleep Muscle Atonia as a Prodromal Marker</h2>
+<p><em>Content pending.</em> Will cover REM Sleep without Atonia (RSWA), its link to synucleinopathies (Parkinson's disease, Lewy body dementia), and quantification via REM/N2 EMG RMS ratios.</p>
+
+<h2 id="t7">7. EEG Foundation Models (BIOT, REVE)</h2>
+<p><em>Content pending.</em> Will cover self-supervised EEG foundation models, how their embeddings transfer to clinical prediction tasks, and the practical integration (unipolar&harr;bipolar channel remapping, embedding normalization).</p>
+
+<h2 id="t8">8. Cross-Site Leak-Free Ensembling</h2>
+<p><em>Content pending.</em> Will cover leave-one-site-out validation, the Stage-1 / Stage-2 meta-learning architecture, sequential &alpha;-blending of sub-models, and graceful-fallback cascade for deployment.</p>
+
+<h2 id="t9">9. Empirical Results &amp; Takeaways</h2>
+<p><em>Content pending.</em> Will report per-site AUROC, ablation on feature families, and broader lessons about sleep neurophysiology as a window into early neurodegenerative decline.</p>
+
+    </div><!-- /.note-body -->
+</article>
+
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+<script src="../notes/notes.js"></script>
+
+</body>
+</html>
