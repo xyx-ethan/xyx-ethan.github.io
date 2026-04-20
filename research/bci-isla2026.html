@@ -76,82 +76,98 @@
         <p>Figure&nbsp;1 sketches the architecture. Five independent method families produce per-trial probabilities or vote fractions; an FBCSP V1 anchor supplies the starting submission. A rule-based fusion layer identifies trials where evidence diverges from the anchor; a Poisson&ndash;Binomial selector then ranks candidate corrections by the tail probability of exceeding 0.93 on the hidden leaderboard.</p>
 
         <figure class="fig">
-        <svg viewBox="0 0 780 420" xmlns="http://www.w3.org/2000/svg">
+        <svg viewBox="0 0 780 560" xmlns="http://www.w3.org/2000/svg">
           <defs>
             <marker id="a1" viewBox="0 0 10 7" refX="10" refY="3.5" markerWidth="7" markerHeight="5" orient="auto-start-reverse">
-              <path d="M0,0 L10,3.5 L0,7" fill="#6488a4"/>
+              <path d="M0,0 L10,3.5 L0,7" fill="#90a8c0"/>
             </marker>
           </defs>
           <style>
-            .nd{fill:#1a1c22;stroke:#38404c;stroke-width:1}
+            .nd{fill:#1a1c22;stroke:#4a5260;stroke-width:1}
             .nd-anchor{fill:#1c1e24;stroke:#90a8c0;stroke-width:1.5}
-            .nd-deep{fill:#1a1c22;stroke:#7a8aad;stroke-width:1}
+            .nd-deep{fill:#1a1c22;stroke:#90a8c0;stroke-width:1.2}
             .nd-classical{fill:#1a1c22;stroke:#6488a4;stroke-width:1}
-            .nd-out{fill:#1c1e24;stroke:#90a8c0;stroke-width:1.5}
-            .tt{font:500 11px Inter,sans-serif;fill:#c8ccd4}
-            .tt-h{font:600 11.5px Inter,sans-serif;fill:#e4e7ec}
-            .tt-s{font:italic 10px Inter,sans-serif;fill:#8a92a2}
-            .ln{stroke:#6488a4;stroke-width:1;fill:none}
-            .ln-dim{stroke:#4a5260;stroke-width:0.8;fill:none;stroke-dasharray:2 2}
+            .nd-out{fill:#1c1e24;stroke:#90a8c0;stroke-width:1.8}
+            .tt{font:500 11.5px Inter,sans-serif;fill:#e4e7ec}
+            .tt-h{font:600 12.5px Inter,sans-serif;fill:#f0f2f5}
+            .tt-s{font:italic 10.5px Inter,sans-serif;fill:#b8c0cc}
+            .tt-sect{font:600 10px Inter,sans-serif;fill:#90a8c0;letter-spacing:1.2px}
+            .ln{stroke:#90a8c0;stroke-width:1.3;fill:none}
+            .ln-dim{stroke:#6a7280;stroke-width:1;fill:none;stroke-dasharray:3 3}
           </style>
+
           <!-- Input -->
-          <rect class="nd" x="20" y="25" width="180" height="38" rx="6"/>
-          <text class="tt-h" x="110" y="43" text-anchor="middle">Raw EEG (64&times;1537)</text>
-          <text class="tt-s" x="110" y="56" text-anchor="middle">bandpass 7&ndash;30 Hz, crop [384:1537]</text>
+          <rect class="nd" x="290" y="15" width="200" height="44" rx="6"/>
+          <text class="tt-h" x="390" y="34" text-anchor="middle">Raw EEG (64 &times; 1537)</text>
+          <text class="tt-s" x="390" y="50" text-anchor="middle">bandpass 7&ndash;30 Hz, crop [384:1537]</text>
 
-          <!-- V1 anchor -->
-          <rect class="nd-anchor" x="20" y="100" width="180" height="44" rx="6"/>
-          <text class="tt-h" x="110" y="119" text-anchor="middle">V1 anchor (FBCSP)</text>
-          <text class="tt-s" x="110" y="134" text-anchor="middle">per-subject best · 0.91 online</text>
+          <!-- Layer A label -->
+          <text class="tt-sect" x="40" y="100">METHOD FAMILIES (PARALLEL)</text>
 
-          <!-- Deep family -->
-          <rect class="nd-deep" x="230" y="80" width="200" height="90" rx="6"/>
-          <text class="tt-h" x="330" y="100" text-anchor="middle">Deep family</text>
-          <text class="tt" x="330" y="118" text-anchor="middle">EEGNet × 38 variants</text>
-          <text class="tt-s" x="330" y="134" text-anchor="middle">F1∈{8,16}, σ∈{.03,.05,.07}, ts∈{16,32,48}</text>
-          <text class="tt" x="330" y="152" text-anchor="middle">+ KNN-Retrieval TTA (novel)</text>
+          <!-- V1 anchor (left) -->
+          <rect class="nd-anchor" x="40" y="115" width="160" height="56" rx="6"/>
+          <text class="tt-h" x="120" y="137" text-anchor="middle">V1 anchor</text>
+          <text class="tt" x="120" y="152" text-anchor="middle">FBCSP</text>
+          <text class="tt-s" x="120" y="165" text-anchor="middle">0.91 online</text>
 
-          <!-- Classical families -->
-          <rect class="nd-classical" x="460" y="25" width="300" height="24" rx="4"/>
-          <text class="tt" x="470" y="41">CSP-256 bootstrap (classical SPD)</text>
-          <rect class="nd-classical" x="460" y="57" width="300" height="24" rx="4"/>
-          <text class="tt" x="470" y="73">CSSP-128 (delay-augmented CSP)</text>
-          <rect class="nd-classical" x="460" y="89" width="300" height="24" rx="4"/>
-          <text class="tt" x="470" y="105">Phase-Pair-32 (inter-channel PLV)</text>
-          <rect class="nd-classical" x="460" y="121" width="300" height="24" rx="4"/>
-          <text class="tt" x="470" y="137">Hybrid-32 (CSSP + phase)</text>
+          <!-- Deep family (middle) -->
+          <rect class="nd-deep" x="220" y="115" width="200" height="95" rx="6"/>
+          <text class="tt-h" x="320" y="137" text-anchor="middle">Deep family</text>
+          <text class="tt" x="320" y="155" text-anchor="middle">EEGNet &times; 38 variants</text>
+          <text class="tt-s" x="320" y="171" text-anchor="middle">F1&isin;{8,16}, &sigma;&isin;{.03,.05,.07}</text>
+          <text class="tt-s" x="320" y="186" text-anchor="middle">ts&isin;{16,32,48}</text>
+          <text class="tt" x="320" y="203" text-anchor="middle" fill="#c0d0e0">+ KNN-Retrieval TTA</text>
+
+          <!-- Classical families (right) -->
+          <rect class="nd-classical" x="440" y="115" width="300" height="22" rx="4"/>
+          <text class="tt" x="455" y="130">CSP-256 bootstrap (classical SPD)</text>
+          <rect class="nd-classical" x="440" y="143" width="300" height="22" rx="4"/>
+          <text class="tt" x="455" y="158">CSSP-128 (delay-augmented CSP)</text>
+          <rect class="nd-classical" x="440" y="171" width="300" height="22" rx="4"/>
+          <text class="tt" x="455" y="186">Phase-Pair-32 (inter-channel PLV)</text>
+          <rect class="nd-classical" x="440" y="199" width="300" height="22" rx="4"/>
+          <text class="tt" x="455" y="214">Hybrid-32 (CSSP + phase)</text>
+
+          <!-- Layer B label -->
+          <text class="tt-sect" x="40" y="270">TRIAL-LEVEL FUSION</text>
 
           <!-- Evidence fusion -->
-          <rect class="nd" x="230" y="210" width="300" height="70" rx="6"/>
-          <text class="tt-h" x="380" y="232" text-anchor="middle">Trial-level evidence fusion</text>
-          <text class="tt-s" x="380" y="250" text-anchor="middle">rule-based recommendations</text>
-          <text class="tt-s" x="380" y="266" text-anchor="middle">stable_remove · new_flip · keep · deep_only</text>
+          <rect class="nd" x="180" y="285" width="420" height="80" rx="6"/>
+          <text class="tt-h" x="390" y="309" text-anchor="middle">Trial-level evidence fusion</text>
+          <text class="tt-s" x="390" y="328" text-anchor="middle">rule-based recommendations</text>
+          <text class="tt-s" x="390" y="346" text-anchor="middle">stable_remove_from_strict &middot; new_flip_candidate</text>
+          <text class="tt-s" x="390" y="360" text-anchor="middle">keep_mainline &middot; deep_only</text>
+
+          <!-- Layer C label -->
+          <text class="tt-sect" x="40" y="408">CANDIDATE SELECTION</text>
 
           <!-- Poisson-Binomial -->
-          <rect class="nd" x="230" y="305" width="300" height="38" rx="6"/>
-          <text class="tt-h" x="380" y="322" text-anchor="middle">Poisson&ndash;Binomial candidate ranking</text>
-          <text class="tt-s" x="380" y="336" text-anchor="middle">P(score ≥ 0.93 | p_1,...,p_K)</text>
+          <rect class="nd" x="180" y="420" width="420" height="48" rx="6"/>
+          <text class="tt-h" x="390" y="441" text-anchor="middle">Poisson&ndash;Binomial candidate ranking</text>
+          <text class="tt-s" x="390" y="458" text-anchor="middle">P(score &ge; 0.93 | p&#8321;, p&#8322;, ..., p&#8344;)</text>
 
           <!-- Output -->
-          <rect class="nd-out" x="230" y="368" width="300" height="38" rx="6"/>
-          <text class="tt-h" x="380" y="385" text-anchor="middle">v22 submission &middot; 0.92 leaderboard</text>
-          <text class="tt-s" x="380" y="399" text-anchor="middle">4 trial-level corrections, multi-family supported</text>
+          <rect class="nd-out" x="180" y="495" width="420" height="48" rx="6"/>
+          <text class="tt-h" x="390" y="516" text-anchor="middle" fill="#ffffff">v22 submission &middot; 0.92 leaderboard</text>
+          <text class="tt-s" x="390" y="533" text-anchor="middle" fill="#c0d0e0">4 trial-level corrections, multi-family supported</text>
 
-          <!-- Arrows -->
-          <path class="ln" d="M110 63 L110 100" marker-end="url(#a1)"/>
-          <path class="ln" d="M200 125 L230 125" marker-end="url(#a1)"/>
-          <path class="ln" d="M200 44 L255 44 L255 80" marker-end="url(#a1)"/>
-          <path class="ln" d="M200 44 L460 44" marker-end="url(#a1)"/>
-          <path class="ln" d="M200 44 L460 69" marker-end="url(#a1)"/>
-          <path class="ln" d="M200 44 L460 101" marker-end="url(#a1)"/>
-          <path class="ln" d="M200 44 L460 133" marker-end="url(#a1)"/>
-          <path class="ln" d="M330 170 L330 210" marker-end="url(#a1)"/>
-          <path class="ln" d="M610 145 L610 185 L430 210" marker-end="url(#a1)"/>
-          <path class="ln-dim" d="M110 144 L110 245 L230 245"/>
-          <path class="ln" d="M380 280 L380 305" marker-end="url(#a1)"/>
-          <path class="ln" d="M380 343 L380 368" marker-end="url(#a1)"/>
+          <!-- Vertical arrows from input to each family -->
+          <path class="ln" d="M340 59 L340 90 L120 90 L120 115" marker-end="url(#a1)"/>
+          <path class="ln" d="M390 59 L390 115" marker-end="url(#a1)"/>
+          <path class="ln" d="M440 59 L440 90 L590 90 L590 115" marker-end="url(#a1)"/>
+
+          <!-- Family outputs to fusion -->
+          <path class="ln-dim" d="M120 171 L120 260 L210 260 L210 285"/>
+          <path class="ln" d="M320 210 L320 285" marker-end="url(#a1)"/>
+          <path class="ln" d="M590 221 L590 260 L540 260 L540 285" marker-end="url(#a1)"/>
+
+          <!-- Fusion to selector -->
+          <path class="ln" d="M390 365 L390 420" marker-end="url(#a1)"/>
+
+          <!-- Selector to output -->
+          <path class="ln" d="M390 468 L390 495" marker-end="url(#a1)"/>
         </svg>
-        <figcaption>Figure&nbsp;1. Architecture. Five independent method families (one deep, four classical) contribute trial-level evidence; an FBCSP V1 anchor seeds the submission. Rule-based fusion identifies trials where multi-family evidence disagrees with the anchor, and a Poisson&ndash;Binomial selector ranks resulting candidates by the tail probability of exceeding 0.93.</figcaption>
+        <figcaption>Figure&nbsp;1. Architecture. Five independent method families (one deep, four classical) receive the same preprocessed EEG input and emit trial-level evidence. An FBCSP V1 anchor (dashed line) seeds the candidate submission. Rule-based fusion identifies trials where multi-family evidence disagrees with the anchor; a Poisson&ndash;Binomial selector ranks resulting candidates by the tail probability of exceeding 0.93.</figcaption>
         </figure>
 
         <h3>2.2 Deep Family: EEGNet Pretrain&ndash;Finetune &amp; KNN-Retrieval</h3>
@@ -214,11 +230,12 @@ elif c_V1 < 0.70 and at_least(3, [p_csp >= 0.50, p_cssp >= 0.65,
           <style>
             .bar{fill:#6488a4;stroke:#90a8c0;stroke-width:1}
             .bar-emph{fill:#90a8c0;stroke:#b0bace;stroke-width:1}
-            .grid{stroke:#2e3038;stroke-width:0.6}
-            .ax{stroke:#4a5260;stroke-width:1}
-            .lab{font:500 10.5px Inter,sans-serif;fill:#8a92a2}
-            .val{font:600 11px JetBrains Mono,monospace;fill:#c8ccd4}
-            .ti{font:600 12px Inter,sans-serif;fill:#e4e7ec}
+            .grid{stroke:#3a404a;stroke-width:0.6}
+            .ax{stroke:#7a8090;stroke-width:1}
+            .lab{font:600 11.5px Inter,sans-serif;fill:#d0d4dc}
+            .lab-s{font:500 11px Inter,sans-serif;fill:#b0b6c0}
+            .val{font:700 12px JetBrains Mono,monospace;fill:#f0f2f5}
+            .ti{font:600 13.5px Inter,sans-serif;fill:#f0f2f5}
           </style>
           <!-- Y axis with grid -->
           <line class="grid" x1="140" y1="40" x2="700" y2="40"/>
@@ -240,39 +257,39 @@ elif c_V1 < 0.70 and at_least(3, [p_csp >= 0.50, p_cssp >= 0.65,
           <rect class="bar" x="160" y="217" width="70" height="3"/>
           <text class="val" x="195" y="238" text-anchor="middle">0.821</text>
           <text class="lab" x="195" y="253" text-anchor="middle">V1 anchor</text>
-          <text class="lab" x="195" y="266" text-anchor="middle">CSP-8c</text>
+          <text class="lab-s" x="195" y="267" text-anchor="middle">CSP-8c</text>
 
           <!-- EEGNet no aug: 0.836 -> h = (0.836-0.82)/0.05 * 180 = 57.6 -->
           <rect class="bar" x="250" y="163" width="70" height="57"/>
           <text class="val" x="285" y="238" text-anchor="middle">0.836</text>
           <text class="lab" x="285" y="253" text-anchor="middle">+ 5-other</text>
-          <text class="lab" x="285" y="266" text-anchor="middle">pretrain</text>
+          <text class="lab-s" x="285" y="267" text-anchor="middle">pretrain</text>
 
           <!-- + multi-band aug: 0.846 -> h = 93.6 -->
           <rect class="bar" x="340" y="126" width="70" height="94"/>
           <text class="val" x="375" y="238" text-anchor="middle">0.846</text>
           <text class="lab" x="375" y="253" text-anchor="middle">+ aug</text>
-          <text class="lab" x="375" y="266" text-anchor="middle">(σ=.05, ts=32)</text>
+          <text class="lab-s" x="375" y="267" text-anchor="middle">(&sigma;=.05, ts=32)</text>
 
           <!-- + F1=16 ensemble: 0.846 (same CV, but stabilises) -->
           <rect class="bar" x="430" y="126" width="70" height="94"/>
           <text class="val" x="465" y="238" text-anchor="middle">0.846</text>
           <text class="lab" x="465" y="253" text-anchor="middle">+ F1=16</text>
-          <text class="lab" x="465" y="266" text-anchor="middle">38-ensemble</text>
+          <text class="lab-s" x="465" y="267" text-anchor="middle">38-ensemble</text>
 
           <!-- + KNN-Retrieve: 0.862 (projected) -->
           <rect class="bar" x="520" y="69" width="70" height="151"/>
           <text class="val" x="555" y="238" text-anchor="middle">0.862*</text>
           <text class="lab" x="555" y="253" text-anchor="middle">+ KNN-Retr</text>
-          <text class="lab" x="555" y="266" text-anchor="middle">(novel)</text>
+          <text class="lab-s" x="555" y="267" text-anchor="middle">(novel)</text>
 
           <!-- Final v22 (emph): 0.870 -->
           <rect class="bar-emph" x="610" y="40" width="70" height="180"/>
           <text class="val" x="645" y="238" text-anchor="middle">0.870*</text>
           <text class="lab" x="645" y="253" text-anchor="middle">v22 final</text>
-          <text class="lab" x="645" y="266" text-anchor="middle">(fusion)</text>
+          <text class="lab-s" x="645" y="267" text-anchor="middle">(fusion)</text>
 
-          <text class="ti" x="400" y="25" text-anchor="middle">Subject B — CV accuracy by component</text>
+          <text class="ti" x="400" y="22" text-anchor="middle">Subject B &mdash; CV accuracy by component</text>
         </svg>
         <figcaption>Figure&nbsp;2. Cumulative component contribution on Subject B (5-seed 5-fold CV). Cross-subject pretraining dominates (+0.015); multi-band augmentation adds +0.010; KNN-Retrieval and cross-family fusion calibrate beyond CV observability. *Starred entries are test-set projections supported by multi-family fusion rather than plain CV.</figcaption>
         </figure>
@@ -283,16 +300,17 @@ elif c_V1 < 0.70 and at_least(3, [p_csp >= 0.50, p_cssp >= 0.65,
         <figure class="fig">
         <svg viewBox="0 0 760 300" xmlns="http://www.w3.org/2000/svg">
           <style>
-            .ln{stroke:#6488a4;stroke-width:1.5;fill:none}
-            .ln-deep{stroke:#90a8c0;stroke-width:1.5;fill:none;stroke-dasharray:4 3}
-            .dot-v1{fill:#6488a4;stroke:#1c1e24;stroke-width:1.5}
-            .dot-deep{fill:#90a8c0;stroke:#1c1e24;stroke-width:1.5}
-            .grid{stroke:#2e3038;stroke-width:0.6}
-            .ax{stroke:#4a5260;stroke-width:1}
-            .lab{font:500 11px Inter,sans-serif;fill:#8a92a2}
-            .val{font:500 10px JetBrains Mono,monospace;fill:#a8aeb8}
-            .leg{font:500 11px Inter,sans-serif;fill:#c8ccd4}
-            .ti{font:600 12px Inter,sans-serif;fill:#e4e7ec}
+            .ln{stroke:#90a8c0;stroke-width:1.8;fill:none}
+            .ln-deep{stroke:#b0c0d0;stroke-width:1.8;fill:none;stroke-dasharray:5 3}
+            .dot-v1{fill:#90a8c0;stroke:#0c1018;stroke-width:2}
+            .dot-deep{fill:#b0c0d0;stroke:#0c1018;stroke-width:2}
+            .grid{stroke:#3a404a;stroke-width:0.6}
+            .ax{stroke:#7a8090;stroke-width:1}
+            .lab{font:600 11.5px Inter,sans-serif;fill:#d0d4dc}
+            .val{font:600 11px JetBrains Mono,monospace;fill:#e4e7ec}
+            .leg{font:500 12px Inter,sans-serif;fill:#e4e7ec}
+            .ti{font:600 13.5px Inter,sans-serif;fill:#f0f2f5}
+            .ann{font:italic 600 11.5px Inter,sans-serif;fill:#c0c8d4}
           </style>
           <line class="ax" x1="80" y1="60" x2="80" y2="250"/>
           <line class="ax" x1="80" y1="250" x2="720" y2="250"/>
@@ -348,8 +366,8 @@ elif c_V1 < 0.70 and at_least(3, [p_csp >= 0.50, p_cssp >= 0.65,
           <circle cx="555" cy="62" r="4" class="dot-deep"/>
           <text class="leg" x="580" y="66">EEGNet ensemble</text>
 
-          <text class="ti" x="400" y="28" text-anchor="middle">Per-subject CV accuracy: V1 anchor vs EEGNet ensemble</text>
-          <text class="lab" x="240" y="215" fill="#c8ccd4" font-weight="600">B is the bottleneck →</text>
+          <text class="ti" x="400" y="22" text-anchor="middle">Per-subject CV accuracy: V1 anchor vs EEGNet ensemble</text>
+          <text class="ann" x="260" y="215">B is the bottleneck &rarr;</text>
         </svg>
         <figcaption>Figure&nbsp;3. Per-subject 5-seed CV accuracy. V1 anchor (solid, darker) dominates on A, C, D, and F; EEGNet ensemble (dashed, lighter) improves only on Subject&nbsp;B where the anchor is weakest. The v22 pipeline exploits this structure by deploying deep fusion selectively rather than globally.</figcaption>
         </figure>
