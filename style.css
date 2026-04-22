@@ -1167,30 +1167,27 @@ section h2 {
 
 .notes-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 14px;
-}
-
-@media (max-width: 1024px) {
-    .notes-grid { grid-template-columns: repeat(2, 1fr); }
+    grid-template-columns: 1fr;
+    gap: 10px;
 }
 
 .note-card {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    align-items: center;
+    gap: 16px;
     background: var(--glass-bg);
     backdrop-filter: blur(var(--glass-blur));
     -webkit-backdrop-filter: blur(var(--glass-blur));
     border: 1px solid var(--glass-border);
     border-radius: 12px;
-    padding: 24px 26px;
-    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    padding: 14px 48px 14px 20px;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     text-decoration: none;
     color: inherit;
     box-shadow:
         0 1px 2px rgba(0,0,0,0.06),
-        0 4px 12px rgba(0,0,0,0.08),
-        0 12px 32px rgba(0,0,0,0.04);
+        0 4px 12px rgba(0,0,0,0.06);
 }
 
 .note-card:hover {
@@ -1227,16 +1224,20 @@ section h2 {
 }
 
 .note-card h3 {
-    font-size: 15px;
+    font-size: 14.5px;
     font-weight: 600;
     color: var(--text-card-title);
-    margin-bottom: 4px;
+    margin: 0;
+    flex: 0 0 auto;
+    white-space: nowrap;
 }
 
 .note-meta {
     font-size: 12.5px;
     color: var(--text-faint);
-    margin-bottom: 12px;
+    margin: 0;
+    flex: 0 0 auto;
+    white-space: nowrap;
 }
 
 .note-status {
@@ -1245,10 +1246,12 @@ section h2 {
     font-weight: 600;
     padding: 3px 10px;
     border-radius: 20px;
-    margin-top: auto;
+    margin-left: auto;
+    flex: 0 0 auto;
     width: fit-content;
     text-transform: uppercase;
     letter-spacing: 0.3px;
+    white-space: nowrap;
 }
 
 .note-status.wip {
@@ -1377,6 +1380,11 @@ footer::before {
     .card-header { flex-direction: column; gap: 6px; }
     .date-badge { align-self: flex-start; }
     .skills-grid, .notes-grid, .projects-grid { grid-template-columns: 1fr; }
+    /* Note-card row layout falls back to column on narrow screens */
+    .note-card { flex-direction: column; align-items: flex-start; gap: 6px; padding: 14px 44px 14px 18px; }
+    .note-card h3, .note-card .note-meta, .note-card .note-status { white-space: normal; }
+    .note-card .note-status { margin-left: 0; }
+    .note-card .card-arrow { top: auto; bottom: 18px; margin-top: 0; }
     .timeline { padding-left: 24px; }
     .timeline::before { left: 5px; }
     .timeline-dot { left: -24px; width: 12px; height: 12px; border-width: 2px; }
@@ -1412,7 +1420,6 @@ footer::before {
 }
 
 /* ===== Hover arrow: affordance for clickable cards (same idiom as .cert-arrow) ===== */
-/* Both benchmark and note cards share the same bottom-right arrow position. */
 .card-arrow {
     font-size: 15px;
     font-weight: 500;
@@ -1425,6 +1432,14 @@ footer::before {
     position: absolute;
     bottom: 20px;
     right: 20px;
+}
+
+/* Note cards use a compact horizontal row layout — centre the arrow
+   vertically within the row instead of pinning it to the bottom. */
+.note-card .card-arrow {
+    top: 50%;
+    bottom: auto;
+    margin-top: -8px;
 }
 
 .project-card[data-href]:hover .card-arrow,
