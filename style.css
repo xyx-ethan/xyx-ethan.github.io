@@ -742,11 +742,20 @@ section h2 {
     vertical-align: middle;
 }
 
-/* GPA badge sitting inline beside the school name in education cards */
-.education-list h3 .gpa-badge {
+/* GPA / grade badge sitting inline beside the h3 title — used in both
+   education cards (school + GPA) and completed coursework cards
+   (course + grade). */
+.education-list h3 .gpa-badge,
+.note-card h3 .gpa-badge {
     margin-left: 10px;
     position: relative;
     top: -1px;
+}
+
+/* Slightly tighter sizing when used inside the compact coursework row. */
+.note-card h3 .gpa-badge {
+    font-size: 10.5px;
+    padding: 2px 8px;
 }
 
 .label {
