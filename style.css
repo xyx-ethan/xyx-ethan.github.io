@@ -372,20 +372,11 @@ a.contact-item:hover svg {
     -webkit-backdrop-filter: blur(20px);
 }
 
-.home-nav-name {
-    color: var(--text-heading);
-    font-weight: 600;
-    font-size: 16px;
-    text-decoration: none;
-    transition: color 0.2s;
-}
-
-.home-nav-name:hover { color: var(--accent-blue-deep); }
-
 .home-nav-right {
     display: flex;
     align-items: center;
     gap: 8px;
+    margin-left: auto;
 }
 
 .home-nav-btn {
