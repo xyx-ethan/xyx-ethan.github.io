@@ -738,7 +738,15 @@ section h2 {
     border: 1px solid var(--border-gpa-badge);
     padding: 2px 10px;
     border-radius: 20px;
-    margin-top: 8px;
+    white-space: nowrap;
+    vertical-align: middle;
+}
+
+/* GPA badge sitting inline beside the school name in education cards */
+.education-list h3 .gpa-badge {
+    margin-left: 10px;
+    position: relative;
+    top: -1px;
 }
 
 .label {
@@ -1091,6 +1099,36 @@ section h2 {
     top: -1px;
 }
 
+/* Small icon links (GitHub, leaderboard) sitting immediately after the
+   rank badge in the h3 row. 16px icons, muted colour, lift on hover. */
+.title-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    margin-left: 6px;
+    border-radius: 6px;
+    color: var(--text-muted);
+    vertical-align: middle;
+    position: relative;
+    top: -1px;
+    transition: color 0.2s, background 0.2s, transform 0.2s;
+}
+.title-icon:first-of-type {
+    margin-left: 10px;
+}
+.title-icon svg {
+    width: 16px;
+    height: 16px;
+    stroke: currentColor;
+}
+.title-icon:hover {
+    color: var(--accent-blue-deep);
+    background: var(--bg-cert-hover);
+    transform: translateY(-1px);
+}
+
 .inline-link {
     color: var(--accent-blue);
     text-decoration: none;
@@ -1129,8 +1167,12 @@ section h2 {
 
 .notes-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 14px;
+}
+
+@media (max-width: 1024px) {
+    .notes-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
 .note-card {
