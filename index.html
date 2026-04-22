@@ -23,11 +23,14 @@
 </head>
 <body>
 
-<!-- Mobile top bar -->
-<div class="mobile-bar" id="mobileBar">
-    <span class="mobile-name">Ethan Xu</span>
-    <div class="mobile-right">
-        <button class="mobile-theme-toggle" id="mobileThemeToggle" aria-label="Toggle theme">
+<!-- Universal top nav bar (desktop + mobile) -->
+<nav class="home-nav">
+    <a href="#about" class="home-nav-name">Ethan Xu</a>
+    <div class="home-nav-right">
+        <a href="CV.pdf" download class="home-nav-btn" aria-label="Download CV" title="Download CV">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        </a>
+        <button class="home-nav-btn" id="themeToggle" aria-label="Toggle theme" title="Toggle theme">
             <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
             <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
         </button>
@@ -35,18 +38,12 @@
             <span></span><span></span><span></span>
         </button>
     </div>
-</div>
+</nav>
 
 <!-- Sidebar -->
 <aside class="sidebar" id="sidebar">
     <div class="sidebar-inner">
-        <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme" title="Toggle theme">
-            <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-            <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-        </button>
-
         <div class="profile">
-            <div class="avatar">XY</div>
             <h1>Ethan (Yuxuan) Xu</h1>
             <p class="tagline">M.Sc. Computer Science</p>
             <p class="tagline-sub">Georgia Institute of Technology</p>
@@ -93,10 +90,6 @@
             <a href="https://www.linkedin.com/in/yuxuan-xu-9a3699403/" class="contact-item" target="_blank" rel="noopener">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
                 LinkedIn
-            </a>
-            <a href="CV.pdf" download class="cv-button">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                Download CV
             </a>
         </div>
     </div>
@@ -469,7 +462,6 @@ function toggleTheme() {
     localStorage.setItem('theme', next);
 }
 document.getElementById('themeToggle').addEventListener('click', toggleTheme);
-document.getElementById('mobileThemeToggle').addEventListener('click', toggleTheme);
 
 // Clickable cards — whole card navigates to data-href, but nested links (subtitle author)
 // still work because we bail out if the click landed inside an <a>.

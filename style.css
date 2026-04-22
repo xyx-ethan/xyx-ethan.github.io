@@ -178,10 +178,10 @@ a {
 /* ===== Sidebar ===== */
 .sidebar {
     position: fixed;
-    top: 0;
+    top: 56px;
     left: 0;
     width: 260px;
-    height: 100vh;
+    height: calc(100vh - 56px);
     background: var(--bg-sidebar);
     border-right: 1px solid var(--border-sidebar);
     color: var(--text-body);
@@ -219,100 +219,18 @@ a {
     position: relative;
 }
 
-/* Theme toggle */
-.theme-toggle {
-    position: absolute;
-    top: 12px;
-    right: 12px;
-    width: 32px;
-    height: 32px;
-    background: none;
-    border: 1px solid var(--border-main);
-    border-radius: 8px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--text-nav);
-    transition: all 0.2s;
-    z-index: 10;
-}
-
-.theme-toggle:hover {
-    background: var(--bg-nav-hover);
-    color: var(--text-body);
-    border-color: var(--border-card-hover);
-}
-
-.theme-toggle svg {
-    width: 16px;
-    height: 16px;
-}
-
+/* Theme icon swap (used by .home-nav-btn#themeToggle) — show moon in
+   light mode and sun in dark mode, so the icon represents the state
+   the user would switch TO. */
 .icon-sun { display: none; }
 .icon-moon { display: block; }
 [data-theme="dark"] .icon-sun { display: block; }
 [data-theme="dark"] .icon-moon { display: none; }
 
-/* Mobile theme toggle */
-.mobile-theme-toggle {
-    width: 32px;
-    height: 32px;
-    background: none;
-    border: 1px solid var(--border-main);
-    border-radius: 8px;
-    cursor: pointer;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    color: var(--text-nav);
-    transition: all 0.2s;
-    margin-right: 8px;
-}
-
-.mobile-theme-toggle:hover {
-    color: var(--text-body);
-}
-
-.mobile-theme-toggle svg {
-    width: 16px;
-    height: 16px;
-}
-
 /* Profile */
 .profile {
     text-align: center;
     margin-bottom: 36px;
-}
-
-.avatar {
-    width: 72px;
-    height: 72px;
-    border-radius: 50%;
-    background: var(--avatar-bg);
-    color: var(--avatar-text);
-    font-size: 24px;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto 14px;
-    letter-spacing: 1px;
-    border: 2px solid var(--border-avatar);
-    transition: all 0.3s;
-    position: relative;
-    box-shadow: 0 0 20px var(--glow-blue), 0 0 40px rgba(77, 138, 173, 0.05);
-    animation: avatarPulse 4s ease-in-out infinite;
-}
-
-.avatar:hover {
-    transform: scale(1.05);
-    box-shadow: 0 0 25px var(--glow-blue), 0 0 50px rgba(77, 138, 173, 0.1);
-}
-
-@keyframes avatarPulse {
-    0%, 100% { box-shadow: 0 0 20px var(--glow-blue), 0 0 40px rgba(77, 138, 173, 0.05); }
-    50% { box-shadow: 0 0 25px var(--glow-blue), 0 0 50px rgba(77, 138, 173, 0.1); }
 }
 
 .profile h1 {
@@ -432,42 +350,11 @@ a.contact-item:hover svg {
     stroke: var(--accent-blue);
 }
 
-/* Download CV button */
-.cv-button {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    margin-top: 18px;
-    padding: 10px 16px;
-    background: var(--bg-tag-primary);
-    color: var(--accent-blue-text);
-    border: 1px solid var(--border-tag-primary);
-    border-radius: 8px;
-    font-size: 13px;
-    font-weight: 600;
-    text-decoration: none;
-    transition: all 0.25s ease;
-    cursor: pointer;
-}
-
-.cv-button:hover {
-    background: linear-gradient(135deg, var(--accent-blue-deep) 0%, var(--accent-blue) 100%);
-    color: var(--text-heading);
-    border-color: var(--accent-blue-deep);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 16px var(--glow-blue);
-}
-
-.cv-button svg {
-    width: 16px;
-    height: 16px;
-    flex-shrink: 0;
-}
-
-/* ===== Mobile bar ===== */
-.mobile-bar {
-    display: none;
+/* ===== Top nav bar ===== */
+/* Universal top nav bar — shown on all screen widths, mirrors the
+   note-page's .note-nav so the homepage and research notes share the
+   same top-of-page chrome. */
+.home-nav {
     position: fixed;
     top: 0;
     left: 0;
@@ -476,21 +363,56 @@ a.contact-item:hover svg {
     background: var(--bg-sidebar);
     border-bottom: 1px solid var(--border-sidebar);
     z-index: 150;
+    display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 16px;
+    padding: 0 32px;
     transition: background 0.3s, border-color 0.3s;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
 }
 
-.mobile-name {
+.home-nav-name {
     color: var(--text-heading);
     font-weight: 600;
     font-size: 16px;
+    text-decoration: none;
+    transition: color 0.2s;
 }
 
-.mobile-right {
+.home-nav-name:hover { color: var(--accent-blue-deep); }
+
+.home-nav-right {
     display: flex;
     align-items: center;
+    gap: 8px;
+}
+
+.home-nav-btn {
+    width: 32px;
+    height: 32px;
+    background: none;
+    border: 1px solid var(--border-main);
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-nav);
+    text-decoration: none;
+    transition: all 0.2s;
+    padding: 0;
+}
+
+.home-nav-btn:hover {
+    background: var(--bg-nav-hover);
+    color: var(--text-body);
+    border-color: var(--border-card-hover);
+}
+
+.home-nav-btn svg {
+    width: 16px;
+    height: 16px;
 }
 
 .menu-toggle {
@@ -538,7 +460,7 @@ a.contact-item:hover svg {
 /* ===== Main ===== */
 main {
     margin-left: 260px;
-    padding: 48px 60px 56px;
+    padding: 104px 60px 56px;
     max-width: 980px;
 }
 
@@ -1373,19 +1295,15 @@ footer::before {
 
 /* ===== Responsive ===== */
 @media (max-width: 768px) {
-    .mobile-bar { display: flex; }
     .menu-toggle { display: flex; }
-    .mobile-theme-toggle { display: flex; }
+    .home-nav { padding: 0 16px; }
     .sidebar {
         transform: translateX(-100%);
         transition: transform 0.3s ease;
-        top: 56px;
-        height: calc(100vh - 56px);
     }
     .sidebar.open { transform: translateX(0); }
     .sidebar .profile { display: none; }
-    .sidebar .theme-toggle { display: none; }
-    main { margin-left: 0; padding: 72px 20px 40px; }
+    main { margin-left: 0; padding: 80px 20px 40px; }
     .card-header { flex-direction: column; gap: 6px; }
     .date-badge { align-self: flex-start; }
     .skills-grid, .notes-grid, .projects-grid { grid-template-columns: 1fr; }
@@ -1517,7 +1435,7 @@ section h2 {
 /* ===== Print ===== */
 @media print {
     body { background: #fff; color: #1e293b; }
-    .sidebar, .mobile-bar, .overlay, .scroll-top, .theme-toggle, .mobile-theme-toggle { display: none; }
+    .sidebar, .home-nav, .overlay, .scroll-top { display: none; }
     main { margin-left: 0; padding: 0; max-width: 100%; }
     .card { background: #fff; border: 1px solid #ccc; border-left: 3px solid #999; }
     .card:hover { transform: none; box-shadow: none; }
