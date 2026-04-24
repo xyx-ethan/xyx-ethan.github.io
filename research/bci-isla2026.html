@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>When Classical EEG Baselines Beat Deep Transformers &mdash; Ethan Xu</title>
-    <meta name="description" content="Three findings from a 6-subject binary motor-imagery benchmark: a mu-band CSP+SVM outperforms a PhysioNet-pretrained EEG-Conformer; per-subject heterogeneity forces adaptive family selection; and a clinical EEG foundation model fails to transfer. CV 0.9512 / test 0.93, matching peer-reviewed SOTA.">
+    <meta name="description" content="Three findings from a 6-subject binary motor-imagery benchmark: a mu-band CSP+SVM outperforms a PhysioNet-pretrained EEG-Conformer; per-subject heterogeneity forces adaptive family selection; and a clinical EEG foundation model fails to transfer. CV 0.9496 / test 0.93, matching peer-reviewed SOTA.">
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%232a3a4a'/%3E%3Cstop offset='100%25' stop-color='%231a2636'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx='50' cy='50' r='50' fill='url(%23g)'/%3E%3Ctext x='50' y='56' text-anchor='middle' dominant-baseline='middle' font-family='Inter,sans-serif' font-size='34' font-weight='700' fill='%23d0d8e4'%3EXY%3C/text%3E%3C/svg%3E">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -37,7 +37,7 @@
         <div class="note-sidebar-header">
             <span class="note-badge">BCI-ISLA 2026</span>
             <h2>When Classical Beats Deep</h2>
-            <p>CV 0.9512 &middot; Test 0.93</p>
+            <p>CV 0.9496 &middot; Test 0.93</p>
         </div>
         <div class="toc-title">Contents</div>
         <ol class="toc-list"></ol>
@@ -74,14 +74,14 @@
 <div class="card-concept">
 <ol>
 <li><strong>Finding 1.</strong> On the subject with the cleanest sensorimotor μ rhythm, a 4-component <strong>CSP + RBF-SVM restricted to 8&ndash;13 Hz</strong> reaches <strong>5-fold CV 0.9786</strong>, compared with <strong>0.7143 for a PhysioNet-pretrained EEG-Conformer</strong> and <strong>0.8238 for the best of 91 EEGNet variants</strong> &mdash; trained and evaluated under identical folds.</li>
-<li><strong>Finding 2.</strong> The argmax CV pipeline is different for every subject. Forcing a single model family across all six costs <strong>3&ndash;8 points</strong> of macro-CV, depending on which family is forced. Per-subject adaptive selection hits <strong>0.9512 macro-CV / 0.93 test accuracy</strong>, matching peer-reviewed SOTA on comparable 2-class benchmarks.</li>
-<li><strong>Finding 3.</strong> A 5&nbsp;M-parameter EEG foundation model (CBraMod, ICLR 2025) with its public TUEG-corpus weights reaches <strong>CV&nbsp;0.4929 on SUB1 &mdash; indistinguishable from chance</strong>. A clinical-EEG pretrain does not transfer to narrow-band motor imagery at this scale.</li>
+<li><strong>Finding 2.</strong> The argmax CV pipeline is different for every subject. Forcing a single model family across all six costs <strong>3&ndash;8 points</strong> of macro-CV, depending on which family is forced. Per-subject adaptive selection hits <strong>0.9496 macro-CV / 0.93 test accuracy</strong>, matching peer-reviewed SOTA on comparable 2-class benchmarks.</li>
+<li><strong>Finding 3.</strong> A 5&nbsp;M-parameter EEG foundation model (CBraMod, ICLR 2025) with its public TUEG-corpus weights reaches <strong>CV&nbsp;0.4929 on Subject 1 &mdash; indistinguishable from chance</strong>. A clinical-EEG pretrain does not transfer to narrow-band motor imagery at this scale.</li>
 </ol>
 </div>
 
 <h2 id="f1">Finding 1 &mdash; μ-band CSP+SVM surpasses a PhysioNet-pretrained transformer</h2>
 
-<p>SUB1 has a clean sensorimotor μ rhythm: its band-limited trial covariance matrices are well-conditioned and their class means are separable under the affine-invariant Riemannian metric. This is the regime classical spatial filtering is built for. To test how much room modern deep architectures actually have on such a subject, I ran every candidate pipeline under the same fixed 5-fold <code>StratifiedKFold</code> split.</p>
+<p>Subject 1 has a clean sensorimotor μ rhythm: its band-limited trial covariance matrices are well-conditioned and their class means are separable under the affine-invariant Riemannian metric. This is the regime classical spatial filtering is built for. To test how much room modern deep architectures actually have on such a subject, I ran every candidate pipeline under the same fixed 5-fold <code>StratifiedKFold</code> split.</p>
 
 <figure class="fig">
 <svg viewBox="0 0 780 320" xmlns="http://www.w3.org/2000/svg">
@@ -129,9 +129,9 @@
   <text class="val" x="685" y="258" text-anchor="middle">0.7143</text>
   <text class="lab" x="685" y="274" text-anchor="middle">EEG-Conformer</text>
   <text class="lab-s" x="685" y="288" text-anchor="middle">pretrained</text>
-  <text class="ti" x="460" y="30" text-anchor="middle">SUB1 &mdash; 5-fold CV accuracy by candidate family</text>
+  <text class="ti" x="460" y="30" text-anchor="middle">Subject 1 &mdash; 5-fold CV accuracy by candidate family</text>
 </svg>
-<figcaption>Figure&nbsp;1. On SUB1, a classical CSP + RBF-SVM restricted to 8&ndash;13 Hz outperforms every evaluated deep baseline on identical folds. Deep architectures with broadband input and 112 training trials per fold overfit to nuisance features that the narrow-band spatial filter simply cannot see.</figcaption>
+<figcaption>Figure&nbsp;1. On Subject 1, a classical CSP + RBF-SVM restricted to 8&ndash;13 Hz outperforms every evaluated deep baseline on identical folds. Deep architectures with broadband input and 112 training trials per fold overfit to nuisance features that the narrow-band spatial filter simply cannot see.</figcaption>
 </figure>
 
 <p>The ablation over frequency bands under the same CSP+SVM pipeline shows why this is the μ-band specifically:</p>
@@ -171,57 +171,58 @@
   <text class="lab" x="72" y="134" text-anchor="end">0.90</text>
   <text class="lab" x="72" y="176" text-anchor="end">0.85</text>
   <text class="lab" x="72" y="218" text-anchor="end">0.80</text>
-  <!-- Values: SUB1 0.9786, SUB2 0.8786, SUB3 1.0000, SUB4 0.9857, SUB5 0.9214, SUB6 0.9429 -->
-  <path class="ln" d="M140,73 L240,178 L340,50 L440,65 L540,134 L640,110"/>
+  <!-- Values: Subject 1 0.9786, Subject 2 0.8786, Subject 3 0.9905, Subject 4 0.9857, Subject 5 0.9214, Subject 6 0.9429 -->
+  <path class="ln" d="M140,73 L240,178 L340,60 L440,65 L540,134 L640,110"/>
   <circle class="dot-v1" cx="140" cy="73" r="5"/>
   <circle class="dot-v1" cx="240" cy="178" r="5"/>
-  <circle class="dot-v1" cx="340" cy="50" r="5"/>
+  <circle class="dot-v1" cx="340" cy="60" r="5"/>
   <circle class="dot-v1" cx="440" cy="65" r="5"/>
   <circle class="dot-v1" cx="540" cy="134" r="5"/>
   <circle class="dot-v1" cx="640" cy="110" r="5"/>
   <text class="val" x="140" y="63" text-anchor="middle">0.9786</text>
   <text class="val" x="240" y="198" text-anchor="middle">0.8786</text>
-  <text class="val" x="340" y="40" text-anchor="middle">1.0000</text>
+  <text class="val" x="340" y="50" text-anchor="middle">0.9905</text>
   <text class="val" x="440" y="55" text-anchor="middle">0.9857</text>
   <text class="val" x="540" y="154" text-anchor="middle">0.9214</text>
   <text class="val" x="640" y="130" text-anchor="middle">0.9429</text>
-  <text class="lab" x="140" y="278" text-anchor="middle">SUB1</text>
+  <text class="lab" x="140" y="278" text-anchor="middle">S1</text>
   <text class="lab-s" x="140" y="292" text-anchor="middle">CSP+SVM μ</text>
-  <text class="lab" x="240" y="278" text-anchor="middle">SUB2</text>
+  <text class="lab" x="240" y="278" text-anchor="middle">S2</text>
   <text class="lab-s" x="240" y="292" text-anchor="middle">EEGNet aug</text>
-  <text class="lab" x="340" y="278" text-anchor="middle">SUB3</text>
+  <text class="lab" x="340" y="278" text-anchor="middle">S3</text>
   <text class="lab-s" x="340" y="292" text-anchor="middle">pyRiemann TS</text>
-  <text class="lab" x="440" y="278" text-anchor="middle">SUB4</text>
+  <text class="lab" x="440" y="278" text-anchor="middle">S4</text>
   <text class="lab-s" x="440" y="292" text-anchor="middle">stacking LR</text>
-  <text class="lab" x="540" y="278" text-anchor="middle">SUB5</text>
+  <text class="lab" x="540" y="278" text-anchor="middle">S5</text>
   <text class="lab-s" x="540" y="292" text-anchor="middle">CSP+LDA 10–14</text>
-  <text class="lab" x="640" y="278" text-anchor="middle">SUB6</text>
+  <text class="lab" x="640" y="278" text-anchor="middle">S6</text>
   <text class="lab-s" x="640" y="292" text-anchor="middle">CSP+LDA 10–14</text>
   <text class="ti" x="400" y="26" text-anchor="middle">Per-subject best-CV accuracy and selected family</text>
 </svg>
-<figcaption>Figure&nbsp;2. Best-CV pipeline per subject. Four different families win somewhere. SUB2 is the sole subject where a deep network beats every classical alternative; SUB3&ndash;SUB4 are won by pyRiemann variants; SUB1, SUB5, and SUB6 are won by narrow-band CSP. Macro-average CV 0.9512.</figcaption>
+<figcaption>Figure&nbsp;2. Best-CV pipeline per subject. Four different families win somewhere. Subject 2 is the sole subject where a deep network beats every classical alternative; Subject 3&ndash;Subject 4 are won by pyRiemann variants; Subject 1, Subject 5, and Subject 6 are won by narrow-band CSP. Macro-average CV 0.9496.</figcaption>
 </figure>
 
-<p>Because CSP wins on three subjects and pyRiemann on two, one might be tempted to just use the winning family globally. That fails: forcing CSP+SVM on every subject drops SUB4 from 0.9857 to 0.9786, forcing pyRiemann on every subject drops SUB1 from 0.9786 to 0.9357, and forcing EEGNet globally is catastrophic (SUB3 falls from 1.0000 to 0.9500). The <em>selection</em> is doing the work, not any single family.</p>
+<p>Because CSP wins on three subjects and pyRiemann on two, one might be tempted to just use the winning family globally. That fails: forcing CSP+SVM on every subject drops Subject 4 from 0.9857 to 0.9786, forcing pyRiemann on every subject drops Subject 1 from 0.9786 to 0.9357, and forcing EEGNet globally is catastrophic (Subject 3 falls from ~0.99 to 0.9500). The <em>selection</em> is doing the work, not any single family.</p>
 
 <table class="tbl">
   <thead><tr><th>Subject</th><th>Selected pipeline</th><th>Band (Hz)</th><th>Window (s)</th><th>CV</th></tr></thead>
   <tbody>
-    <tr><td>SUB1</td><td>CSP($k$=4) + SVM-RBF</td><td>8&ndash;13</td><td>2.25</td><td>0.9786</td></tr>
-    <tr><td>SUB2</td><td>EEGNet (augmented)</td><td>7&ndash;30</td><td>2.25</td><td>0.8786</td></tr>
-    <tr><td>SUB3</td><td>pyRiemann TS + L2-LR</td><td>6&ndash;30</td><td>2.50</td><td>1.0000</td></tr>
-    <tr><td>SUB4</td><td>Stacking (L2-LR, $C$=10) over 5 TS variants</td><td>6&ndash;30</td><td>2.25</td><td>0.9857</td></tr>
-    <tr><td>SUB5</td><td>CSP($k$=4) + LDA</td><td>10&ndash;14</td><td>2.50</td><td>0.9214</td></tr>
-    <tr><td>SUB6</td><td>CSP($k$=4) + LDA</td><td>10&ndash;14</td><td>2.50</td><td>0.9429</td></tr>
-    <tr><td colspan="4"><strong>Macro-average CV</strong></td><td><strong>0.9512</strong></td></tr>
+    <tr><td>Subject 1</td><td>CSP($k$=4) + SVM-RBF</td><td>8&ndash;13</td><td>2.25</td><td>0.9786</td></tr>
+    <tr><td>Subject 2</td><td>EEGNet (augmented)</td><td>7&ndash;30</td><td>2.25</td><td>0.8786</td></tr>
+    <tr><td>Subject 3</td><td>pyRiemann TS + L2-LR</td><td>6&ndash;30</td><td>2.50</td><td>0.9905 <sup>&dagger;</sup></td></tr>
+    <tr><td>Subject 4</td><td>Stacking (L2-LR, $C$=10) over 5 TS variants</td><td>6&ndash;30</td><td>2.25</td><td>0.9857</td></tr>
+    <tr><td>Subject 5</td><td>CSP($k$=4) + LDA</td><td>10&ndash;14</td><td>2.50</td><td>0.9214</td></tr>
+    <tr><td>Subject 6</td><td>CSP($k$=4) + LDA</td><td>10&ndash;14</td><td>2.50</td><td>0.9429</td></tr>
+    <tr><td colspan="4"><strong>Macro-average CV</strong></td><td><strong>0.9494</strong></td></tr>
   </tbody>
 </table>
+<p class="caveat"><sup>&dagger;</sup> Subject 3 is at the classifier's ceiling: a single fixed-seed split with this pipeline had all 140 held-out predictions correct (5-fold CV = 1.000). The value reported in the table is a more honest 6-seed stratified-CV mean. With 28 validation trials per fold, the cross-seed standard deviation is ~0.010, so the distinction between "nominally perfect" and "0.99" is within CV-variance noise on this subject.</p>
 
 <h2 id="f3">Finding 3 &mdash; A clinical EEG foundation model fails to transfer</h2>
 
-<p>CBraMod (Wang et al., ICLR&nbsp;2025) is a 5&nbsp;M-parameter criss-cross transformer pretrained on the Temple University Hospital EEG Corpus (TUEG), the largest publicly-available clinical EEG corpus. Its authors report it is a strong downstream backbone for a range of biosignal tasks. The natural hope is that it transfers to motor imagery, in particular on the bottleneck subject (SUB2) where the classical baselines saturate below 0.88.</p>
+<p>CBraMod (Wang et al., ICLR&nbsp;2025) is a 5&nbsp;M-parameter criss-cross transformer pretrained on the Temple University Hospital EEG Corpus (TUEG), the largest publicly-available clinical EEG corpus. Its authors report it is a strong downstream backbone for a range of biosignal tasks. The natural hope is that it transfers to motor imagery, in particular on the bottleneck subject (Subject 2) where the classical baselines saturate below 0.88.</p>
 
-<p>It does not. Loaded from the official HuggingFace checkpoint (<code>braindecode/cbramod-pretrained</code>) and fine-tuned per-subject under 5-fold CV with <code>AdamW(lr=3e-5)</code> for 20 epochs, CBraMod reaches <strong>CV 0.4929 on SUB1</strong> &mdash; indistinguishable from chance given 140 trials. Substituting the same architecture trained from scratch (no pretrained weights) yields CV 0.47; the pretrain is contributing almost no useful prior.</p>
+<p>It does not. Loaded from the official HuggingFace checkpoint (<code>braindecode/cbramod-pretrained</code>) and fine-tuned per-subject under 5-fold CV with <code>AdamW(lr=3e-5)</code> for 20 epochs, CBraMod reaches <strong>CV 0.4929 on Subject 1</strong> &mdash; indistinguishable from chance given 140 trials. Substituting the same architecture trained from scratch (no pretrained weights) yields CV 0.47; the pretrain is contributing almost no useful prior.</p>
 
 <div class="card-caution">
 <strong>Why the transfer fails.</strong> The domain gap is large on three independent axes:
@@ -252,7 +253,7 @@ This is consistent with the caution in Lotte et al. (2018): generic EEG represen
   <li><strong>EEGNet</strong> (Lawhern et al., 2018) with strong in-batch augmentation (Gaussian noise, time shift, channel dropout). A 91-variant hyperparameter sweep constitutes an external pool.</li>
   <li><strong>Filter-Bank CSP</strong> (Ang et al., 2012) with nine overlapping bands and mutual-information feature selection.</li>
   <li><strong>Stacking meta-learner</strong> (Wolpert, 1992) over top-CV base pipelines, with an L2-regularised logistic regression on out-of-fold positive-class probabilities.</li>
-  <li><strong>Window augmentation at test time</strong>. For three subjects (SUB3, SUB5, SUB6) a wider 2.5&nbsp;s window beats the 2.25&nbsp;s default on CV; a new classifier is trained with that window, and only the per-fold test probabilities are averaged &mdash; no test-label information ever informs the window choice.</li>
+  <li><strong>Window augmentation at test time</strong>. For three subjects (Subject 3, Subject 5, Subject 6) a wider 2.5&nbsp;s window beats the 2.25&nbsp;s default on CV; a new classifier is trained with that window, and only the per-fold test probabilities are averaged &mdash; no test-label information ever informs the window choice.</li>
 </ul>
 
 <h2 id="why">Why the numbers are trustworthy</h2>
@@ -266,10 +267,10 @@ This is consistent with the caution in Lotte et al. (2018): generic EEG represen
 
 <h2 id="didnt">What didn't work (in addition to CBraMod)</h2>
 
-<p>The compliant CV-driven ceiling I reached is <strong>0.93 test / 0.9512 macro-CV</strong>, and it is genuinely a ceiling: sixteen independent path attempts all failed to exceed it.</p>
+<p>The compliant CV-driven ceiling I reached is <strong>0.93 test / 0.9496 macro-CV</strong>, and it is genuinely a ceiling: sixteen independent path attempts all failed to exceed it.</p>
 
 <table class="tbl">
-  <thead><tr><th>Attempted extension</th><th>Effect on bottleneck subject (SUB2)</th><th>Verdict</th></tr></thead>
+  <thead><tr><th>Attempted extension</th><th>Effect on bottleneck subject (Subject 2)</th><th>Verdict</th></tr></thead>
   <tbody>
     <tr><td>Stacking meta-learner over CSP/pyRiemann variants</td><td>CV 0.8143</td><td>below the 91-variant EEGNet pool winner (0.8786)</td></tr>
     <tr><td>Multi-seed bagging (6 seeds, per-pipeline)</td><td>CV 0.8186</td><td>variance reduction, no mean improvement</td></tr>
@@ -279,14 +280,14 @@ This is consistent with the caution in Lotte et al. (2018): generic EEG represen
     <tr><td>Wavelet-packet + phase-amplitude coupling features</td><td>CV 0.67</td><td>far below</td></tr>
     <tr><td>Spectral PSD + XGBoost / LightGBM</td><td>CV 0.66</td><td>far below</td></tr>
     <tr><td>Confidence-threshold self-training (pseudo-labels)</td><td>CV up, test unchanged</td><td>classical self-training trap</td></tr>
-    <tr><td>PhysioNet-pretrained EEG-Conformer</td><td>SUB1 CV 0.7143</td><td>negative transfer</td></tr>
-    <tr><td>Riemannian Procrustes cross-subject alignment</td><td>CV 0.88 for SUB6</td><td>no gain over baseline</td></tr>
-    <tr><td><strong>CBraMod (ICLR 2025, HF pretrained)</strong></td><td><strong>SUB1 CV 0.4929</strong></td><td><strong>near chance</strong></td></tr>
+    <tr><td>PhysioNet-pretrained EEG-Conformer</td><td>Subject 1 CV 0.7143</td><td>negative transfer</td></tr>
+    <tr><td>Riemannian Procrustes cross-subject alignment</td><td>CV 0.88 for Subject 6</td><td>no gain over baseline</td></tr>
+    <tr><td><strong>CBraMod (ICLR 2025, HF pretrained)</strong></td><td><strong>Subject 1 CV 0.4929</strong></td><td><strong>near chance</strong></td></tr>
   </tbody>
 </table>
 
 <div class="card-note">
-Two negative results were especially instructive. First, a PhysioNet-pretrained EEG-Conformer on SUB1 &mdash; the easiest subject &mdash; lands at 0.71 while a μ-band CSP on the same split reaches 0.98. Cross-dataset pretraining cannot close a 27-point gap in small-$N$ regimes when the pretraining distribution is only tangentially related to the target. Second, self-training pushed CV up on the bottleneck subject while leaving test accuracy unchanged &mdash; a clear case of the model memorising its own early-epoch confidence rather than learning new decision boundaries.
+Two negative results were especially instructive. First, a PhysioNet-pretrained EEG-Conformer on Subject 1 &mdash; the easiest subject &mdash; lands at 0.71 while a μ-band CSP on the same split reaches 0.98. Cross-dataset pretraining cannot close a 27-point gap in small-$N$ regimes when the pretraining distribution is only tangentially related to the target. Second, self-training pushed CV up on the bottleneck subject while leaving test accuracy unchanged &mdash; a clear case of the model memorising its own early-epoch confidence rather than learning new decision boundaries.
 </div>
 
 <h2 id="takeaways">Takeaways for computational neuroscience</h2>
