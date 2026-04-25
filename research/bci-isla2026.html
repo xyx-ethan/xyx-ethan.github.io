@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>When Classical EEG Baselines Beat Deep Transformers &mdash; Ethan Xu</title>
-    <meta name="description" content="Three findings from a 6-subject binary motor-imagery benchmark: a mu-band CSP+SVM outperforms a PhysioNet-pretrained EEG-Conformer; per-subject heterogeneity forces adaptive family selection; and a clinical EEG foundation model fails to transfer. CV 0.9496 / test 0.93, matching peer-reviewed SOTA.">
+    <title>When Classical Spatial Filters Beat Deep EEG Models in Low-Sample Motor Imagery &mdash; Ethan Xu</title>
+    <meta name="description" content="A methodological post-mortem of a 6-subject, binary motor-imagery EEG benchmark with 140 labelled training trials per subject. Per-subject adaptive selection over CSP, Riemannian, EEGNet, stacking, and an off-the-shelf EEG foundation model achieves 0.9496 selection-CV / 0.93 held-out test accuracy under strictly CV-driven model selection.">
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%232a3a4a'/%3E%3Cstop offset='100%25' stop-color='%231a2636'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx='50' cy='50' r='50' fill='url(%23g)'/%3E%3Ctext x='50' y='56' text-anchor='middle' dominant-baseline='middle' font-family='Inter,sans-serif' font-size='34' font-weight='700' fill='%23d0d8e4'%3EXY%3C/text%3E%3C/svg%3E">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -35,9 +35,9 @@
 <aside class="note-sidebar">
     <div class="note-sidebar-inner">
         <div class="note-sidebar-header">
-            <span class="note-badge">BCI-ISLA 2026</span>
-            <h2>When Classical Beats Deep</h2>
-            <p>CV 0.9496 &middot; Test 0.93</p>
+            <span class="note-badge">BCI-ISLA 2026 &middot; Rank 1 / 306</span>
+            <h2>Subject-Adaptive Motor-Imagery Decoding</h2>
+            <p>Selection CV 0.9496 &middot; Held-out test 0.93</p>
         </div>
         <div class="toc-title">Contents</div>
         <ol class="toc-list"></ol>
@@ -47,9 +47,9 @@
 <article class="note-content">
 
     <header class="note-header">
-        <span class="note-badge">BCI-ISLA 2026 &middot; Challenge 15044 &middot; Organised by <a href="https://plcrodrigues.github.io/" target="_blank" rel="noopener" class="inline-link">Pedro L. C. Rodrigues</a> (Inria)</span>
-        <h1>When Classical EEG Baselines Beat Deep Transformers</h1>
-        <p class="note-intro">A methodological post-mortem from a 6-subject binary motor-imagery benchmark (140 training / 60 held-out test trials per subject, 64 channels, 512 Hz). I built and compared a broad set of candidate pipelines &mdash; classical spatial filters, Riemannian-geometric classifiers, modern deep architectures, and pretrained foundation models &mdash; under strictly cross-validation-driven selection with no feedback from the held-out test set. Three findings stand out and motivate the writeup below.</p>
+        <span class="note-badge">BCI-ISLA 2026 &middot; Challenge 15044 &middot; Rank 1 / 306 &middot; Organised by <a href="https://plcrodrigues.github.io/" target="_blank" rel="noopener" class="inline-link">Pedro L. C. Rodrigues</a> (Inria)</span>
+        <h1>When Classical Spatial Filters Beat Deep EEG Models in Low-Sample Motor Imagery</h1>
+        <p class="note-intro">A methodological post-mortem of a 6-subject, binary motor-imagery EEG benchmark (140 labelled training / 60 held-out test trials per subject, 64 channels, 512 Hz). I evaluated classical spatial-filtering pipelines, Riemannian classifiers, EEGNet-style deep models, stacking ensembles, and an off-the-shelf EEG foundation model under a fixed cross-validation protocol. The best-performing solution used per-subject adaptive selection and reached <strong>0.9496 selection-CV / 0.93 held-out test accuracy</strong>. The empirical lesson is not that classical methods universally beat deep learning, but that in low-sample subject-specific EEG, narrow-band spatial filters and Riemannian methods remain hard baselines, and off-the-shelf foundation-model transfer requires task- and montage-aware adaptation.</p>
     </header>
 
     <div class="toc">
@@ -58,10 +58,11 @@
             <li><a href="#tldr">TL;DR</a></li>
             <li><a href="#f1">Finding 1 &mdash; μ-band CSP+SVM surpasses a PhysioNet-pretrained transformer</a></li>
             <li><a href="#f2">Finding 2 &mdash; Per-subject heterogeneity forces adaptive model selection</a></li>
-            <li><a href="#f3">Finding 3 &mdash; A clinical EEG foundation model fails to transfer</a></li>
+            <li><a href="#f3">Finding 3 &mdash; Off-the-shelf foundation-model transfer was not automatic</a></li>
             <li><a href="#methods">Methodological framework</a></li>
-            <li><a href="#why">Why the numbers are trustworthy</a></li>
+            <li><a href="#why">How to read the numbers</a></li>
             <li><a href="#didnt">What didn't work</a></li>
+            <li><a href="#limits">Limitations</a></li>
             <li><a href="#takeaways">Takeaways</a></li>
             <li><a href="#repro">Reproducibility &amp; references</a></li>
         </ol>
@@ -74,8 +75,8 @@
 <div class="card-concept">
 <ol>
 <li><strong>Finding 1.</strong> On the subject with the cleanest sensorimotor μ rhythm, a 4-component <strong>CSP + RBF-SVM restricted to 8&ndash;13 Hz</strong> reaches <strong>5-fold CV 0.9786</strong>, compared with <strong>0.7143 for a PhysioNet-pretrained EEG-Conformer</strong> and <strong>0.8238 for the best augmented-EEGNet configuration tested</strong> &mdash; trained and evaluated under identical folds.</li>
-<li><strong>Finding 2.</strong> The argmax CV pipeline is different for every subject. Forcing a single model family across all six costs <strong>3&ndash;8 points</strong> of macro-CV, depending on which family is forced. Per-subject adaptive selection hits <strong>0.9496 macro-CV / 0.93 test accuracy</strong>, matching peer-reviewed SOTA on comparable 2-class benchmarks.</li>
-<li><strong>Finding 3.</strong> A 5&nbsp;M-parameter EEG foundation model (CBraMod, ICLR 2025) with its public TUEG-corpus weights reaches <strong>CV&nbsp;0.4929 on Subject 1 &mdash; indistinguishable from chance</strong>. A clinical-EEG pretrain does not transfer to narrow-band motor imagery at this scale.</li>
+<li><strong>Finding 2.</strong> No single model family dominates all six subjects. Three model families &mdash; narrow-band CSP, pyRiemann tangent-space, and augmented EEGNet &mdash; each win on at least one subject, with a pyRiemann-based stacking aggregator additionally selected for Subject&nbsp;4. Even within CSP, the optimal frequency band and window length vary substantially across subjects (μ 8&ndash;13 Hz at 2.25 s for Subject 1; upper-μ 10&ndash;14 Hz at 2.5 s for Subjects 5 and 6). Per-subject adaptive selection reaches <strong>0.9496 macro selection-CV / 0.93 held-out test</strong>; this is within the range of strong published two-class motor-imagery decoders, but I do not treat it as a direct SOTA comparison because benchmarks, subject pools, and evaluation protocols differ.</li>
+<li><strong>Finding 3.</strong> A 5&nbsp;M-parameter EEG foundation model (CBraMod, ICLR 2025) with its public TUEG-corpus weights, fine-tuned per-subject under the lightweight protocol described below, reaches <strong>CV&nbsp;0.4929 on Subject 1 &mdash; indistinguishable from chance</strong>. I read this as a protocol-specific negative result rather than a verdict on CBraMod as a model class: it is evidence that clinical-EEG pretraining does not automatically transfer to narrow-band motor imagery without task- and montage-aware adaptation.</li>
 </ol>
 </div>
 
@@ -156,7 +157,7 @@
 
 <h2 id="f2">Finding 2 &mdash; Per-subject heterogeneity forces adaptive model selection</h2>
 
-<p>Running the same pipeline sweep independently for all six subjects reveals sharp subject-level disagreement about which model family is best. Four different families &mdash; narrow-band CSP+SVM, EEGNet with augmentation, pyRiemann tangent-space logistic regression, and a stacking meta-learner &mdash; each win at least one subject.</p>
+<p>Running the same pipeline sweep independently for all six subjects reveals sharp subject-level disagreement about which model family is best. No single family dominates all six. Three model families &mdash; narrow-band CSP, pyRiemann tangent-space, and augmented EEGNet &mdash; each win on at least one subject, with a pyRiemann-based stacking aggregator additionally winning on Subject&nbsp;4. Even where the same family wins on multiple subjects (CSP+LDA on Subjects 5 and 6), the selected frequency band and window length still differ from the CSP+SVM configuration that wins on Subject&nbsp;1.</p>
 
 <figure class="fig">
 <svg viewBox="0 0 760 320" xmlns="http://www.w3.org/2000/svg">
@@ -213,16 +214,16 @@
     <tr><td>Subject 4</td><td>Stacking (L2-LR, $C$=10) over 5 TS variants</td><td>6&ndash;30</td><td>2.25</td><td>0.9857</td></tr>
     <tr><td>Subject 5</td><td>CSP($k$=4) + LDA</td><td>10&ndash;14</td><td>2.50</td><td>0.9214</td></tr>
     <tr><td>Subject 6</td><td>CSP($k$=4) + LDA</td><td>10&ndash;14</td><td>2.50</td><td>0.9429</td></tr>
-    <tr><td colspan="4"><strong>Macro-average CV</strong></td><td><strong>0.9494</strong></td></tr>
+    <tr><td colspan="4"><strong>Macro-average selection CV</strong></td><td><strong>0.9496</strong></td></tr>
   </tbody>
 </table>
 <p class="caveat"><sup>&dagger;</sup> Subject 3 is at the classifier's ceiling: a single fixed-seed split with this pipeline had all 140 held-out predictions correct (5-fold CV = 1.000). The value reported in the table is a more honest 6-seed stratified-CV mean. With 28 validation trials per fold, the cross-seed standard deviation is ~0.010, so the distinction between "nominally perfect" and "0.99" is within CV-variance noise on this subject.</p>
 
-<h2 id="f3">Finding 3 &mdash; A clinical EEG foundation model fails to transfer</h2>
+<h2 id="f3">Finding 3 &mdash; Off-the-shelf foundation-model transfer was not automatic</h2>
 
-<p>CBraMod (Wang et al., ICLR&nbsp;2025) is a 5&nbsp;M-parameter criss-cross transformer pretrained on the Temple University Hospital EEG Corpus (TUEG), the largest publicly-available clinical EEG corpus. Its authors report it is a strong downstream backbone for a range of biosignal tasks. The natural hope is that it transfers to motor imagery, in particular on the lowest-baseline subject (Subject 2) where the classical baselines saturate below 0.88.</p>
+<p>CBraMod (Wang et al., ICLR&nbsp;2025) is a 5&nbsp;M-parameter criss-cross transformer pretrained on the Temple University Hospital EEG Corpus (TUEG), the largest publicly-available clinical EEG corpus, with reported evaluation across multiple downstream BCI datasets. The natural hope is that it transfers to motor imagery, in particular on the lowest-baseline subject where the classical baselines saturate.</p>
 
-<p>It does not. Loaded from the official HuggingFace checkpoint (<code>braindecode/cbramod-pretrained</code>) and fine-tuned per-subject under 5-fold CV with <code>AdamW(lr=3e-5)</code> for 20 epochs, CBraMod reaches <strong>CV 0.4929 on Subject 1</strong> &mdash; indistinguishable from chance given 140 trials. Substituting the same architecture trained from scratch (no pretrained weights) yields CV 0.47; the pretrain is contributing almost no useful prior.</p>
+<p>Under the lightweight protocol I tested, it did not. Loaded from the official HuggingFace checkpoint (<code>braindecode/cbramod-pretrained</code>) and fine-tuned per-subject under the same 5-fold CV with <code>AdamW(lr=3e-5)</code> for 20 epochs, CBraMod reaches <strong>CV 0.4929 on Subject 1</strong> &mdash; indistinguishable from chance given 140 trials. Substituting the same architecture trained from scratch yields CV 0.47, so under this fine-tuning recipe the pretraining contributed almost no useful prior. <strong>I read this as a protocol-specific negative result rather than a verdict on CBraMod as a model class.</strong> A more careful adaptation &mdash; channel-aware tokeniser remapping, resampling to the pretraining rate, learning-rate sweep, frozen-encoder linear probe, longer fine-tuning, or task-matched intermediate pretraining &mdash; could plausibly close the gap, and was outside the budget of this submission.</p>
 
 <div class="card-caution">
 <strong>Why the transfer fails.</strong> The domain gap is large on three independent axes:
@@ -245,6 +246,13 @@ This is consistent with the caution in Lotte et al. (2018): generic EEG represen
 </ol>
 <p>Steps 1&ndash;3 never consult the test-set labels or any leaderboard score. Step 3 is executed once, in a single shot.</p>
 
+<h3>Leakage controls</h3>
+<ul>
+  <li><strong>All fold-dependent transforms are fit only on the training split of each fold</strong>: covariance shrinkage, CSP filters, pyRiemann tangent-space reference means, per-channel scalers, mutual-information feature selectors, and all classifier parameters.</li>
+  <li><strong>Test-time window choice is training-derived.</strong> When a 2.5&nbsp;s window beats the 2.25&nbsp;s default for a given subject, the choice is made on training-fold CV; a new per-fold classifier is then trained on that window and applied to the matching test window. No leaderboard feedback or test labels are consulted.</li>
+  <li><strong>Leaderboard usage during development: 0 submissions</strong>; final evaluation submissions: 1.</li>
+</ul>
+
 <h3>The candidate families</h3>
 <p>All candidates are standard published pipelines evaluated on the same fixed folds:</p>
 <ul>
@@ -256,14 +264,16 @@ This is consistent with the caution in Lotte et al. (2018): generic EEG represen
   <li><strong>Window augmentation at test time</strong>. For three subjects (Subject 3, Subject 5, Subject 6) a wider 2.5&nbsp;s window beats the 2.25&nbsp;s default on CV; a new classifier is trained with that window, and only the per-fold test probabilities are averaged &mdash; no test-label information ever informs the window choice.</li>
 </ul>
 
-<h2 id="why">Why the numbers are trustworthy</h2>
+<h2 id="why">How to read the numbers</h2>
 
-<p>With 360 held-out test trials, the binomial standard error at $p = 0.93$ is 1.35 percentage points. The Wilson 95% confidence interval for the observed test accuracy 0.93 is $[0.90,\ 0.96]$. A difference smaller than roughly 0.01 between this pipeline and any single peer-reviewed alternative on its native benchmark is not resolvable with the available test set, and I do not claim it.</p>
+<p><strong>Held-out test accuracy is the primary external estimate.</strong> The 5-fold CV scores are used for subject-level model selection and paired candidate comparison. Because the same folds are used to choose among many candidate pipelines per subject, the selected CV score should be interpreted as a <em>model-selection score</em>, not as an unbiased generalisation estimate &mdash; non-nested CV after model selection is known to be optimistically biased (see e.g. Cawley &amp; Talbot, 2010; the scikit-learn nested-CV note). The held-out test set is the external check that the selected protocol actually generalises; the leaderboard rank above is computed on that held-out set.</p>
 
-<p>Under the same arithmetic, a 3-seed 5-fold CV reshuffle on any single subject produces a 2&ndash;3 point spread around its mean. This is why every candidate in the sweep was evaluated on a single fixed-seed split: the cross-candidate variance being compared is real; the cross-shuffle variance within a single candidate is statistical noise that would muddy the ranking.</p>
+<p>The held-out set contains 60 trials per subject &times; 6 subjects = 360 trials. At an observed test accuracy of 0.93 (i.e. 335/360 correct), the Wilson 95&nbsp;% confidence interval is approximately [0.900, 0.953]. Differences of less than roughly 1&ndash;2 percentage points between alternative configurations on this set should not be over-interpreted without paired predictions.</p>
+
+<p>Under the same arithmetic, a 3-seed 5-fold CV reshuffle on any single subject produces a 2&ndash;3 point spread around its mean. Every candidate in the sweep was therefore evaluated on a single fixed-seed split so that the cross-candidate variance being compared is real signal rather than reshuffle noise; the Subject&nbsp;3 ceiling row in the table above (single-seed 1.000 vs 6-seed mean 0.9905) is a concrete example of this distinction.</p>
 
 <h3>Compliance statement</h3>
-<p>Every decision in the pipeline &mdash; the candidate list, the fold split, the selection score, the window choice, the final averaging &mdash; is fixed before the test set is consulted. No leaderboard score at any intermediate submission fed back into a later model choice. The final submission is produced by a single-shot execution of the protocol.</p>
+<p>Every decision &mdash; candidate list, fold split, selection score, window choice, final averaging &mdash; is fixed before the test set is consulted. The final submission is produced by a single-shot execution of the protocol; no leaderboard score at any intermediate submission fed back into a later model choice.</p>
 
 <h2 id="didnt">What didn't work (in addition to CBraMod)</h2>
 
@@ -290,13 +300,26 @@ This is consistent with the caution in Lotte et al. (2018): generic EEG represen
 Two negative results were especially instructive. First, a PhysioNet-pretrained EEG-Conformer on Subject&nbsp;1 &mdash; the easiest subject &mdash; lands at 0.71 while a μ-band CSP on the same split reaches 0.98. Cross-dataset pretraining did not close the gap in this small-$N$ regime, presumably because the pretraining distribution (a different channel montage, sampling rate, and task mixture) was only tangentially related to the target. Second, confidence-threshold self-training raised held-out CV on the lowest-baseline subject while leaving test accuracy essentially unchanged &mdash; consistent with the well-documented confirmation-bias failure mode of pseudo-label methods (Arazo et al., 2020).
 </div>
 
+<h2 id="limits">Limitations</h2>
+
+<div class="card-caution">
+<p>This is a six-subject, binary motor-imagery EEG benchmark with 140 labelled training trials and 60 held-out test trials per subject. The findings should not be over-extrapolated:</p>
+<ul>
+  <li>The results do not establish that classical methods dominate deep EEG models in general, only that they are hard to beat <em>in this low-sample, subject-specific, narrow-band regime</em>.</li>
+  <li>The CBraMod result is evidence about a particular off-the-shelf checkpoint plus a lightweight fine-tuning recipe, not a verdict on EEG foundation models as a class.</li>
+  <li>The selection-CV score (0.9496) is used for model selection and is therefore potentially optimistic; the held-out test accuracy (0.93) is the primary external metric.</li>
+  <li>The study does not address cross-session generalisation, online BCI adaptation, clinical deployment, or subject-independent transfer &mdash; all of which would change the evaluation protocol substantially.</li>
+  <li>The candidate set, while broad, is not exhaustive. In particular, Riemannian Procrustes alignment, deep tangent-space networks, and sequence-level transformers tuned for sensorimotor rhythms were either tested only at default settings or not tested at all.</li>
+</ul>
+</div>
+
 <h2 id="takeaways">Takeaways</h2>
 
 <div class="card-concept">
 <ol>
-  <li><strong>In small-$N$ EEG regimes with well-resolved rhythms, classical spatial filtering is a hard-to-beat baseline.</strong> It is not that deep networks are bad; it is that a hundred training trials is not enough for them to relearn the affine structure that CSP finds in closed form.</li>
-  <li><strong>Per-subject heterogeneity is the rule, not an exception.</strong> A global model family is a concession, not a design choice. Adaptive per-subject selection with a small candidate set and fixed CV folds is often the most useful thing a decoder can do.</li>
-  <li><strong>Foundation-model transfer is not free.</strong> When the pretraining distribution is clinical EEG and the downstream task is narrow-band motor imagery, a 5&nbsp;M-parameter pretrained encoder can decode at chance. Task-matched feature engineering remains a competitive option in this regime; the two approaches are not substitutes for each other without further evidence of representation alignment.</li>
+  <li><strong>In small-$N$ EEG regimes with well-resolved rhythms, classical spatial filtering is a hard-to-beat baseline.</strong> Not because deep networks are bad, but because a hundred training trials is not enough for them to rediscover the affine structure that CSP recovers in closed form.</li>
+  <li><strong>Per-subject heterogeneity is the rule, not the exception.</strong> A globally-fixed model family is a concession, not a design choice. Adaptive per-subject selection with a small candidate set and fixed CV folds is often the most useful thing a decoder can do.</li>
+  <li><strong>Off-the-shelf foundation-model transfer is not free.</strong> When the pretraining distribution is clinical EEG and the downstream task is narrow-band motor imagery, a 5&nbsp;M-parameter pretrained encoder can decode at chance under a lightweight fine-tuning recipe. The two approaches are not substitutes without further evidence of representation alignment, but they are also not competitors at this sample size: a serious foundation-model adaptation deserves its own protocol study.</li>
 </ol>
 </div>
 
@@ -317,6 +340,7 @@ Two negative results were especially instructive. First, a PhysioNet-pretrained 
   <li>Song, Y., Zheng, Q., Liu, B., &amp; Gao, X. (2023). EEG Conformer: convolutional transformer for EEG decoding and visualization. <em>IEEE TNSRE</em>, 31, 710&ndash;719.</li>
   <li>Wang, J. <em>et al.</em> (2025). CBraMod: A criss-cross brain foundation model for EEG decoding. <em>ICLR</em> 2025.</li>
   <li>Arazo, E., Ortego, D., Albert, P., O'Connor, N. E., &amp; McGuinness, K. (2020). Pseudo-labeling and confirmation bias in deep semi-supervised learning. <em>IJCNN</em> 2020.</li>
+  <li>Cawley, G. C., &amp; Talbot, N. L. C. (2010). On over-fitting in model selection and subsequent selection bias in performance evaluation. <em>J. Mach. Learn. Res.</em>, 11, 2079&ndash;2107.</li>
 </ul>
 
     </div><!-- /.note-body -->
