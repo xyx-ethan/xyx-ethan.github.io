@@ -62,7 +62,7 @@
             <li><a href="#methods">Methodological framework</a></li>
             <li><a href="#why">Why the numbers are trustworthy</a></li>
             <li><a href="#didnt">What didn't work</a></li>
-            <li><a href="#takeaways">Takeaways for computational neuroscience</a></li>
+            <li><a href="#takeaways">Takeaways</a></li>
             <li><a href="#repro">Reproducibility &amp; references</a></li>
         </ol>
     </div>
@@ -290,7 +290,7 @@ This is consistent with the caution in Lotte et al. (2018): generic EEG represen
 Two negative results were especially instructive. First, a PhysioNet-pretrained EEG-Conformer on Subject&nbsp;1 &mdash; the easiest subject &mdash; lands at 0.71 while a μ-band CSP on the same split reaches 0.98. Cross-dataset pretraining did not close the gap in this small-$N$ regime, presumably because the pretraining distribution (a different channel montage, sampling rate, and task mixture) was only tangentially related to the target. Second, confidence-threshold self-training raised held-out CV on the lowest-baseline subject while leaving test accuracy essentially unchanged &mdash; consistent with the well-documented confirmation-bias failure mode of pseudo-label methods (Arazo et al., 2020).
 </div>
 
-<h2 id="takeaways">Takeaways for computational neuroscience</h2>
+<h2 id="takeaways">Takeaways</h2>
 
 <div class="card-concept">
 <ol>
