@@ -57,9 +57,9 @@
         <h2>Topics</h2>
         <ol>
             <li><a href="#tldr">TL;DR</a></li>
-            <li><a href="#f1">Finding 1 &mdash; When classical spatial filters beat deep EEG baselines (Subject 1)</a></li>
-            <li><a href="#f2">Finding 2 &mdash; Per-subject heterogeneity forces adaptive model selection</a></li>
-            <li><a href="#f3">Finding 3 &mdash; Off-the-shelf foundation-model transfer was not automatic</a></li>
+            <li><a href="#f1">Finding 1: When classical spatial filters beat deep EEG baselines (Subject 1)</a></li>
+            <li><a href="#f2">Finding 2: Per-subject heterogeneity forces adaptive model selection</a></li>
+            <li><a href="#f3">Finding 3: Off-the-shelf foundation-model transfer was not automatic</a></li>
             <li><a href="#methods">Methodological framework</a></li>
             <li><a href="#why">How to read the numbers</a></li>
             <li><a href="#didnt">What didn't work</a></li>
@@ -81,7 +81,7 @@
 </ol>
 </div>
 
-<h2 id="f1">Finding 1 &mdash; When classical spatial filters beat deep EEG baselines (Subject 1)</h2>
+<h2 id="f1">Finding 1: When classical spatial filters beat deep EEG baselines (Subject 1)</h2>
 
 <p>Subject 1 appears to be μ-dominant under the evaluated CSP protocol: the 8&ndash;13 Hz and 7&ndash;14 Hz CSP+SVM pipelines both reach 0.9786 5-fold CV, while β-only (13&ndash;30 Hz) CSP is near chance (0.5214; the binary labels are balanced within each subject so the chance baseline is 0.5). I therefore interpret the results below as a μ-band inductive-bias effect, but I do not claim a full physiological explanation: I did not include ERD/ERS topographies, CSP pattern maps, or AIRM-distance covariance diagnostics, so "clean μ rhythm" should be read as a hypothesis consistent with the band ablation rather than as a measured fact. Every candidate pipeline was evaluated on the same fixed 5-fold partition (<code>StratifiedKFold(n_splits=5, shuffle=True, random_state=42)</code>) so per-fold accuracies are directly comparable.</p>
 
@@ -156,7 +156,7 @@
 <strong>The expected effect size of a &ldquo;strong deep EEG baseline&rdquo;.</strong> Under 5-fold CV on 140 trials, a single held-out fold contains 28 trials &mdash; so one more correctly-classified trial is worth 1/28 = 0.0357 of fold accuracy, and over the full 140-trial OOF CV one trial is worth 1/140 = 0.0071 of the mean. The 0.26 CV gap between μ-band CSP+SVM and the pretrained transformer corresponds to the transformer missing <em>about seven extra trials per fold</em>. The gap is too large to be a rounding artefact on this fixed split, and was not closed by the deep configurations I evaluated; I treat it as a meaningful empirical gap within the candidate set rather than a universal claim about deep EEG models.
 </div>
 
-<h2 id="f2">Finding 2 &mdash; Per-subject heterogeneity forces adaptive model selection</h2>
+<h2 id="f2">Finding 2: Per-subject heterogeneity forces adaptive model selection</h2>
 
 <p>Running the same pipeline sweep independently for all six subjects reveals sharp subject-level disagreement about which model family is best. No single family dominates all six. Three model families &mdash; narrow-band CSP, pyRiemann tangent-space, and augmented EEGNet &mdash; each win on at least one subject, with a pyRiemann-based stacking aggregator additionally winning on Subject&nbsp;4. Even where the same family wins on multiple subjects (CSP+LDA on Subjects 5 and 6), the selected frequency band and window length still differ from the CSP+SVM configuration that wins on Subject&nbsp;1.</p>
 
@@ -221,7 +221,7 @@
 </table>
 <p class="caveat"><sup>&dagger;</sup> Subject 3 sat at this pipeline's ceiling under the fixed-seed split used for argmax selection: all 140 held-out trials were classified correctly (5-fold CV = 1.0000). As a stability check I re-ran the same pipeline under 6 different stratified-CV seeds; the cross-seed mean is 0.9905 with standard deviation ~0.010, so the distinction between "nominally perfect" and "≈ 0.99" is within seed-induced CV noise on this subject. Both the selection-CV figure (0.9512) and the robustness-adjusted figure (0.9496) are reported above so the reader can see the effect of this substitution explicitly.</p>
 
-<h2 id="f3">Finding 3 &mdash; Off-the-shelf foundation-model transfer was not automatic</h2>
+<h2 id="f3">Finding 3: Off-the-shelf foundation-model transfer was not automatic</h2>
 
 <p>CBraMod (Wang et al., ICLR&nbsp;2025) is a compact ~4&nbsp;M-parameter EEG foundation model based on criss-cross attention and masked EEG patch reconstruction, pretrained on the Temple University Hospital EEG Corpus (TUEG), the largest publicly-available clinical EEG corpus, with reported evaluation across multiple downstream BCI datasets. As a sanity check I evaluated it on Subject 1, where the classical baselines saturate near ceiling under the band ablation above &mdash; the most favourable subject-specific regime in this corpus.</p>
 
