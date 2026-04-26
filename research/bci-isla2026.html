@@ -48,7 +48,8 @@
 
     <header class="note-header">
         <span class="note-badge">BCI-ISLA 2026 &middot; Challenge 15044 &middot; Rank 1 / 306 &middot; Organised by <a href="https://plcrodrigues.github.io/" target="_blank" rel="noopener" class="inline-link">Pedro L. C. Rodrigues</a> (Inria)</span>
-        <h1>When Classical Spatial Filters Beat Deep EEG Models in Low-Sample Motor Imagery</h1>
+        <h1>Subject-Adaptive Model Selection for Low-Sample Motor-Imagery EEG Decoding</h1>
+        <p class="note-subtitle">Rank&nbsp;1&nbsp;/&nbsp;306 at BCI-ISLA&nbsp;2026 &middot; classical spatial filters, Riemannian geometry, EEGNet, and an off-the-shelf foundation model evaluated under a fixed cross-validation protocol</p>
         <p class="note-intro">A methodological post-mortem of a 6-subject, binary motor-imagery EEG benchmark (140 labelled training / 60 held-out test trials per subject, 64 channels, 512 Hz). I evaluated classical spatial-filtering pipelines, Riemannian classifiers, EEGNet-style deep models, stacking ensembles, and an off-the-shelf EEG foundation model under a fixed cross-validation protocol. The best-performing solution used per-subject adaptive selection and reached <strong>0.9512 selection-CV / 0.93 held-out test accuracy</strong> (0.9496 if Subject 3, which sat at the classifier ceiling under a single fixed-seed split, is replaced by a 6-seed stratified-CV robustness mean &mdash; see Table&nbsp;1). The empirical lesson is not that classical methods universally beat deep learning, but that in low-sample subject-specific EEG, narrow-band spatial filters and Riemannian methods remain hard baselines, and off-the-shelf foundation-model transfer requires task- and montage-aware adaptation.</p>
     </header>
 
@@ -56,7 +57,7 @@
         <h2>Topics</h2>
         <ol>
             <li><a href="#tldr">TL;DR</a></li>
-            <li><a href="#f1">Finding 1 &mdash; μ-band CSP+SVM surpasses a PhysioNet-pretrained transformer</a></li>
+            <li><a href="#f1">Finding 1 &mdash; When classical spatial filters beat deep EEG baselines (Subject 1)</a></li>
             <li><a href="#f2">Finding 2 &mdash; Per-subject heterogeneity forces adaptive model selection</a></li>
             <li><a href="#f3">Finding 3 &mdash; Off-the-shelf foundation-model transfer was not automatic</a></li>
             <li><a href="#methods">Methodological framework</a></li>
@@ -80,7 +81,7 @@
 </ol>
 </div>
 
-<h2 id="f1">Finding 1 &mdash; μ-band CSP+SVM surpasses a PhysioNet-pretrained transformer</h2>
+<h2 id="f1">Finding 1 &mdash; When classical spatial filters beat deep EEG baselines (Subject 1)</h2>
 
 <p>Subject 1 has a clean sensorimotor μ rhythm: its band-limited trial covariance matrices are well-conditioned and their class means are separable under the affine-invariant Riemannian metric. This is the regime classical spatial filtering is built for. To test how much room modern deep architectures actually have on such a subject, I ran every candidate pipeline under the same fixed 5-fold <code>StratifiedKFold</code> split.</p>
 
@@ -258,6 +259,10 @@
   <li><strong>Stacking meta-learner</strong> (Wolpert, 1992) over top-CV base pipelines, with an L2-regularised logistic regression on out-of-fold positive-class probabilities.</li>
   <li><strong>Window augmentation at test time</strong>. For three subjects (Subject 3, Subject 5, Subject 6) a wider 2.5&nbsp;s window beats the 2.25&nbsp;s default on CV; a new classifier is trained with that window, and only the per-fold test probabilities are averaged &mdash; no test-label information ever informs the window choice.</li>
 </ul>
+
+<h3>Test-time aggregation and the stacking protocol</h3>
+<p>Final per-subject predictions are produced by <strong>CV-bagging</strong>: the 5 fold-models of the selected pipeline each predict probabilities on the test set; those 5 test-probability matrices are averaged and argmax'd. Every fold-model is therefore trained on 112 / 140 trials. I deliberately did not perform a post-selection full-140 refit before submission, because (a) the foldwise ensemble provides an internal averaging effect that reduces variance relative to a single full-data fit, and (b) using exactly the foldwise models keeps the test-time protocol bit-identical to the protocol that produced the selection-CV scores. I make no claim that a full-140 refit would have underperformed; it was simply not tested before the single-shot submission.</p>
+<p>For Subject&nbsp;4's stacking pipeline, the test-time protocol is more involved. Each base tangent-space variant is run through 5-fold CV exactly as above, producing two outputs: an out-of-fold positive-class probability matrix on the 140 training trials (used as meta-feature columns), and an averaged-across-folds test-probability matrix on the 60 test trials. The meta-learner (L2 logistic regression, <em>C</em>=10) is fit once on the (140&nbsp;&times;&nbsp;5) OOF matrix and then applied to the (60&nbsp;&times;&nbsp;5) averaged-test matrix; its 5-fold CV on the OOF matrix is the selection score reported in Table&nbsp;1. By construction every meta-training row is the prediction of a base model that did not see that row during base training, which is the standard Wolpert leakage-free recipe.</p>
 
 <h2 id="why">How to read the numbers</h2>
 

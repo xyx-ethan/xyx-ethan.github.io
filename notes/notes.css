@@ -304,6 +304,16 @@
     line-height: 1.6;
 }
 
+.note-subtitle {
+    font-size: 14.5px;
+    color: var(--text-nav);
+    line-height: 1.55;
+    margin-top: -2px;
+    margin-bottom: 14px;
+    font-style: italic;
+    opacity: 0.9;
+}
+
 /* Hide the old inline TOC */
 .note-content > .toc {
     display: none;
