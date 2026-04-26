@@ -37,7 +37,7 @@
         <div class="note-sidebar-header">
             <span class="note-badge">BCI-ISLA 2026 &middot; Rank 1 / 306</span>
             <h2>Subject-Adaptive Motor-Imagery Decoding</h2>
-            <p>Selection CV 0.9512 &middot; Held-out test 0.93</p>
+            <p>Held-out test 0.93 &middot; selection-CV 0.9512</p>
         </div>
         <div class="toc-title">Contents</div>
         <ol class="toc-list"></ol>
@@ -49,7 +49,7 @@
     <header class="note-header">
         <span class="note-badge">BCI-ISLA 2026 &middot; Challenge 15044 &middot; Rank 1 / 306 &middot; Organised by <a href="https://plcrodrigues.github.io/" target="_blank" rel="noopener" class="inline-link">Pedro L. C. Rodrigues</a> (Inria)</span>
         <h1>Subject-Adaptive Model Selection for Low-Sample Motor-Imagery EEG Decoding</h1>
-        <p class="note-subtitle">Rank&nbsp;1&nbsp;/&nbsp;306 at BCI-ISLA&nbsp;2026 &middot; classical spatial filters, Riemannian geometry, EEGNet, and an off-the-shelf foundation model evaluated under a fixed cross-validation protocol</p>
+        <p class="note-subtitle">Rank&nbsp;1&nbsp;/&nbsp;306 at BCI-ISLA&nbsp;2026 using per-subject adaptive selection across CSP, Riemannian tangent-space classifiers, EEGNet, and foundation-model baselines.</p>
         <p class="note-intro">A methodological post-mortem of a 6-subject, binary motor-imagery EEG benchmark (140 labelled training / 60 held-out test trials per subject, 64 channels, 512 Hz). I evaluated classical spatial-filtering pipelines, Riemannian classifiers, EEGNet-style deep models, stacking ensembles, and an off-the-shelf EEG foundation model under a fixed cross-validation protocol. The best-performing solution used per-subject adaptive selection and reached <strong>0.9512 selection-CV / 0.93 held-out test accuracy</strong> (0.9496 if Subject 3, which sat at the classifier ceiling under a single fixed-seed split, is replaced by a 6-seed stratified-CV robustness mean &mdash; see Table&nbsp;1). The empirical lesson is not that classical methods universally beat deep learning, but that in low-sample subject-specific EEG, narrow-band spatial filters and Riemannian methods remain hard baselines, and off-the-shelf foundation-model transfer requires task- and montage-aware adaptation.</p>
     </header>
 
@@ -83,7 +83,7 @@
 
 <h2 id="f1">Finding 1 &mdash; When classical spatial filters beat deep EEG baselines (Subject 1)</h2>
 
-<p>Subject 1 has a clean sensorimotor μ rhythm: its band-limited trial covariance matrices are well-conditioned and their class means are separable under the affine-invariant Riemannian metric. This is the regime classical spatial filtering is built for. To test how much room modern deep architectures actually have on such a subject, I ran every candidate pipeline under the same fixed 5-fold <code>StratifiedKFold</code> split.</p>
+<p>Subject 1 appears to be μ-dominant under the evaluated CSP protocol: the 8&ndash;13 Hz and 7&ndash;14 Hz CSP+SVM pipelines both reach 0.9786 5-fold CV, while β-only (13&ndash;30 Hz) CSP is near chance (0.5214; the binary labels are balanced within each subject so the chance baseline is 0.5). I therefore interpret the results below as a μ-band inductive-bias effect, but I do not claim a full physiological explanation: I did not include ERD/ERS topographies, CSP pattern maps, or AIRM-distance covariance diagnostics, so "clean μ rhythm" should be read as a hypothesis consistent with the band ablation rather than as a measured fact. Every candidate pipeline was evaluated on the same fixed 5-fold partition (<code>StratifiedKFold(n_splits=5, shuffle=True, random_state=42)</code>) so per-fold accuracies are directly comparable.</p>
 
 <figure class="fig">
 <svg viewBox="0 0 780 320" xmlns="http://www.w3.org/2000/svg">
@@ -153,7 +153,7 @@
 <p>The β band alone decodes at chance on this subject; the narrow μ configurations (8&ndash;13 and 7&ndash;14 Hz) dominate the broader μ+β and β-only configurations. Adding β-band content does not help on this subject, and under this CSP+SVM protocol the strongest discriminative signal appears concentrated in the μ band.</p>
 
 <div class="card-concept">
-<strong>The expected effect size of a &ldquo;strong deep EEG baseline&rdquo;.</strong> Under 5-fold CV on 140 trials, a single held-out fold contains 28 trials &mdash; so one more correctly-classified trial is worth 0.0357 of fold accuracy. The 0.26 CV gap between μ-band CSP+SVM and the pretrained transformer is not a rounding artefact; it corresponds to the transformer missing <em>seven extra trials per fold</em>, consistently across folds. The gap is too large to be a finite-sample fluke; it was not closed by the deep-model configurations I evaluated, but I do not claim that all possible deep hyperparameter settings were exhausted.
+<strong>The expected effect size of a &ldquo;strong deep EEG baseline&rdquo;.</strong> Under 5-fold CV on 140 trials, a single held-out fold contains 28 trials &mdash; so one more correctly-classified trial is worth 1/28 = 0.0357 of fold accuracy, and over the full 140-trial OOF CV one trial is worth 1/140 = 0.0071 of the mean. The 0.26 CV gap between μ-band CSP+SVM and the pretrained transformer corresponds to the transformer missing <em>about seven extra trials per fold</em>. The gap is too large to be a rounding artefact on this fixed split, and was not closed by the deep configurations I evaluated; I treat it as a meaningful empirical gap within the candidate set rather than a universal claim about deep EEG models.
 </div>
 
 <h2 id="f2">Finding 2 &mdash; Per-subject heterogeneity forces adaptive model selection</h2>
@@ -223,20 +223,31 @@
 
 <h2 id="f3">Finding 3 &mdash; Off-the-shelf foundation-model transfer was not automatic</h2>
 
-<p>CBraMod (Wang et al., ICLR&nbsp;2025) is a 5&nbsp;M-parameter criss-cross transformer pretrained on the Temple University Hospital EEG Corpus (TUEG), the largest publicly-available clinical EEG corpus, with reported evaluation across multiple downstream BCI datasets. As a sanity check I evaluated it on Subject 1, where the classical baselines saturate near ceiling and the μ-band signal is clean &mdash; the most favourable subject-specific regime in this corpus.</p>
+<p>CBraMod (Wang et al., ICLR&nbsp;2025) is a compact ~4&nbsp;M-parameter EEG foundation model based on criss-cross attention and masked EEG patch reconstruction, pretrained on the Temple University Hospital EEG Corpus (TUEG), the largest publicly-available clinical EEG corpus, with reported evaluation across multiple downstream BCI datasets. As a sanity check I evaluated it on Subject 1, where the classical baselines saturate near ceiling under the band ablation above &mdash; the most favourable subject-specific regime in this corpus.</p>
 
-<p>Under the lightweight protocol I tested, the off-the-shelf checkpoint did not transfer. Loaded from the official HuggingFace checkpoint (<code>braindecode/cbramod-pretrained</code>) and fine-tuned per-subject under the same 5-fold CV with <code>AdamW(lr=3e-5)</code> for 20 epochs, CBraMod reaches <strong>CV 0.4929 on Subject 1</strong> &mdash; close to chance given 140 trials. Substituting the same architecture trained from scratch under the same recipe yields CV 0.47, so the pretraining contributed almost no useful prior <em>under this particular fine-tuning recipe</em>. <strong>I read this as a protocol-specific negative result rather than a verdict on CBraMod as a model class.</strong> A more careful adaptation &mdash; channel-aware tokeniser remapping, resampling to the pretraining rate, learning-rate sweep, frozen-encoder linear probe, longer fine-tuning, or task-matched intermediate pretraining &mdash; could plausibly close the gap, and was outside the budget of this submission.</p>
+<p>Under the lightweight protocol I tested, the off-the-shelf checkpoint did not transfer. Loaded from the official HuggingFace checkpoint (<code>braindecode/cbramod-pretrained</code>) and fine-tuned per-subject under the same 5-fold CV with <code>AdamW(lr=3e-5)</code> for 20 epochs, CBraMod reaches <strong>CV 0.4929 on Subject 1</strong> &mdash; near chance (binary labels are balanced; chance is 0.5). Substituting the same architecture trained from scratch under the same recipe yields CV 0.47, so the pretraining contributed almost no useful prior <em>under this particular fine-tuning recipe</em>. <strong>I read this as a protocol-specific negative result rather than a verdict on CBraMod as a model class.</strong> CBraMod's architecture and positional encoding are explicitly designed to support diverse EEG channel formats; the failure I observed could equally well reflect implementation-level adaptation issues &mdash; channel mapping, resampling, patching strategy, classifier head, learning rate, or insufficient fine-tuning &mdash; rather than an inherent limitation of the model. A more careful adaptation (channel-aware tokeniser remapping, resampling to the pretraining rate, learning-rate sweep, frozen-encoder linear probe, longer fine-tuning, or task-matched intermediate pretraining) could plausibly close the gap, and was outside the budget of this submission.</p>
 
 <div class="card-caution">
-<strong>Likely sources of the domain gap (not directly measured here).</strong> TUEG-style clinical EEG and cue-locked motor-imagery EEG differ along several axes that have been documented in the broader BCI literature: subject population (clinical vs. healthy), acquisition protocol, montage (variable vs. fixed 64-channel 10&ndash;10), sampling rate (typically 250&ndash;256&nbsp;Hz vs. 512&nbsp;Hz here), artifact profile, and task semantics (passive recording vs. cued sensorimotor imagery). I did not quantify the pretraining-corpus frequency distribution, so I make no specific δ/θ vs μ/β claim. The pretraining objective (masked patch reconstruction) and the downstream task (single-trial 2-class classification) also do not share an intermediate fine-tuning stage that would force representations toward sensorimotor discrimination.
+<strong>Plausible domain-gap axes (not directly measured here).</strong> TUEG-style clinical diagnostic EEG and cue-locked motor-imagery EEG differ along several axes that have been documented in the broader BCI literature: subject population (clinical-cohort recordings vs. motor-imagery benchmark subjects), acquisition protocol, montage (variable vs. fixed 64-channel 10&ndash;10), sampling rate (typically 250&ndash;256&nbsp;Hz vs. 512&nbsp;Hz here), artifact profile, and task semantics (passive recording vs. cued sensorimotor imagery). I did not quantify the pretraining-corpus frequency distribution, so I make no specific δ/θ vs μ/β claim. The pretraining objective (masked patch reconstruction) and the downstream task (single-trial 2-class classification) also do not share an intermediate fine-tuning stage that would force representations toward sensorimotor discrimination.
 </div>
 
 <h2 id="methods">Methodological framework</h2>
 
+<h3>Pre-processing details</h3>
+<ul>
+  <li><strong>Sampling rate &amp; montage.</strong> 512&nbsp;Hz, 64 channels (10&ndash;10 layout, as supplied by the challenge organisers). Channel order is consumed as-is from the supplied NumPy arrays.</li>
+  <li><strong>Trial cropping.</strong> Cue-relative windows: default 2.25&nbsp;s (samples 384&ndash;1537) for CSP and EEGNet pipelines; extended 2.5&nbsp;s (samples 256&ndash;1537) for the pyRiemann tangent-space pipelines and for Subjects&nbsp;5 and 6.</li>
+  <li><strong>Band-pass.</strong> Zero-phase IIR filter via <code>mne.filter.filter_data(method="iir")</code>, with subject- and pipeline-specific cutoffs listed in Table&nbsp;1. Filter is applied independently per trial, on the cropped window.</li>
+  <li><strong>Per-trial z-score.</strong> Mean and standard deviation are computed per trial &times; per channel along the time axis and used to standardise that trial.</li>
+  <li><strong>Not applied.</strong> No notch filter (line noise was not visibly dominant in the supplied arrays), no session-level re-referencing, no ICA, no manual artifact rejection. This keeps the protocol reproducible without per-subject expert review and without a labelled bad-trial list.</li>
+  <li><strong>Class balance.</strong> The two motor-imagery classes are balanced within each subject (70 / 70 in training, 30 / 30 in test), so the chance accuracy baseline is 0.5.</li>
+  <li><strong>Reproducibility seeds.</strong> All <code>StratifiedKFold</code> calls use <code>random_state=42</code>, <code>shuffle=True</code>; PyTorch and NumPy are seeded before each training run; scikit-learn classifiers and pyRiemann components are deterministic given the input.</li>
+</ul>
+
 <h3>The selection protocol</h3>
 <p>For each subject independently:</p>
 <ol>
-  <li>Enumerate candidate pipelines ahead of time. All candidates share a fixed 5-fold <code>StratifiedKFold(random_state=42)</code> split, so per-fold accuracies are directly comparable.</li>
+  <li>Enumerate candidate pipelines ahead of time. All candidates share a fixed 5-fold <code>StratifiedKFold(n_splits=5, shuffle=True, random_state=42)</code> split, so per-fold accuracies are directly comparable.</li>
   <li>Pick the argmax-CV pipeline; or, if it is a stacking meta-learner built over several top-CV base pipelines, use its out-of-fold 5-fold CV on the meta-feature matrix as the selection score.</li>
   <li>Refit each fold's selected pipeline on its training split, average the five per-fold test probabilities, and argmax to produce the final per-subject label sequence.</li>
 </ol>
@@ -253,7 +264,7 @@
 <p>All candidates are standard published pipelines evaluated on the same fixed folds:</p>
 <ul>
   <li><strong>CSP + SVM/LDA</strong> (Ramoser et al., 2000; Blankertz et al., 2008) with Ledoit&ndash;Wolf shrinkage of class covariances. The log-variance of the top <em>k</em> projected components is classified by either an RBF-kernel SVM or linear discriminant analysis.</li>
-  <li><strong>pyRiemann tangent-space + L2 logistic regression</strong> (Barachant et al., 2012, 2013). Sample covariances mapped to the tangent space at the Riemannian mean under the affine-invariant metric.</li>
+  <li><strong>pyRiemann tangent-space + L2 logistic regression</strong> (Barachant et al., 2012, 2013). Sample covariances (Oracle Approximating Shrinkage estimator) are mapped to the tangent space at the Riemannian mean under the affine-invariant metric, with <code>TangentSpace(metric="riemann", tsupdate=False)</code> &mdash; the reference mean is estimated only on training-fold data, no transductive update at test time.</li>
   <li><strong>EEGNet</strong> (Lawhern et al., 2018) with strong in-batch augmentation (Gaussian noise, time shift, channel dropout). A broad hyperparameter sweep over temporal-filter count, augmentation strength, and random-seed realisations is evaluated under the same folds.</li>
   <li><strong>Filter-Bank CSP</strong> (Ang et al., 2012) with nine overlapping bands and mutual-information feature selection.</li>
   <li><strong>Stacking meta-learner</strong> (Wolpert, 1992) over top-CV base pipelines, with an L2-regularised logistic regression on out-of-fold positive-class probabilities.</li>
@@ -262,7 +273,9 @@
 
 <h3>Test-time aggregation and the stacking protocol</h3>
 <p>Final per-subject predictions are produced by <strong>CV-bagging</strong>: the 5 fold-models of the selected pipeline each predict probabilities on the test set; those 5 test-probability matrices are averaged and argmax'd. Every fold-model is therefore trained on 112 / 140 trials. I deliberately did not perform a post-selection full-140 refit before submission, because (a) the foldwise ensemble provides an internal averaging effect that reduces variance relative to a single full-data fit, and (b) using exactly the foldwise models keeps the test-time protocol bit-identical to the protocol that produced the selection-CV scores. I make no claim that a full-140 refit would have underperformed; it was simply not tested before the single-shot submission.</p>
-<p>For Subject&nbsp;4's stacking pipeline, the test-time protocol is more involved. Each base tangent-space variant is run through 5-fold CV exactly as above, producing two outputs: an out-of-fold positive-class probability matrix on the 140 training trials (used as meta-feature columns), and an averaged-across-folds test-probability matrix on the 60 test trials. The meta-learner (L2 logistic regression, <em>C</em>=10) is fit once on the (140&nbsp;&times;&nbsp;5) OOF matrix and then applied to the (60&nbsp;&times;&nbsp;5) averaged-test matrix; its 5-fold CV on the OOF matrix is the selection score reported in Table&nbsp;1. By construction every meta-training row is the prediction of a base model that did not see that row during base training, which is the standard Wolpert leakage-free recipe.</p>
+<p>For Subject&nbsp;4's stacking pipeline, the test-time protocol is more involved. The five base variants are pre-specified pyRiemann tangent-space classifiers at five fixed bandpasses &mdash; <code>6&ndash;30</code>, <code>8&ndash;30</code>, <code>4&ndash;40</code>, <code>8&ndash;13</code>, and <code>6&ndash;14</code>&nbsp;Hz &mdash; chosen on the basis of training-fold CV before any stacking meta-learner was fit, and frozen before any test prediction was generated (the exact list is in <code>configs/default.yaml</code>). Each base variant is then run through 5-fold CV exactly as above, producing two outputs: an out-of-fold positive-class probability matrix on the 140 training trials (used as meta-feature columns), and an averaged-across-folds test-probability matrix on the 60 test trials. The meta-learner (L2 logistic regression, <em>C</em>=10) is fit once on the (140&nbsp;&times;&nbsp;5) OOF matrix and then applied to the (60&nbsp;&times;&nbsp;5) averaged-test matrix; its 5-fold CV on the OOF matrix is the selection score reported in Table&nbsp;1. By construction every meta-training row is the prediction of a base model that did not see that row during base training, which is the standard Wolpert leakage-free recipe.</p>
+
+<p><strong>Selection-CV vs. final test estimator.</strong> Because final per-subject prediction uses CV-bagging (averaging the five fold-models' test probabilities), the held-out test estimator is not bit-identical to the single-fold OOF estimator that produced the selection-CV scores. I therefore treat selection-CV as a model-selection score, while the held-out test result is the actual estimate of the submitted CV-bagged ensemble.</p>
 
 <h2 id="why">How to read the numbers</h2>
 
@@ -277,24 +290,25 @@
 
 <h2 id="didnt">What didn't work (in addition to CBraMod)</h2>
 
-<p>Within the candidate set I evaluated under the fixed protocol, <strong>0.93 test / 0.9512 macro selection-CV</strong> was the best compliant solution I found. Every candidate extension I tried failed to improve on it on the training-fold CV. (I do not claim this is a "real ceiling"; it is the best I reached within the evaluated grid, and a different candidate set or a more careful adaptation of the items below could move it.)</p>
+<p>Within the candidate set I evaluated under the fixed protocol, <strong>0.93 test / 0.9512 macro selection-CV</strong> was the best compliant solution I found. Every candidate extension I tried either failed to improve the fixed-fold CV score, improved CV only through a diagnostically unreliable signal (e.g. confidence-threshold pseudo-labels), or introduced a protocol risk I rejected before submission. I do not claim this is a "real ceiling"; it is the best I reached within the evaluated grid, and a different candidate set or a more careful adaptation of the items below could move it. The "Coverage" column makes explicit whether each row was a single-subject ablation or a wider sweep, so single-subject failures are not read as universal conclusions.</p>
 
 <table class="tbl">
-  <thead><tr><th>Attempted extension</th><th>Representative subject</th><th>Observed CV</th><th>Verdict relative to baseline</th></tr></thead>
+  <thead><tr><th>Attempted extension</th><th>Coverage</th><th>Observed CV</th><th>Verdict relative to baseline</th></tr></thead>
   <tbody>
-    <tr><td>Stacking meta-learner over CSP / pyRiemann variants</td><td>Subject 2</td><td>0.8143</td><td>below augmented-EEGNet best of 0.8786</td></tr>
-    <tr><td>Multi-seed bagging (6 seeds per pipeline)</td><td>Subject 2</td><td>0.8186</td><td>variance reduced, mean unchanged</td></tr>
-    <tr><td>Filter-bank CSP + MI feature selection + XGBoost</td><td>Subject 2</td><td>0.7357</td><td>below single-band CSP</td></tr>
-    <tr><td>EEGNeX and FBCNet (3 seeds each, heavy augmentation)</td><td>Subject 2</td><td>0.76&ndash;0.83</td><td>below the best EEGNet variant</td></tr>
-    <tr><td>Riemannian tangent-space covariance augmentation</td><td>Subject 2</td><td>0.8429</td><td>below pyRiemann baseline</td></tr>
-    <tr><td>Wavelet-packet + phase-amplitude coupling features</td><td>Subject 2</td><td>0.67</td><td>far below</td></tr>
-    <tr><td>Spectral PSD + XGBoost / LightGBM</td><td>Subject 2</td><td>0.66</td><td>far below</td></tr>
-    <tr><td>Confidence-threshold self-training (pseudo-labels)</td><td>Subject 2</td><td>CV inflated, OOF calibration degraded</td><td>rejected pre-submission for confirmation-bias signature</td></tr>
-    <tr><td>PhysioNet-pretrained EEG-Conformer</td><td>Subject 1</td><td>0.7143</td><td>27 pts below μ-band CSP under this fine-tuning recipe</td></tr>
-    <tr><td>Riemannian Procrustes cross-subject alignment</td><td>Subject 6</td><td>0.88</td><td>no gain over within-subject baseline</td></tr>
-    <tr><td><strong>CBraMod (ICLR 2025, HF pretrained + fine-tune)</strong></td><td><strong>Subject 1</strong></td><td><strong>0.4929</strong></td><td><strong>close to chance under this fine-tuning recipe</strong></td></tr>
+    <tr><td>Stacking meta-learner over CSP / pyRiemann variants</td><td>Subject 2 only</td><td>0.8143</td><td>below augmented-EEGNet best of 0.8786</td></tr>
+    <tr><td>Multi-seed bagging (6 seeds per pipeline)</td><td>Subject 2 only</td><td>0.8186</td><td>variance reduced, mean unchanged</td></tr>
+    <tr><td>Filter-bank CSP + MI feature selection + XGBoost</td><td>Subject 2 only</td><td>0.7357</td><td>below single-band CSP</td></tr>
+    <tr><td>EEGNeX and FBCNet (3 seeds each, heavy augmentation)</td><td>Subject 2 only</td><td>0.76&ndash;0.83</td><td>below the best EEGNet variant</td></tr>
+    <tr><td>Riemannian tangent-space covariance augmentation</td><td>Subject 2 only</td><td>0.8429</td><td>below pyRiemann baseline</td></tr>
+    <tr><td>Wavelet-packet + phase-amplitude coupling features</td><td>Subject 2 only</td><td>0.67</td><td>far below</td></tr>
+    <tr><td>Spectral PSD + XGBoost / LightGBM</td><td>Subject 2 only</td><td>0.66</td><td>far below</td></tr>
+    <tr><td>Confidence-threshold self-training (pseudo-labels)</td><td>Subject 2 only</td><td>CV inflated, OOF calibration degraded</td><td>rejected pre-submission for confirmation-bias signature</td></tr>
+    <tr><td>PhysioNet-pretrained EEG-Conformer</td><td>Subject 1 only</td><td>0.7143</td><td>27 pts below μ-band CSP under this fine-tuning recipe</td></tr>
+    <tr><td>Riemannian Procrustes cross-subject alignment</td><td>Subject 6 only</td><td>0.88</td><td>no gain over within-subject baseline</td></tr>
+    <tr><td><strong>CBraMod (ICLR 2025, HF pretrained + fine-tune)</strong></td><td><strong>Subject 1 only</strong></td><td><strong>0.4929</strong></td><td><strong>close to chance under this fine-tuning recipe</strong></td></tr>
   </tbody>
 </table>
+<p class="caveat">Most rows are single-subject ablations targeted at the lowest-baseline subject (Subject 2) where new candidates had the most room to help, plus the foundation-model probes on the cleanest subject (Subject 1) where lack of transfer is most informative. Single-subject failures should not be read as universal claims.</p>
 
 <div class="card-note">
 Two negative results were especially instructive. First, a PhysioNet-pretrained EEG-Conformer on Subject&nbsp;1 &mdash; the easiest subject &mdash; lands at 0.71 while a μ-band CSP on the same split reaches 0.98. Cross-dataset pretraining did not close the gap in this low-sample regime, plausibly because the pretraining distribution (a different channel montage, sampling rate, and task mixture) was only tangentially related to the target; I make no claim about the model class itself. Second, confidence-threshold self-training inflated training-fold CV while degrading the calibration of the out-of-fold probability matrix &mdash; the classic confirmation-bias signature of pseudo-label methods (Arazo et al., 2020) &mdash; and was rejected before any submission was made.
