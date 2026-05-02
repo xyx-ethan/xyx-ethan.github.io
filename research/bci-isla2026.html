@@ -62,6 +62,7 @@
             <li><a href="#f3">Finding 3: Off-the-shelf foundation-model transfer was not automatic</a></li>
             <li><a href="#methods">Methodological framework</a></li>
             <li><a href="#why">How to read the numbers</a></li>
+            <li><a href="#frontier">Frontier-vs-classical comparison on the same dataset</a></li>
             <li><a href="#didnt">What didn't work</a></li>
             <li><a href="#limits">Limitations</a></li>
             <li><a href="#takeaways">Takeaways</a></li>
@@ -287,6 +288,39 @@
 
 <h3>Compliance statement</h3>
 <p>Every decision &mdash; candidate list, fold split, selection score, window choice, final averaging &mdash; is fixed before the test set is consulted. The final submission is produced by a single-shot execution of the protocol; no leaderboard score at any intermediate submission fed back into a later model choice.</p>
+
+<h2 id="frontier">Frontier-vs-classical comparison on the same dataset</h2>
+
+<p>To verify the per-subject adaptive ensemble against current deep MI baselines on the <em>same</em> 6 subjects under the <em>same</em> 5-fold split and <em>same</em> preprocessing (crop 384&ndash;1537, IIR 7&ndash;30 Hz, per-trial z-score), I ran six modern deep methods (ShallowConvNet, Deep4Net, EEGNetv4, EEGConformer, ATCNet, EEGITNet via <a href="https://braindecode.org/" target="_blank" rel="noopener" class="inline-link">braindecode 1.4</a>) against five classical baselines (CSP+SVM, CSP+LDA at &mu; and broad bands, pyRiemann TS+LR). Source-paper default hyperparameters under <code>AdamW(lr=1e-3, weight_decay=1e-4)</code>, 100 epochs, 3 seeds. Reproduction scripts: <a href="https://github.com/xyx-ethan/bci-mi-decoder/tree/main/experiments" target="_blank" rel="noopener" class="inline-link">experiments/</a>.</p>
+
+<table class="tbl">
+  <thead><tr><th>Comparator</th><th>Macro CV</th><th>&Delta; vs ensemble (0.9496)</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Submitted ensemble (per-subject adaptive selection)</strong></td><td><strong>0.9496</strong></td><td>&mdash;</td></tr>
+    <tr><td><strong>Best-of-N single methods (per-subject argmax, matched protocol)</strong></td><td><strong>0.8698</strong></td><td><strong>+7.98 pp</strong> &larr; apples-to-apples</td></tr>
+    <tr><td>Best uniform single method (no per-subject selection)</td><td>0.8369</td><td>+11.27 pp &larr; deployment view</td></tr>
+    <tr><td>EEGConformer (Song 2023, best deep)</td><td>0.7750</td><td>+17.46 pp</td></tr>
+    <tr><td>ATCNet (Altaheri 2022)</td><td>0.7480</td><td>+20.16 pp</td></tr>
+    <tr><td>ShallowConvNet (Schirrmeister 2017)</td><td>0.7345</td><td>+21.51 pp</td></tr>
+    <tr><td>EEGNetv4 vanilla (Lawhern 2018)</td><td>0.7147</td><td>+23.49 pp</td></tr>
+    <tr><td>Deep4Net (Schirrmeister 2017, recipe-disadvantaged)</td><td>0.6325</td><td>+31.71 pp</td></tr>
+    <tr><td>EEGITNet (Salami 2022)</td><td>0.6008</td><td>+34.88 pp</td></tr>
+  </tbody>
+</table>
+
+<div class="card-caution">
+<strong>Honest caveats on this comparison.</strong>
+<ul>
+<li><strong>Selection-bias optimism on the ensemble row.</strong> Per-subject argmax over a candidate pool of N&nbsp;&ge;&nbsp;10 pipelines adds an expected <strong>+4&ndash;6&nbsp;pp upward bias</strong> (Cawley &amp; Talbot 2010) that the single-method rows do not carry. After this correction, the residual real advantage vs the strongest classical baseline is &asymp;&nbsp;+5&ndash;7&nbsp;pp; the one-sided 95&thinsp;% lower bound approaches 0.</li>
+<li><strong>Subject 4 stacking does not improve over `CSP+LDA broad 7&ndash;30&nbsp;Hz`.</strong> Both reach 138/140 = 0.9857 macro CV. Stacking buys nothing measurable on this subject.</li>
+<li><strong>S5/S6 advantage is band+window confound.</strong> The ensemble uses CSP+LDA at upper-&mu; 10&ndash;14&nbsp;Hz with a 2.5&nbsp;s window; deep rows use 7&ndash;30&nbsp;Hz with the default 2.25&nbsp;s window.</li>
+<li><strong>S2 augmentation asymmetry.</strong> The submitted EEGNet on S2 uses Gaussian-noise / time-shift / channel-dropout augmentation; the benchmark's vanilla `EEGNetv4` does not. The +0.14 gap on S2 is essentially the augmentation gap, not a model-class gap.</li>
+<li><strong>Multiple-testing.</strong> Across 77 cells the Bonferroni-adjusted significance threshold at the per-cell level is &asymp;&nbsp;32&nbsp;pp; only the deltas vs Deep4Net and EEGITNet survive Bonferroni at the macro level. The 11&nbsp;pp lead vs strong classicals does <em>not</em> reach Bonferroni significance.</li>
+<li><strong>Deep-side protocol is suboptimal.</strong> Source-paper recipes call for per-method learning rates and cosine schedules (e.g. Song 2023 EEGConformer: 2e-4 + warmup; Schirrmeister 2017: 6.25e-4). A v2 re-run with per-method recipes is in progress; the expected lift on the deep ceiling is +5&ndash;10&nbsp;pp, bringing the strongest deep method to <em>parity</em> with classical (~0.83&ndash;0.85) but not above.</li>
+</ul>
+</div>
+
+<p><strong>Defensible take-aways:</strong> (i) under a fixed-config-per-method deep protocol, no tested deep MI method matches the per-subject adaptive ensemble; (ii) all deep methods underperform `pyRiemann TS+LR broad` and `CSP+LDA broad` on this dataset; (iii) adaptive per-subject preprocessing selection (band, window, augmentation) explains a substantial fraction of the lead, more than any single deep architecture choice; (iv) Subject 4 stacking is dominated by simpler `CSP+LDA broad`, suggesting the stacking complexity should be removed from this subject in any future deployment.</p>
 
 <h2 id="didnt">What didn't work (in addition to CBraMod)</h2>
 
