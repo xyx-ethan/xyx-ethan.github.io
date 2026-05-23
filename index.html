@@ -20,15 +20,28 @@
     <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <script>(function(){var t=localStorage.getItem('theme');if(t==='light')localStorage.removeItem('theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');})()</script>
+    <style>
+    @media print {
+        .home-nav, .sidebar, .overlay, .scroll-top { display: none !important; }
+        .home-main { margin: 0 !important; padding: 0 !important; max-width: 100% !important; }
+        * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
+        .fade-in,
+        .education-list > *, .skills-grid > *, .timeline-shell > *, .cert-list > * {
+            opacity: 1 !important; transform: none !important; transition: none !important;
+        }
+        .timeline-card, .card, .skill-card, .cert-panel { page-break-inside: avoid; }
+        .home-section { page-break-inside: auto; }
+    }
+    </style>
 </head>
 <body class="home-page">
 
 <!-- Universal top nav bar (desktop + mobile) -->
 <nav class="home-nav">
     <div class="home-nav-right">
-        <a href="CV.pdf" download class="home-nav-btn" aria-label="Download CV" title="Download CV">
+        <button class="home-nav-btn" id="pageDownload" aria-label="Download this page as PDF" title="Download this page as PDF">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        </a>
+        </button>
         <button class="home-nav-btn" id="themeToggle" aria-label="Toggle theme" title="Toggle theme">
             <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
             <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
@@ -49,14 +62,17 @@
             <a href="#skills">
                 Skills
             </a>
-            <a href="#projects">
-                Research
-            </a>
             <a href="#education">
                 Education
             </a>
             <a href="#notes">
                 Coursework
+            </a>
+            <a href="#projects">
+                Projects
+            </a>
+            <a href="#research">
+                Research
             </a>
             <a href="#experience">
                 Experience
@@ -104,7 +120,6 @@
         </p>
     </section>
 
-    <!-- Skills -->
     <section id="skills" class="home-section">
         <div class="section-head">
             <h2>Skills</h2>
@@ -189,67 +204,6 @@
         </div>
     </section>
 
-    <!-- Research / Projects -->
-    <section id="projects" class="home-section">
-        <div class="section-head">
-            <h2>Research</h2>
-        </div>
-
-        <div class="timeline timeline-shell">
-            <div class="timeline-rail"></div>
-
-            <div class="timeline-group current">
-                <div class="timeline-group-dot"></div>
-                <p class="timeline-group-label">2026</p>
-                <div class="timeline-group-items">
-                    <div class="timeline-card project-card linkable" data-href="research/physionet2026.html">
-                        <p class="timeline-lead accent">Feb to Aug</p>
-                        <div class="timeline-main">
-                            <div class="timeline-title-row">
-                                <h3>George B. Moody PhysioNet Challenge 2026</h3>
-                                <span class="timeline-pill success">Rank 12 / 244 &middot; AUROC 0.693</span>
-                                <a href="https://github.com/xyx-ethan/gt-neurosignals-lab-physionet2026-submission" target="_blank" rel="noopener" class="title-icon" aria-label="Source code on GitHub (private during active submission)" title="Source code on GitHub (private during active submission)" onclick="event.stopPropagation()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg></a>
-                                <a href="https://moody-challenge.physionet.org/2026/leaderboard/" target="_blank" rel="noopener" class="title-icon" aria-label="PhysioNet Challenge leaderboard" title="PhysioNet Challenge leaderboard" onclick="event.stopPropagation()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg></a>
-                            </div>
-                            <p class="timeline-subtitle">PhysioNet &middot; Organized by <a href="https://research.gatech.edu/people/gari-clifford" target="_blank" rel="noopener" class="inline-link">Gari Clifford</a> (Emory / Georgia Tech)</p>
-                            <p class="timeline-desc">Decoding cognitive impairment from overnight polysomnography (Team GT NeuroSignals Lab).</p>
-                            <div class="tags timeline-chips">
-                                <span class="tag primary">Sleep EEG</span>
-                                <span class="tag primary">Cognitive Impairment</span>
-                                <span class="tag">Brain-Heart Coupling</span>
-                                <span class="tag">Computational Neuroscience</span>
-                            </div>
-                        </div>
-                        <span class="card-arrow" aria-hidden="true">&rarr;</span>
-                    </div>
-
-                    <div class="timeline-card project-card linkable" data-href="research/bci-isla2026.html">
-                        <p class="timeline-lead accent">Apr to May</p>
-                        <div class="timeline-main">
-                            <div class="timeline-title-row">
-                                <h3>Motor Imagery EEG Decoding (ISLA 2026)</h3>
-                                <span class="timeline-pill success">Top 4 / 114 &middot; Test 0.93</span>
-                                <a href="https://github.com/xyx-ethan/bci-mi-decoder" target="_blank" rel="noopener" class="title-icon" aria-label="Source code on GitHub" title="Source code on GitHub" onclick="event.stopPropagation()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg></a>
-                                <a href="https://www.codabench.org/competitions/15044/#/results-tab" target="_blank" rel="noopener" class="title-icon" aria-label="CodaBench leaderboard" title="CodaBench leaderboard" onclick="event.stopPropagation()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg></a>
-                            </div>
-                            <p class="timeline-subtitle">CodaBench &middot; Organized by <a href="https://plcrodrigues.github.io/" target="_blank" rel="noopener" class="inline-link">Pedro L. C. Rodrigues</a> (Inria)</p>
-                            <p class="timeline-desc">Per-subject adaptive selection across CSP, Riemannian, EEGNet, and stacking pipelines.</p>
-                            <div class="tags timeline-chips">
-                                <span class="tag primary">Brain-Computer Interfaces</span>
-                                <span class="tag primary">EEG Decoding</span>
-                                <span class="tag">Motor Imagery</span>
-                                <span class="tag">Model Calibration</span>
-                                <span class="tag">Computational Neuroscience</span>
-                            </div>
-                        </div>
-                        <span class="card-arrow" aria-hidden="true">&rarr;</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Education -->
     <section id="education" class="home-section">
         <div class="section-head">
             <h2>Education</h2>
@@ -313,7 +267,6 @@
         </div>
     </section>
 
-    <!-- Notes -->
     <section id="notes" class="home-section">
         <div class="section-head">
             <h2>Coursework</h2>
@@ -392,13 +345,13 @@
                     </div>
 
                     <div class="timeline-card course-card upcoming-card">
-                        <p class="timeline-lead">CS 6476</p>
+                        <p class="timeline-lead">CS 8903</p>
                         <div class="timeline-main">
                             <div class="timeline-title-row">
-                                <h3>Computer Vision</h3>
+                                <h3>Special Problems</h3>
                                 <span class="timeline-pill upcoming">Coming Soon</span>
                             </div>
-                            <p class="timeline-subtitle">Georgia Tech</p>
+                            <p class="timeline-subtitle">Georgia Tech &middot; OMSCS</p>
                         </div>
                     </div>
 
@@ -428,10 +381,9 @@
         </div>
     </section>
 
-    <!-- Experience -->
-    <section id="experience" class="home-section">
+    <section id="projects" class="home-section">
         <div class="section-head">
-            <h2>Experience</h2>
+            <h2>Projects</h2>
         </div>
 
         <div class="timeline timeline-shell">
@@ -439,56 +391,69 @@
 
             <div class="timeline-group current">
                 <div class="timeline-group-dot"></div>
-                <p class="timeline-group-label">2024 to 2025</p>
+                <p class="timeline-group-label">2026</p>
                 <div class="timeline-group-items">
-                    <article class="timeline-card experience-card">
-                        <p class="timeline-lead accent">Jul 2024 to Aug 2025</p>
+                    <div class="timeline-card project-card linkable" data-href="research/physionet2026.html">
+                        <p class="timeline-lead accent">Feb to Aug</p>
                         <div class="timeline-main">
                             <div class="timeline-title-row">
-                                <h3>High School Teacher</h3>
+                                <h3>George B. Moody PhysioNet Challenge 2026</h3>
+                                <span class="timeline-pill success">Rank 12 / 244 &middot; AUROC 0.693</span>
+                                <a href="https://github.com/xyx-ethan/gt-neurosignals-lab-physionet2026-submission" target="_blank" rel="noopener" class="title-icon" aria-label="Source code on GitHub (private during active submission)" title="Source code on GitHub (private during active submission)" onclick="event.stopPropagation()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg></a>
+                                <a href="https://moody-challenge.physionet.org/2026/leaderboard/" target="_blank" rel="noopener" class="title-icon" aria-label="PhysioNet Challenge leaderboard" title="PhysioNet Challenge leaderboard" onclick="event.stopPropagation()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg></a>
                             </div>
-                            <p class="timeline-subtitle">Vineridge Academy &middot; Niagara-on-the-Lake, ON</p>
-                            <p class="timeline-desc">Taught Grade 11-12 mathematics courses and supported students across senior secondary curricula.</p>
+                            <p class="timeline-subtitle">PhysioNet &middot; Organized by <a href="https://research.gatech.edu/people/gari-clifford" target="_blank" rel="noopener" class="inline-link">Gari Clifford</a> (Emory / Georgia Tech)</p>
                         </div>
-                    </article>
+                        <span class="card-arrow" aria-hidden="true">&rarr;</span>
+                    </div>
+
+                    <div class="timeline-card project-card linkable" data-href="research/bci-isla2026.html">
+                        <p class="timeline-lead accent">Apr to May</p>
+                        <div class="timeline-main">
+                            <div class="timeline-title-row">
+                                <h3>Motor Imagery EEG Decoding (ISLA 2026)</h3>
+                                <span class="timeline-pill success">Top 4 / 114 &middot; Test 0.93</span>
+                                <a href="https://github.com/xyx-ethan/bci-mi-decoder" target="_blank" rel="noopener" class="title-icon" aria-label="Source code on GitHub" title="Source code on GitHub" onclick="event.stopPropagation()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg></a>
+                                <a href="https://www.codabench.org/competitions/15044/#/results-tab" target="_blank" rel="noopener" class="title-icon" aria-label="CodaBench leaderboard" title="CodaBench leaderboard" onclick="event.stopPropagation()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg></a>
+                            </div>
+                            <p class="timeline-subtitle">CodaBench &middot; Organized by <a href="https://plcrodrigues.github.io/" target="_blank" rel="noopener" class="inline-link">Pedro L. C. Rodrigues</a> (Inria)</p>
+                        </div>
+                        <span class="card-arrow" aria-hidden="true">&rarr;</span>
+                    </div>
                 </div>
             </div>
+        </div>
+    </section>
 
-            <div class="timeline-group">
+    <section id="research" class="home-section">
+        <div class="section-head">
+            <h2>Research</h2>
+        </div>
+
+        <div class="timeline timeline-shell">
+            <div class="timeline-rail"></div>
+
+            <div class="timeline-group current">
                 <div class="timeline-group-dot"></div>
-                <p class="timeline-group-label">2024</p>
+                <p class="timeline-group-label">2026</p>
                 <div class="timeline-group-items">
                     <article class="timeline-card experience-card">
-                        <p class="timeline-lead">May 2024 to Jun 2024</p>
+                        <p class="timeline-lead accent">May 2026 to Present</p>
                         <div class="timeline-main">
                             <div class="timeline-title-row">
-                                <h3>Data Analyst</h3>
-                                <span class="timeline-pill muted">Contract</span>
+                                <h3>Graduate Researcher</h3>
                             </div>
-                            <p class="timeline-subtitle">LinkedKey &middot; Toronto, ON</p>
-                            <p class="timeline-desc">Built a Python tool to analyze Waterloo mathematics contest questions and support data-driven instruction.</p>
+                            <p class="timeline-subtitle">GTEDM Lab, Georgia Tech &middot; Learning Analytics</p>
                         </div>
                     </article>
 
                     <article class="timeline-card experience-card">
-                        <p class="timeline-lead">Mar 2024 to Jun 2024</p>
+                        <p class="timeline-lead accent">May 2026 to Present</p>
                         <div class="timeline-main">
                             <div class="timeline-title-row">
-                                <h3>High School Teacher</h3>
+                                <h3>Graduate Researcher</h3>
                             </div>
-                            <p class="timeline-subtitle">Hanson Academy &middot; Toronto, ON</p>
-                            <p class="timeline-desc">Taught Grade 10-12 mathematics courses, prepared lessons, and guided students through core math topics.</p>
-                        </div>
-                    </article>
-
-                    <article class="timeline-card experience-card">
-                        <p class="timeline-lead">Sep 2023 to Feb 2024</p>
-                        <div class="timeline-main">
-                            <div class="timeline-title-row">
-                                <h3>Junior Data Scientist</h3>
-                            </div>
-                            <p class="timeline-subtitle">Taacam &middot; Mississauga, ON</p>
-                            <p class="timeline-desc">Built a 3D avatar pipeline for VR meetings using web tooling, motion optimization, and custom OBJ parsing.</p>
+                            <p class="timeline-subtitle">CPSec Lab, Georgia Tech &middot; LLM Evaluation</p>
                         </div>
                     </article>
                 </div>
@@ -504,8 +469,65 @@
                             <div class="timeline-title-row">
                                 <h3>Research Assistant</h3>
                             </div>
-                            <p class="timeline-subtitle">Hohai University &middot; Nanjing, Jiangsu, China</p>
-                            <p class="timeline-desc">Improved hydrology streamflow forecasting accuracy by 12% using Python for hydrology research.</p>
+                            <p class="timeline-subtitle">Hohai University &middot; Nanjing, China &middot; Time Series Forecasting</p>
+                        </div>
+                    </article>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="experience" class="home-section">
+        <div class="section-head">
+            <h2>Experience</h2>
+        </div>
+
+        <div class="timeline timeline-shell">
+            <div class="timeline-rail"></div>
+
+            <div class="timeline-group current">
+                <div class="timeline-group-dot"></div>
+                <p class="timeline-group-label">2024 to 2025</p>
+                <div class="timeline-group-items">
+                    <article class="timeline-card experience-card">
+                        <p class="timeline-lead accent">Mar 2024 to Aug 2025</p>
+                        <div class="timeline-main">
+                            <div class="timeline-title-row">
+                                <h3>High School Teacher</h3>
+                            </div>
+                            <p class="timeline-subtitle">Vineridge Acad. / Hanson Acad. / North Bay HS &middot; Ontario</p>
+                        </div>
+                    </article>
+                </div>
+            </div>
+
+            <div class="timeline-group">
+                <div class="timeline-group-dot"></div>
+                <p class="timeline-group-label">2024</p>
+                <div class="timeline-group-items">
+                    <article class="timeline-card experience-card">
+                        <p class="timeline-lead">May 2024 to Jun 2024</p>
+                        <div class="timeline-main">
+                            <div class="timeline-title-row">
+                                <h3>Data Analyst</h3>
+                            </div>
+                            <p class="timeline-subtitle">LinkedKey &middot; Toronto, ON</p>
+                        </div>
+                    </article>
+                </div>
+            </div>
+
+            <div class="timeline-group">
+                <div class="timeline-group-dot"></div>
+                <p class="timeline-group-label">2023 to 2024</p>
+                <div class="timeline-group-items">
+                    <article class="timeline-card experience-card">
+                        <p class="timeline-lead">Sep 2023 to Feb 2024</p>
+                        <div class="timeline-main">
+                            <div class="timeline-title-row">
+                                <h3>Junior Data Scientist</h3>
+                            </div>
+                            <p class="timeline-subtitle">Taacam &middot; Mississauga, ON</p>
                         </div>
                     </article>
                 </div>
@@ -536,6 +558,14 @@ function toggleTheme() {
     localStorage.setItem('theme', next);
 }
 document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+
+// Download current page as PDF via browser print (preserves current light/dark theme)
+var pageDownload = document.getElementById('pageDownload');
+if (pageDownload) {
+    pageDownload.addEventListener('click', function() {
+        window.print();
+    });
+}
 
 // Clickable cards — whole card navigates to data-href, but nested links (subtitle author)
 // still work because we bail out if the click landed inside an <a>.
