@@ -23,9 +23,11 @@
     <style>
     @media print {
         @page { margin: 0; size: A4; }
-        html, body { margin: 0 !important; padding: 0 !important; }
+        html { background: var(--bg-body) !important; }
+        html, body { margin: 0 !important; padding: 0 !important; min-height: 100% !important; }
+        body.home-page { background: var(--bg-body) !important; }
         .home-nav, .sidebar, .overlay, .scroll-top { display: none !important; }
-        .home-main { margin: 0 auto !important; padding: 1.4cm 1.4cm 1.2cm !important; max-width: 100% !important; }
+        .home-main { margin: 0 auto !important; padding: 1.4cm 1.4cm 1.2cm !important; max-width: 100% !important; background: transparent !important; }
         * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
         .fade-in,
         .education-list > *, .skills-grid > *, .timeline-shell > *, .cert-list > * {
