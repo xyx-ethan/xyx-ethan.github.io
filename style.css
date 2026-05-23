@@ -539,20 +539,16 @@ section h2 {
     font-weight: 600;
 }
 
-/* ===== Cards — Layered Glass Depth ===== */
+/* ===== Cards — Flat, body-matched ===== */
 .card {
-    background: var(--bg-card);
+    background: var(--bg-body);
     border: 1px solid var(--border-main);
     border-left: 3px solid var(--border-card-left);
     border-radius: 12px;
     padding: 22px 26px;
     margin-bottom: 16px;
     transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-    /* Layered shadow: ambient + edge + lift */
-    box-shadow:
-        0 1px 2px rgba(0,0,0,0.06),
-        0 4px 12px rgba(0,0,0,0.08),
-        0 12px 32px rgba(0,0,0,0.04);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
 }
 
 .card:hover {
