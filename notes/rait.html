@@ -118,42 +118,39 @@ $$p_i' = p_{\text{exact}} \cdot p_{(i-U) \bmod n} + p_{\text{over}} \cdot p_{(i-
 <p>Over time, the distribution converges to a sharp peak at the robot's true location, even starting from total uncertainty.</p>
 
 <h3>1.5 Python Implementation</h3>
-<pre><code class="language-python">def sense(p, Z):
-    q = []
-    for i in range(len(p)):
-        hit = (Z == world[i])
-        q.append(p[i] * (hit * pHit + (1 - hit) * pMiss))
-    s = sum(q)
-    for i in range(len(q)):
-        q[i] = q[i] / s
+<pre><code class="language-pseudocode">function sense(belief p, observation Z):
+    for each cell i in p:
+        if world[i] matches Z:
+            q[i] ← p[i] · pHit
+        else:
+            q[i] ← p[i] · pMiss
+    normalize q so that sum(q) = 1
     return q
 
-def move(p, U):
-    q = []
-    for i in range(len(p)):
-        s = pExact * p[(i - U) % len(p)]
-        s += pOvershoot * p[(i - U - 1) % len(p)]
-        s += pUndershoot * p[(i - U + 1) % len(p)]
-        q.append(s)
+function move(belief p, control U):
+    for each cell i in p:
+        q[i] ←  pExact      · p[(i − U    ) mod N]
+              + pOvershoot  · p[(i − U − 1) mod N]
+              + pUndershoot · p[(i − U + 1) mod N]
     return q
 
-# Main loop
-for k in range(len(measurements)):
-    p = sense(p, measurements[k])
-    p = move(p, motions[k])</code></pre>
+// Main loop: alternate measurement and motion updates
+for each step k:
+    p ← sense(p, measurements[k])
+    p ← move (p, motions[k])</code></pre>
 
 <h3>1.6 Worked Example</h3>
 <p>Suppose we have 5 cells, world = [green, red, red, green, green], and the robot senses <strong>red</strong>. Starting from a uniform prior:</p>
-<pre><code class="language-python">p = [0.2, 0.2, 0.2, 0.2, 0.2]
-world = ['green', 'red', 'red', 'green', 'green']
-pHit, pMiss = 0.6, 0.2
+<pre><code class="language-pseudocode">Initial uniform belief :  p     = [0.2, 0.2, 0.2, 0.2, 0.2]
+World layout           :  world = [green, red, red, green, green]
+Sensor model           :  pHit = 0.6,  pMiss = 0.2
 
-# After sensing 'red':
-# cells 1,2 are red  → multiply by 0.6 → 0.12
-# cells 0,3,4 are green → multiply by 0.2 → 0.04
-# Raw:  [0.04, 0.12, 0.12, 0.04, 0.04]  sum = 0.36
-# Normalized: [1/9, 1/3, 1/3, 1/9, 1/9]
-# ≈ [0.111, 0.333, 0.333, 0.111, 0.111]
+After sensing 'red':
+  cells 1, 2  are red    →  multiply by 0.6  →  0.12
+  cells 0,3,4 are green  →  multiply by 0.2  →  0.04
+  Raw         :  [0.04, 0.12, 0.12, 0.04, 0.04]   sum = 0.36
+  Normalized  :  [1/9 , 1/3 , 1/3 , 1/9 , 1/9 ]
+              ≈  [0.111, 0.333, 0.333, 0.111, 0.111]
 </code></pre>
 <div class="card-concept">
 <strong>Histogram filter convergence:</strong> After one measurement, the robot is 3x more likely to be at a red cell than a green cell. After a second sense + move cycle, the distribution sharpens further, converging on the true position.
@@ -206,21 +203,21 @@ $$\mu' = \mu + u \qquad \sigma^{2\prime} = \sigma^2 + r^2$$
 <p>This is much simpler than the measurement update. Motion always <em>increases</em> uncertainty because the robot's actuators are noisy.</p>
 
 <h3>2.5 Complete 1D Kalman Filter</h3>
-<pre><code class="language-python">def update(mean1, var1, mean2, var2):
-    new_mean = (var2 * mean1 + var1 * mean2) / (var1 + var2)
-    new_var = 1 / (1 / var1 + 1 / var2)
-    return [new_mean, new_var]
+<pre><code class="language-pseudocode">function update(prior μ₁, prior σ₁², meas μ₂, meas σ₂²):
+    μ'  ← (σ₂² · μ₁ + σ₁² · μ₂) / (σ₁² + σ₂²)
+    σ'² ← 1 / (1/σ₁² + 1/σ₂²)
+    return (μ', σ'²)
 
-def predict(mean1, var1, mean2, var2):
-    new_mean = mean1 + mean2
-    new_var = var1 + var2
-    return [new_mean, new_var]
+function predict(state μ₁, state σ₁², motion μ₂, motion σ₂²):
+    μ'  ← μ₁ + μ₂
+    σ'² ← σ₁² + σ₂²
+    return (μ', σ'²)
 
-# Main Kalman filter loop
-mu, sig = 0, 10000  # initial: unknown position, huge uncertainty
-for n in range(len(measurements)):
-    [mu, sig] = update(mu, sig, measurements[n], measurement_sig)
-    [mu, sig] = predict(mu, sig, motion[n], motion_sig)</code></pre>
+// Main Kalman filter loop
+μ ← 0;   σ² ← 10000        // initial belief: unknown position, huge uncertainty
+for each step n:
+    (μ, σ²) ← update (μ, σ², measurements[n], measurement_variance)
+    (μ, σ²) ← predict(μ, σ², motion      [n], motion_variance)</code></pre>
 
 <h3>2.6 Multi-Dimensional Kalman Filter</h3>
 <p>In higher dimensions (e.g., tracking position and velocity), the state is a vector $\mathbf{x}$ and the uncertainty is a covariance matrix $\mathbf{P}$. The filter uses matrix operations:</p>
@@ -243,27 +240,24 @@ $$\mathbf{F} = \begin{pmatrix} 1 & \Delta t \\ 0 & 1 \end{pmatrix} \qquad \mathb
 
 <h3>2.7 Worked Example (1D)</h3>
 <p>Measurements: [5, 6, 7, 9, 10]. Motions: [1, 1, 2, 1, 1]. Initial: $\mu = 0$, $\sigma^2 = 10000$ (unknown), measurement noise $= 4$, motion noise $= 2$.</p>
-<pre><code class="language-python">measurements = [5., 6., 7., 9., 10.]
-motions = [1., 1., 2., 1., 1.]
-measurement_sig = 4.
-motion_sig = 2.
-mu = 0.
-sig = 10000.
+<pre><code class="language-pseudocode">Inputs:
+    measurements = [5, 6, 7, 9, 10]
+    motions      = [1, 1, 2, 1, 1]
+    measurement_variance = 4
+    motion_variance      = 2
 
-for n in range(len(measurements)):
-    # Measurement update
-    mu, sig = update(mu, sig, measurements[n], measurement_sig)
-    print(f"update:  mu={mu:.2f}, sig={sig:.2f}")
-    # Motion prediction
-    mu, sig = predict(mu, sig, motions[n], motion_sig)
-    print(f"predict: mu={mu:.2f}, sig={sig:.2f}")
+Initial belief:  μ = 0,  σ² = 10000   // position unknown
 
-# Output:
-# update:  mu=5.00, sig=3.98   ← first measurement dominates (prior was huge)
-# predict: mu=6.00, sig=5.98   ← add motion, uncertainty grows
-# update:  mu=6.00, sig=2.40   ← second measurement sharpens
-# ...
-# Final:   mu=10.99, sig=4.01  ← tracks the true position accurately
+for each step n:
+    (μ, σ²) ← update (μ, σ², measurements[n], measurement_variance)
+    (μ, σ²) ← predict(μ, σ², motions[n],     motion_variance)
+
+Trace (rounded):
+    update :  μ =  5.00,  σ² =  3.98    ← first measurement dominates the diffuse prior
+    predict:  μ =  6.00,  σ² =  5.98    ← motion grows the uncertainty
+    update :  μ =  6.00,  σ² =  2.40    ← second measurement sharpens
+    ...
+    Final  :  μ = 10.99,  σ² =  4.01    ← tracks the true position accurately
 </code></pre>
 
 <h3>2.8 Summary</h3>
@@ -304,79 +298,79 @@ $$w_i = \prod_{j=1}^{L} \frac{1}{\sqrt{2\pi\sigma_s^2}} \exp\!\left(-\frac{(d_{i
 <h3>3.3 The Particle Filter Algorithm</h3>
 <ol>
     <li><strong>Initialization:</strong> Create $N$ particles (e.g., $N = 1000$) with random positions and headings uniformly distributed in the world:
-<pre><code class="language-python">p = []
-for i in range(N):
-    x = robot()
-    x.set_noise(0.05, 0.05, 5.0)
-    p.append(x)</code></pre>
+<pre><code class="language-pseudocode">// 1. Initialisation: N random particles, uniformly distributed
+particles ← empty list
+for i ← 1 to N:
+    x ← new Robot with random pose (x, y, θ)
+    set_noise(x, forward=0.05, turn=0.05, sense=5.0)
+    append x to particles</code></pre>
     </li>
     <li><strong>Motion update:</strong> Apply the same control command (turn, distance) to every particle. Each particle independently adds noise, so they spread differently:
-<pre><code class="language-python">p2 = []
-for i in range(N):
-    p2.append(p[i].move(turn, distance))
-p = p2</code></pre>
+<pre><code class="language-pseudocode">// 2. Motion update: apply the same control to every particle (each adds its own noise)
+new_particles ← empty list
+for each particle x in particles:
+    append move(x, turn, distance) to new_particles
+particles ← new_particles</code></pre>
     </li>
     <li><strong>Importance weights:</strong> Compare each particle's predicted measurements with the robot's actual measurements. Particles close to the true position will have high weights:
-<pre><code class="language-python">w = []
-for i in range(N):
-    w.append(p[i].measurement_prob(Z))</code></pre>
+<pre><code class="language-pseudocode">// 3. Importance weights: how likely is the actual measurement Z under each particle's hypothesis?
+weights ← empty list
+for each particle x in particles:
+    append P(Z | x) to weights     // product of per-landmark Gaussian likelihoods</code></pre>
     </li>
     <li><strong>Resampling:</strong> Draw $N$ new particles with replacement, probability proportional to weights. High-weight particles get duplicated; low-weight particles disappear.</li>
 </ol>
 
 <h3>3.4 Resampling Wheel Algorithm</h3>
 <p>An efficient $O(N)$ resampling method that avoids sorting:</p>
-<pre><code class="language-python">p3 = []
-index = int(random.random() * N)
-beta = 0.0
-mw = max(w)
-for i in range(N):
-    beta += random.random() * 2.0 * mw
-    while beta > w[index]:
-        beta -= w[index]
-        index = (index + 1) % N
-    p3.append(p[index])
-p = p3</code></pre>
+<pre><code class="language-pseudocode">// Resampling wheel — O(N), no sort, samples with probability ∝ weight
+resampled ← empty list
+index ← random integer in [0, N)
+β ← 0
+w_max ← max(weights)
+repeat N times:
+    β ← β + uniform_random(0, 2 · w_max)
+    while β > weights[index]:
+        β     ← β − weights[index]
+        index ← (index + 1) mod N
+    append particles[index] to resampled
+particles ← resampled</code></pre>
 <p>Think of the weights as sectors on a roulette wheel. We spin the wheel $N$ times, and larger sectors (higher weights) get selected more often. A particle with $\alpha_i = 0.1$ might never be sampled; one with $\alpha_i = 0.4$ will likely appear multiple times.</p>
 
 <h3>3.5 Complete Particle Filter</h3>
 <p>Putting it all together in a single loop:</p>
-<pre><code class="language-python">N = 1000
-myrobot = robot()
-myrobot.set_noise(0.05, 0.05, 5.0)
+<pre><code class="language-pseudocode">N ← 1000
+true_robot ← new Robot;  set_noise(true_robot, 0.05, 0.05, 5.0)
+particles  ← N random Robots,   each with noise (0.05, 0.05, 5.0)
 
-# Initialize N random particles
-p = [robot() for _ in range(N)]
-for x in p:
-    x.set_noise(0.05, 0.05, 5.0)
+repeat for 50 time steps:
+    // The real robot moves and gives a noisy sensor reading
+    true_robot ← move(true_robot, turn=0.1, distance=5.0)
+    Z ← sense(true_robot)
 
-for t in range(50):  # 50 iterations
-    # Robot moves
-    myrobot = myrobot.move(0.1, 5.0)
-    Z = myrobot.sense()
+    // Step 1: apply the same control to every particle
+    for each x in particles:
+        x ← move(x, 0.1, 5.0)
 
-    # 1. Move all particles with same command
-    p = [x.move(0.1, 5.0) for x in p]
+    // Step 2: importance weights
+    for each x in particles:
+        weight[x] ← P(Z | x)
 
-    # 2. Compute importance weights
-    w = [x.measurement_prob(Z) for x in p]
+    // Step 3: low-variance resampling (wheel)
+    resampled ← empty list
+    index ← random integer in [0, N)
+    β ← 0;  w_max ← max(weight)
+    repeat N times:
+        β ← β + uniform_random(0, 2 · w_max)
+        while β > weight[particles[index]]:
+            β     ← β − weight[particles[index]]
+            index ← (index + 1) mod N
+        append particles[index] to resampled
+    particles ← resampled
 
-    # 3. Resample using resampling wheel
-    p3 = []
-    index = int(random.random() * N)
-    beta = 0.0
-    mw = max(w)
-    for i in range(N):
-        beta += random.random() * 2.0 * mw
-        while beta > w[index]:
-            beta -= w[index]
-            index = (index + 1) % N
-        p3.append(p[index])
-    p = p3
-
-    # Estimate position = average of particles
-    x_est = sum([x.x for x in p]) / N
-    y_est = sum([x.y for x in p]) / N
+    // Position estimate = mean of the cloud
+    x_est ← mean of {x.position for x in particles}
+    y_est ← mean of {y.position for x in particles}
 </code></pre>
 <div class="card-example">
 <strong>Resampling probability:</strong> Given weights $w = [0.6, 1.2, 2.4, 0.6, 1.2]$ with sum $W = 6$, the normalized probability of selecting particle 3 is $\alpha_3 = 2.4/6 = 0.4$. The probability of <em>never</em> sampling particle 3 in 5 draws is $(1 - 0.4)^5 = 0.6^5 \approx 0.078$ &mdash; unlikely but possible.
@@ -416,18 +410,17 @@ $$y_i \leftarrow y_i + \alpha(x_i - y_i) + \beta(y_{i+1} + y_{i-1} - 2y_i)$$
     <li>$\beta$ only ($\alpha = 0$): all points collapse to a straight line (start/end fixed) or single point</li>
     <li>Both $\alpha$ and $\beta$: a smooth curve that approximates the original path</li>
 </ul>
-<pre><code class="language-python">def smooth(path, weight_data=0.5, weight_smooth=0.1, tolerance=0.000001):
-    newpath = deepcopy(path)
-    change = tolerance
-    while change >= tolerance:
-        change = 0.0
-        for i in range(1, len(path) - 1):
-            for j in range(len(path[0])):
-                aux = newpath[i][j]
-                newpath[i][j] += weight_data * (path[i][j] - newpath[i][j]) + \
-                    weight_smooth * (newpath[i-1][j] + newpath[i+1][j] - 2.0 * newpath[i][j])
-                change += abs(aux - newpath[i][j])
-    return newpath</code></pre>
+<pre><code class="language-pseudocode">function smooth(path, α = 0.5, β = 0.1, tolerance = 1e-6):
+    new_path ← copy of path
+    repeat until total change &lt; tolerance:
+        for each interior point i (1 ≤ i ≤ length(path) − 2):
+            for each coordinate j:
+                old ← new_path[i][j]
+                new_path[i][j] ← new_path[i][j]
+                              + α · (path[i][j] − new_path[i][j])              // data term
+                              + β · (new_path[i−1][j] + new_path[i+1][j] − 2 · new_path[i][j])  // smoothness term
+                accumulate |new_path[i][j] − old| into total change
+    return new_path</code></pre>
 
 <h3>4.2 Crosstrack Error (CTE)</h3>
 <p>The <strong>crosstrack error</strong> is the lateral distance from the robot's current position to the nearest point on the reference trajectory. All PID terms operate on the CTE. For a simple case where the reference is the x-axis, $\text{CTE} = y_{\text{robot}}$.</p>
@@ -445,12 +438,13 @@ $$\alpha = -\tau_p \cdot \text{CTE}$$
 $$\alpha = -\tau_p \cdot \text{CTE} - \tau_d \cdot \frac{d(\text{CTE})}{dt}$$
 <p>In discrete time: $\frac{d(\text{CTE})}{dt} \approx \text{CTE}_t - \text{CTE}_{t-1}$</p>
 <p>The D-term acts as a <strong>damper</strong>. As the robot approaches the trajectory (CTE decreasing), the derivative is negative, which counter-steers to prevent overshoot. The result: smooth, graceful convergence without oscillation.</p>
-<pre><code class="language-python">crosstrack_error = robot.y
-for i in range(n):
-    diff_cte = robot.y - crosstrack_error
-    crosstrack_error = robot.y
-    steer = -tau_p * crosstrack_error - tau_d * diff_cte
-    robot.move(steer, speed)</code></pre>
+<pre><code class="language-pseudocode">prev_CTE ← robot.y                       // initial crosstrack error
+for each control step:
+    CTE      ← robot.y                   // current crosstrack error
+    dCTE     ← CTE − prev_CTE            // discrete derivative
+    steering ← − τ_p · CTE − τ_d · dCTE  // PD law
+    move(robot, steering, speed)
+    prev_CTE ← CTE</code></pre>
 
 <h3>4.5 PID-Controller (Proportional-Integral-Derivative)</h3>
 <p>The full PID controller adds an <strong>integral</strong> term that accumulates past error:</p>
@@ -464,26 +458,24 @@ $$\alpha = -\tau_p \cdot \text{CTE} - \tau_d \cdot \frac{d(\text{CTE})}{dt} - \t
 
 <h3>4.6 Twiddle (Parameter Optimization)</h3>
 <p>How do we find good values for $\tau_p, \tau_i, \tau_d$? <strong>Twiddle</strong> is a coordinate-descent algorithm:</p>
-<pre><code class="language-python">p = [0, 0, 0]      # initial parameters [tau_p, tau_d, tau_i]
-dp = [1, 1, 1]     # step sizes
-best_err = run(p)   # evaluate initial error
+<pre><code class="language-pseudocode">parameters    ← [τ_p, τ_d, τ_i]  initialised to [0, 0, 0]
+step_sizes    ← [1, 1, 1]
+best_error    ← run(parameters)                     // controller error for these gains
 
-while sum(dp) > tolerance:
-    for i in range(len(p)):
-        p[i] += dp[i]
-        err = run(p)
-        if err < best_err:
-            best_err = err
-            dp[i] *= 1.1       # success: increase step
+while sum(step_sizes) &gt; tolerance:
+    for each gain i:
+        parameters[i] ← parameters[i] + step_sizes[i]
+        if run(parameters) &lt; best_error:                // tried positive direction, improved
+            best_error    ← run(parameters)
+            step_sizes[i] ← step_sizes[i] · 1.1         // grow the step
         else:
-            p[i] -= 2 * dp[i]  # try other direction
-            err = run(p)
-            if err < best_err:
-                best_err = err
-                dp[i] *= 1.1
+            parameters[i] ← parameters[i] − 2 · step_sizes[i]   // try negative direction
+            if run(parameters) &lt; best_error:
+                best_error    ← run(parameters)
+                step_sizes[i] ← step_sizes[i] · 1.1
             else:
-                p[i] += dp[i]  # undo: neither direction helped
-                dp[i] *= 0.9   # shrink step</code></pre>
+                parameters[i] ← parameters[i] + step_sizes[i]   // restore, neither direction helped
+                step_sizes[i] ← step_sizes[i] · 0.9             // shrink the step</code></pre>
 
 <!-- ============================================================ -->
 <h2 id="t5">5. Search</h2>
@@ -494,14 +486,16 @@ while sum(dp) > tolerance:
 
 <h3>5.1 Problem Formulation</h3>
 <p>Given: a <strong>grid</strong> (0 = free, 1 = obstacle), a <strong>start</strong> position, a <strong>goal</strong> position, and a <strong>cost</strong> function. The robot can move up, down, left, or right. Goal: find the minimum-cost sequence of actions from start to goal.</p>
-<pre><code class="language-python">grid = [[0, 0, 1, 0, 0, 0],
-        [0, 0, 1, 0, 0, 0],
-        [0, 0, 0, 0, 1, 0],
-        [0, 0, 1, 1, 1, 0],
-        [0, 0, 0, 0, 1, 0]]
-init = [0, 0]
-goal = [len(grid)-1, len(grid[0])-1]
-delta = [[-1,0], [0,-1], [1,0], [0,1]]  # up, left, down, right</code></pre>
+<pre><code class="language-pseudocode">grid:                                    // 0 = free cell, 1 = obstacle
+    row 0:  [0, 0, 1, 0, 0, 0]
+    row 1:  [0, 0, 1, 0, 0, 0]
+    row 2:  [0, 0, 0, 0, 1, 0]
+    row 3:  [0, 0, 1, 1, 1, 0]
+    row 4:  [0, 0, 0, 0, 1, 0]
+
+start  ← (0, 0)
+goal   ← (last_row, last_col)
+deltas ← {(−1, 0) up, (0, −1) left, (1, 0) down, (0, 1) right}</code></pre>
 
 <h3>5.2 Breadth-First Search / Uniform-Cost Search</h3>
 <p>Maintain an <strong>open list</strong> of nodes to explore (sorted by $g$-value = cost from start) and a <strong>closed list</strong> of already-expanded nodes. Algorithm:</p>
@@ -523,36 +517,32 @@ $$f(n) = g(n) + h(n)$$
 <p>To reconstruct the optimal <em>path</em>, store the <strong>action</strong> taken to reach each cell. After the search completes, backtrack from the goal to the start using inverse actions. This produces a <strong>policy</strong> &mdash; a grid showing the optimal direction ($\uparrow \downarrow \leftarrow \rightarrow$) to move from every cell.</p>
 
 <h3>5.5 A* Implementation</h3>
-<pre><code class="language-python">def search(grid, init, goal, cost, heuristic):
-    closed = [[0] * len(grid[0]) for _ in range(len(grid))]
-    closed[init[0]][init[1]] = 1
-    action = [[-1] * len(grid[0]) for _ in range(len(grid))]
+<pre><code class="language-pseudocode">function A_star_search(grid, start, goal, step_cost, heuristic):
+    closed  ← 2-D array of false, same shape as grid
+    closed[start] ← true
+    action  ← 2-D array initialised to "none"
 
-    x, y = init
-    g = 0
-    h = heuristic[x][y]
-    f = g + h
-    open_list = [[f, g, x, y]]
+    g ← 0
+    h ← heuristic[start]
+    f ← g + h
+    open_list ← min-priority queue ordered by f, seeded with (f, g, start)
 
-    while len(open_list) > 0:
-        open_list.sort(reverse=True)
-        next_node = open_list.pop()
-        f, g, x, y = next_node
+    while open_list is not empty:
+        (f, g, current) ← pop smallest-f node from open_list
 
-        if [x, y] == goal:
-            return g  # optimal path cost
+        if current = goal:
+            return g                              // optimal path cost
 
-        for i, (dx, dy) in enumerate(delta):
-            x2, y2 = x + dx, y + dy
-            if 0 <= x2 < len(grid) and 0 <= y2 < len(grid[0]):
-                if closed[x2][y2] == 0 and grid[x2][y2] == 0:
-                    g2 = g + cost
-                    h2 = heuristic[x2][y2]
-                    f2 = g2 + h2
-                    open_list.append([f2, g2, x2, y2])
-                    closed[x2][y2] = 1
-                    action[x2][y2] = i
-    return -1  # no path found
+        for each direction d in deltas:
+            neighbour ← current + d
+            if neighbour is inside grid and grid[neighbour] = 0 (free):
+                if not closed[neighbour]:
+                    g'  ← g + step_cost
+                    f'  ← g' + heuristic[neighbour]
+                    push (f', g', neighbour) onto open_list
+                    closed[neighbour] ← true
+                    action[neighbour] ← d         // remember how we arrived (for path reconstruction)
+    return failure                                // no path exists
 </code></pre>
 <div class="card-note">
 <strong>Heuristic choice:</strong> For grid worlds, the Manhattan distance $h(n) = |x_n - x_g| + |y_n - y_g|$ is admissible (never overestimates) when the robot moves in 4 directions. This guarantees A* finds the optimal path while expanding far fewer nodes than UCS.
@@ -607,36 +597,32 @@ $$\boldsymbol{\mu} = \Omega^{-1} \xi$$
 
 <h3>6.6 Implementation Example</h3>
 <p>A simplified 1D Graph SLAM with 3 poses and 1 landmark:</p>
-<pre><code class="language-python">import numpy as np
+<pre><code class="language-pseudocode">// Variables: 3 robot poses (x0, x1, x2) + 1 landmark (L0) = 4 unknowns
+Ω ← 4×4 zero matrix        // information matrix
+ξ ← length-4 zero vector   // information vector
 
-# 3 poses (x0, x1, x2) + 1 landmark (L0) = 4 variables
-dim = 4
-omega = np.zeros((dim, dim))  # information matrix
-xi = np.zeros(dim)            # information vector
+// Anchor: x0 = 0 (initial pose known with high confidence)
+add 1 to Ω[x0, x0];  add 0 to ξ[x0]
 
-# Initial position: x0 = 0 (high confidence)
-omega[0][0] += 1.0
-xi[0] += 0.0
+// Motion constraint x0 → x1 with displacement +5
+add  +1 to Ω[x0, x0];   add  −1 to Ω[x0, x1]
+add  −1 to Ω[x1, x0];   add  +1 to Ω[x1, x1]
+add  −5 to ξ[x0];       add  +5 to ξ[x1]
 
-# Motion: x0 -> x1, displacement = 5
-omega[0][0] += 1; omega[0][1] -= 1
-omega[1][0] -= 1; omega[1][1] += 1
-xi[0] += -5;      xi[1] += 5
+// Motion constraint x1 → x2 with displacement +3
+add  +1 to Ω[x1, x1];   add  −1 to Ω[x1, x2]
+add  −1 to Ω[x2, x1];   add  +1 to Ω[x2, x2]
+add  −3 to ξ[x1];       add  +3 to ξ[x2]
 
-# Motion: x1 -> x2, displacement = 3
-omega[1][1] += 1; omega[1][2] -= 1
-omega[2][1] -= 1; omega[2][2] += 1
-xi[1] += -3;      xi[2] += 3
+// Measurement: from x1, observe L0 at relative position +2
+add  +1 to Ω[x1, x1];   add  −1 to Ω[x1, L0]
+add  −1 to Ω[L0, x1];   add  +1 to Ω[L0, L0]
+add  −2 to ξ[x1];       add  +2 to ξ[L0]
 
-# Measurement: from x1, see L0 at relative position 2
-omega[1][1] += 1; omega[1][3] -= 1
-omega[3][1] -= 1; omega[3][3] += 1
-xi[1] += -2;      xi[3] += 2
+// Solve the linear system for the joint MAP estimate
+μ ← Ω⁻¹ · ξ
 
-# Solve: mu = omega^(-1) * xi
-mu = np.linalg.solve(omega, xi)
-print(f"x0={mu[0]:.1f}, x1={mu[1]:.1f}, x2={mu[2]:.1f}, L0={mu[3]:.1f}")
-# Output: x0=0.0, x1=5.0, x2=8.0, L0=7.0
+// Result:  x0 = 0,  x1 = 5,  x2 = 8,  L0 = 7
 </code></pre>
 <div class="card-concept">
 <strong>SLAM intuition:</strong> Each constraint acts like a rubber band connecting two variables. The matrix solve finds the configuration that minimizes the total tension in all rubber bands simultaneously. When the robot re-observes a landmark (loop closure), it adds a new rubber band that pulls all intermediate poses into consistency.
@@ -693,48 +679,41 @@ $$y' = c_y - \cos(\theta + \beta) \cdot R$$
 $$\theta' = (\theta + \beta) \bmod 2\pi$$
 
 <h3>7.4 Implementation in Python</h3>
-<pre><code class="language-python">def move(self, steering, distance):
-    turn = tan(steering) * distance / self.length
-    if abs(turn) < tolerance:
-        # approximate by straight-line motion
-        self.x += distance * cos(self.orientation)
-        self.y += distance * sin(self.orientation)
-        self.orientation = (self.orientation + turn) % (2.0 * pi)
+<pre><code class="language-pseudocode">function move_bicycle(state (x, y, θ), steering α, distance d, wheelbase L):
+    turn ← tan(α) · d / L
+    if |turn| &lt; tolerance:
+        // near-zero steering: straight-line approximation
+        x ← x + d · cos(θ)
+        y ← y + d · sin(θ)
+        θ ← (θ + turn) mod 2π
     else:
-        # approximate bicycle model for motion
-        radius = distance / turn
-        cx = self.x - sin(self.orientation) * radius
-        cy = self.y + cos(self.orientation) * radius
-        self.orientation = (self.orientation + turn) % (2.0 * pi)
-        self.x = cx + sin(self.orientation) * radius
-        self.y = cy - cos(self.orientation) * radius</code></pre>
+        // circular-arc motion
+        R  ← d / turn                               // turning radius
+        cx ← x − sin(θ) · R                         // centre of circle (x)
+        cy ← y + cos(θ) · R                         // centre of circle (y)
+        θ  ← (θ + turn) mod 2π
+        x  ← cx + sin(θ) · R
+        y  ← cy − cos(θ) · R
+    return (x, y, θ)</code></pre>
 
 <h3>7.5 Compound Motion Insight</h3>
 <p>When both steering angle and forward distance are applied, the rear wheel traces a smaller circle and the front wheel traces a larger circle with the same center. With a fixed non-zero steering angle, the robot drives in a circle. This is why the bicycle model produces smooth, continuous turning behavior used throughout the course.</p>
 
 <h3>7.6 Worked Example</h3>
 <p>Given: pose $(x, y, \theta) = (2, 2, \pi/3)$, steering angle $\alpha = 0.5$ rad, distance $d = 10$, wheelbase $L = 0.5$.</p>
-<pre><code class="language-python">from math import tan, sin, cos, pi
+<pre><code class="language-pseudocode">Inputs:  (x, y, θ) = (2.0,  2.0,  π/3)
+         α  = 0.5,  d = 10.0,  L = 0.5
 
-x, y, theta = 2.0, 2.0, pi / 3
-alpha, d, L = 0.5, 10.0, 0.5
+Step 1.  Turning radius           R   ← L / tan(α)        ≈ 0.5 / 0.5463 ≈ 0.9153
+Step 2.  Centre of circle         c_x ← x − sin(θ) · R    ≈ 2 − 0.866·0.915 ≈ 1.207
+                                  c_y ← y + cos(θ) · R    ≈ 2 + 0.500·0.915 ≈ 2.458
+Step 3.  Swept (central) angle    β   ← d / R             ≈ 10.925 rad
+Step 4.  New pose
+            θ'  ← (θ + β) mod 2π
+            x'  ← c_x + sin(θ') · R
+            y'  ← c_y − cos(θ') · R
 
-# Step 1: turning radius
-R = L / tan(alpha)          # R = 0.5 / 0.5463 ≈ 0.9153
-
-# Step 2: center of circle
-cx = x - sin(theta) * R     # cx ≈ 2 - 0.866 * 0.915 ≈ 1.207
-cy = y + cos(theta) * R     # cy ≈ 2 + 0.5 * 0.915 ≈ 2.458
-
-# Step 3: turning angle
-beta = d / R                # beta ≈ 10.925 rad
-
-# Step 4: new pose
-theta_new = (theta + beta) % (2 * pi)
-x_new = cx + sin(theta_new) * R
-y_new = cy - cos(theta_new) * R
-
-print(f"New pose: ({x_new:.2f}, {y_new:.2f}, {theta_new:.2f})")
+Result:  new pose ≈ (x', y', θ')   (numerical values follow directly from the formulas)
 </code></pre>
 
 <!-- ============================================================ -->

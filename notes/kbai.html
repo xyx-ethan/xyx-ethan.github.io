@@ -359,7 +359,7 @@
             <li>The <strong>consequent</strong> specifies actions: modify working memory, trigger an external action, or assert new facts.</li>
         </ul>
         <p>Example (baseball pitcher):</p>
-<pre><code class="language-python"># Production rules for a pitcher
+<pre><code class="language-pseudocode"># Production rules for a pitcher
 IF runner_on_first AND batter_is_right_handed THEN throw_slider_away
 IF bases_empty AND count_is_0_2 THEN throw_waste_pitch
 IF runner_on_third AND less_than_two_outs THEN pitch_from_stretch
@@ -656,7 +656,7 @@ IF runner_on_third AND less_than_two_outs THEN pitch_from_stretch
             <li><strong>Operators</strong> &mdash; actions with <strong>preconditions</strong> (what must be true to apply the operator) and <strong>postconditions</strong> (what changes after the operator is applied, including add-effects and delete-effects).</li>
         </ul>
         <p>Example operators in the blocks world:</p>
-<pre><code class="language-python"># Operator: Move(x, y) - move block x onto block y
+<pre><code class="language-pseudocode"># Operator: Move(x, y) - move block x onto block y
 # Preconditions: Clear(x), Clear(y), On(x, z)
 # Add-effects: On(x, y), Clear(z)
 # Delete-effects: On(x, z), Clear(y)

@@ -167,14 +167,13 @@ $$\mathbf{v}_{\text{agent}} = \text{speed} \cdot \hat{\mathbf{BA}}$$
 $$\mathbf{B'} = \mathbf{B} + \mathbf{v}_{\text{agent}} \cdot \Delta t$$
 <p>In Unity, use <code>Time.deltaTime</code>. In a custom engine, measure wall-clock time between frames. Without delta-time scaling, agents move faster on faster machines &mdash; a classic bug.</p>
 
-<pre><code class="language-python"># Frame-rate independent movement
-def update(agent, target, speed, dt):
-    direction = target.position - agent.position
-    distance = direction.magnitude()
-    if distance > 0:
-        direction = direction / distance  # normalize
-    agent.velocity = direction * speed
-    agent.position += agent.velocity * dt</code></pre>
+<pre><code class="language-pseudocode">// Frame-rate independent movement: scale by elapsed time Δt
+function update(agent, target, speed, Δt):
+    direction ← target.position − agent.position
+    if |direction| &gt; 0:
+        direction ← direction / |direction|        // unit vector
+    agent.velocity ← direction · speed
+    agent.position ← agent.position + agent.velocity · Δt</code></pre>
 
 <h3>2.5 Orientation</h3>
 <p>Agents should face the direction they are moving. Convert a velocity vector to an angle using <code>atan2</code>:</p>
@@ -191,23 +190,21 @@ $$\theta = \text{atan2}(v_y, v_x)$$
     <li><strong>Path Following</strong> &mdash; visit a sequence of waypoints using seek with a capture radius to trigger advancing to the next waypoint</li>
 </ul>
 
-<pre><code class="language-python">def kinematic_arrive(agent, target, max_speed, slow_radius, capture_radius):
-    direction = target - agent.position
-    distance = direction.magnitude()
+<pre><code class="language-pseudocode">function kinematic_arrive(agent, target, max_speed, slow_radius, capture_radius):
+    direction ← target − agent.position
+    distance  ← |direction|
 
-    if distance < capture_radius:
-        agent.velocity = Vector2(0, 0)
+    if distance &lt; capture_radius:
+        agent.velocity ← (0, 0)                                    // close enough — stop
         return
 
-    if distance < slow_radius:
-        # Linear interpolation: slow down as we approach
-        target_speed = max_speed * (distance / slow_radius)
+    if distance &lt; slow_radius:
+        target_speed ← max_speed · (distance / slow_radius)        // linear slowdown inside the radius
     else:
-        target_speed = max_speed
+        target_speed ← max_speed
 
-    # Set velocity toward target at computed speed
-    agent.velocity = direction.normalized() * target_speed
-    agent.orientation = atan2(agent.velocity.y, agent.velocity.x)</code></pre>
+    agent.velocity    ← unit(direction) · target_speed
+    agent.orientation ← atan2(agent.velocity.y, agent.velocity.x)  // face direction of travel</code></pre>
 
 <h3>2.7 Statics vs. Kinematics</h3>
 <div class="card-def">
@@ -228,22 +225,22 @@ $$\theta = \text{atan2}(v_y, v_x)$$
 
 <h3>3.2 Epsilon Testing</h3>
 <p>Never compare floats with <code>==</code>. Use an epsilon tolerance:</p>
-<pre><code class="language-python"># Bad: fails due to floating-point rounding
-if v == target:
-    print("arrived")
+<pre><code class="language-pseudocode">// Anti-pattern: fragile, fails on floating-point rounding error
+if v = target then
+    report "arrived"
 
-# Good: epsilon comparison
-epsilon = 1e-6
-if abs(v - target) < epsilon:
-    print("arrived")</code></pre>
+// Correct pattern: tolerate small numerical error with an epsilon
+ε ← 10⁻⁶
+if |v − target| &lt; ε then
+    report "arrived"</code></pre>
 
 <h3>3.3 Integer Representation</h3>
 <p>For critical geometry operations (intersection tests, winding number computations), convert to integers by multiplying by a scale factor:</p>
-<pre><code class="language-python"># Convert float coordinates to integer representation
-SCALE = 1000
-ix = int(x * SCALE)
-iy = int(y * SCALE)
-# Integer arithmetic is exact (no rounding errors)</code></pre>
+<pre><code class="language-pseudocode">// Quantise floating-point coordinates to integers (exact arithmetic, no rounding)
+SCALE ← 1000
+i_x ← round(x · SCALE)
+i_y ← round(y · SCALE)
+// All subsequent intersection / winding tests run on (i_x, i_y) — no rounding error</code></pre>
 <p>Watch for <strong>overflow</strong> &mdash; intermediate products of large integers can exceed the representable range. Reorder equation terms to minimize intermediate values. Perform conversion during <strong>baking/preprocessing</strong>, not at runtime, to avoid the performance cost.</p>
 
 <h3>3.4 Twice-Area and the Left Predicate</h3>
@@ -256,21 +253,12 @@ $$\text{Area2}(A, B, C) = (b_x - a_x)(c_y - a_y) - (c_x - a_x)(b_y - a_y)$$
     <li><strong>Collinear:</strong> $\text{Area2} = 0$ means $A$, $B$, $C$ lie on the same line</li>
 </ul>
 
-<pre><code class="language-python">def area2(a, b, c):
-    """Signed twice-area of triangle ABC."""
-    return (b[0] - a[0]) * (c[1] - a[1]) - (c[0] - a[0]) * (b[1] - a[1])
+<pre><code class="language-pseudocode">function Area2(A, B, C):                                // signed twice-area of triangle ABC
+    return (Bₓ − Aₓ)·(C_y − A_y) − (Cₓ − Aₓ)·(B_y − A_y)
 
-def left(a, b, c):
-    """True if C is strictly left of directed line AB."""
-    return area2(a, b, c) > 0
-
-def left_on(a, b, c):
-    """True if C is left of or on directed line AB."""
-    return area2(a, b, c) >= 0
-
-def collinear(a, b, c):
-    """True if A, B, C are collinear."""
-    return area2(a, b, c) == 0</code></pre>
+predicate Left   (A, B, C):  Area2(A, B, C) &gt; 0         // C strictly left of directed line AB
+predicate LeftOn (A, B, C):  Area2(A, B, C) ≥ 0         // C left of, or on, line AB
+predicate Collinear(A, B, C): Area2(A, B, C) = 0        // A, B, C lie on a single line</code></pre>
 
 <h3>3.5 Line Segment Intersection</h3>
 <p>Two segments $\overline{AB}$ and $\overline{CD}$ intersect if and only if:</p>
@@ -289,22 +277,19 @@ def collinear(a, b, c):
     <li>Avoid square roots by working with <strong>squared distances</strong> whenever possible</li>
 </ol>
 
-<pre><code class="language-python">def point_segment_distance_sq(p, a, b):
-    """Squared distance from point P to segment AB."""
-    ab = (b[0] - a[0], b[1] - a[1])
-    ap = (p[0] - a[0], p[1] - a[1])
-    ab_sq = ab[0]**2 + ab[1]**2
+<pre><code class="language-pseudocode">function point_segment_distance_squared(P, A, B):
+    AB    ← B − A
+    AP    ← P − A
+    AB·AB ← dot(AB, AB)                  // squared length of AB
 
-    if ab_sq == 0:
-        return ap[0]**2 + ap[1]**2  # A == B
+    if AB·AB = 0 then                    // degenerate segment (A = B)
+        return dot(AP, AP)
 
-    t = (ap[0] * ab[0] + ap[1] * ab[1]) / ab_sq
-    t = max(0.0, min(1.0, t))  # clamp to segment
+    t ← dot(AP, AB) / AB·AB              // projection parameter
+    t ← clamp(t, 0, 1)                   // keep the closest point on the segment
 
-    closest = (a[0] + t * ab[0], a[1] + t * ab[1])
-    dx = p[0] - closest[0]
-    dy = p[1] - closest[1]
-    return dx * dx + dy * dy</code></pre>
+    closest ← A + t · AB
+    return |P − closest|²                // squared distance — no sqrt needed</code></pre>
 
 <div class="card-note">
 <strong>Performance tip:</strong> Square root is expensive. For comparisons (is point closer to A or B?), compare squared distances. Only take the square root when you need the actual distance value for display or physics calculations.
@@ -357,36 +342,34 @@ $$f(n) = g(n) + h(n)$$
 <strong>A* Algorithm:</strong> A* is a best-first graph search that expands the node minimizing $f(n) = g(n) + h(n)$, where $g(n)$ is the actual cost from the start and $h(n)$ is a heuristic estimate to the goal. It is guaranteed to find the shortest path when the heuristic is admissible (never overestimates) and consistent (satisfies the triangle inequality). A* is the most widely used pathfinding algorithm in games due to this optimality guarantee combined with efficient heuristic-guided pruning.
 </div>
 
-<pre><code class="language-python">def a_star(start, goal, graph, heuristic):
-    open_set = PriorityQueue()
-    open_set.put((0, start))
-    came_from = {start: None}
-    cost_so_far = {start: 0}
+<pre><code class="language-pseudocode">function A_star(start, goal, graph, heuristic h):
+    open_set    ← min-priority queue, ordered by f-value
+    push (f = 0, start) onto open_set
+    came_from   ← map (start ↦ none)
+    cost_so_far ← map (start ↦ 0)             // g-value
 
-    while not open_set.empty():
-        _, current = open_set.get()
+    while open_set is not empty:
+        current ← pop node with smallest f from open_set
 
-        if current == goal:
+        if current = goal:
             return reconstruct_path(came_from, goal)
 
-        for neighbor, edge_cost in graph.neighbors(current):
-            new_cost = cost_so_far[current] + edge_cost
+        for each (neighbour, edge_cost) in graph.neighbours(current):
+            new_cost ← cost_so_far[current] + edge_cost
+            if neighbour ∉ cost_so_far  or  new_cost &lt; cost_so_far[neighbour]:
+                cost_so_far[neighbour] ← new_cost
+                f                       ← new_cost + h(neighbour, goal)
+                push (f, neighbour) onto open_set
+                came_from[neighbour]    ← current
 
-            if neighbor not in cost_so_far or new_cost < cost_so_far[neighbor]:
-                cost_so_far[neighbor] = new_cost
-                priority = new_cost + heuristic(neighbor, goal)
-                open_set.put((priority, neighbor))
-                came_from[neighbor] = current
+    return failure                              // no path exists
 
-    return None  # no path found
-
-def reconstruct_path(came_from, goal):
-    path = []
-    current = goal
-    while current is not None:
-        path.append(current)
-        current = came_from[current]
-    path.reverse()
+function reconstruct_path(came_from, goal):
+    path    ← empty list
+    current ← goal
+    while current ≠ none:
+        prepend current to path
+        current ← came_from[current]
     return path</code></pre>
 
 <h3>4.4 Admissible Heuristics</h3>
@@ -458,15 +441,11 @@ $$\mathbf{p'} = \mathbf{p} + \mathbf{v} \cdot \Delta t$$
 $$\mathbf{v'} = \mathbf{v} + \mathbf{a} \cdot \Delta t$$
 <p>After updating velocity, clamp speed to the agent's maximum: if $|\mathbf{v'}| > v_{\max}$, then $\mathbf{v'} = v_{\max} \cdot \hat{\mathbf{v'}}$.</p>
 
-<pre><code class="language-python">def steering_update(agent, acceleration, dt, max_speed):
-    # Update position
-    agent.position += agent.velocity * dt
-    # Update velocity
-    agent.velocity += acceleration * dt
-    # Clamp to max speed
-    speed = agent.velocity.magnitude()
-    if speed > max_speed:
-        agent.velocity = agent.velocity.normalized() * max_speed</code></pre>
+<pre><code class="language-pseudocode">function steering_update(agent, acceleration a, Δt, max_speed):
+    agent.position ← agent.position + agent.velocity · Δt        // 1. integrate position
+    agent.velocity ← agent.velocity + a · Δt                     // 2. integrate velocity
+    if |agent.velocity| &gt; max_speed:                             // 3. clamp to v_max
+        agent.velocity ← unit(agent.velocity) · max_speed</code></pre>
 
 <h3>5.2 Fundamental Steering Behaviors</h3>
 <ul>
@@ -501,23 +480,18 @@ $$R = \frac{v_{\max}^2}{a_{\max}}$$
     <li><strong>Obstacle Avoidance</strong> &mdash; cast a ray ahead along the velocity direction. If it hits an obstacle, steer away. Use <strong>whisker rays</strong> at angles for wider detection. Corner traps (concave environments where whiskers detect obstacles on both sides) can be solved with an adaptive fan angle</li>
 </ul>
 
-<pre><code class="language-python">def pursue(agent, target, max_speed):
-    """Predict target's future position and seek it."""
-    displacement = target.position - agent.position
-    distance = displacement.magnitude()
+<pre><code class="language-pseudocode">function pursue(agent, target, max_speed):
+    // Estimate when the agent will reach the target (constant-velocity assumption)
+    displacement ← target.position − agent.position
+    distance     ← |displacement|
+    speed        ← |agent.velocity|
+    t_predict    ← (distance / speed)  if speed &gt; 0  else 1.0
 
-    # Estimate time to intercept
-    speed = agent.velocity.magnitude()
-    if speed <= 0:
-        t_predict = 1.0
-    else:
-        t_predict = distance / speed
+    // Predict where the target will be at that moment
+    future_position ← target.position + target.velocity · t_predict
 
-    # Predict future position assuming constant velocity
-    future_pos = target.position + target.velocity * t_predict
-
-    # Delegate to seek
-    return seek(agent, future_pos, max_speed)</code></pre>
+    // Delegate to seek: aim at the predicted future position
+    return seek(agent, future_position, max_speed)</code></pre>
 
 <h3>5.6 Blended Steering</h3>
 <p>Combine multiple behaviors by <strong>weighted summation</strong> of their output accelerations:</p>
@@ -574,48 +548,34 @@ $$\mathbf{p}(t) = \mathbf{p}_0 + \mathbf{v} t + \frac{1}{2}\mathbf{g} t^2$$
     <li>Back-substitute to find $\hat{\mathbf{u}}$</li>
 </ol>
 
-<pre><code class="language-python">def solve_ballistic_static(p0, target, speed, gravity=-9.8):
-    """Solve for launch velocity to hit a static target under gravity."""
-    delta = target - p0
-    dx, dy, dz = delta.x, delta.y, delta.z
+<pre><code class="language-pseudocode">function solve_ballistic_static(p₀, target, projectile_speed s, gravity g = −9.8):
+    // Find the launch velocity that hits a stationary target under gravity.
+    Δ ← target − p₀
+    horizontal_distance² ← Δx² + Δz²
+    G ← |g|
 
-    # Horizontal distance squared
-    h_dist_sq = dx**2 + dz**2
+    // The flight-time equation reduces to a quadratic in x = t²:
+    //      (G²/4) · x  +  (−(s² + G·Δy)) · x  +  (horizontal_distance² + Δy²)  =  0
+    A ← G² / 4
+    B ← −(s² + G · Δy)
+    C ← horizontal_distance² + Δy²
 
-    s2 = speed * speed
-    s4 = s2 * s2
-    g = abs(gravity)
+    discriminant ← B² − 4·A·C
+    if discriminant &lt; 0:
+        return "out of range"
 
-    # Quadratic in t^2: coefficients
-    a = g * g / 4.0
-    b = -(s2 + g * dy)
-    c = h_dist_sq + dy * dy
+    x₁ ← (−B + √discriminant) / (2A)
+    x₂ ← (−B − √discriminant) / (2A)
+    x  ← smallest positive root among {x₁, x₂}
+    if no positive root exists: return "out of range"
 
-    discriminant = b * b - 4 * a * c
-    if discriminant < 0:
-        return None  # target out of range
+    t_c ← √x
 
-    sqrt_disc = math.sqrt(discriminant)
-    t_sq_1 = (-b + sqrt_disc) / (2 * a)
-    t_sq_2 = (-b - sqrt_disc) / (2 * a)
-
-    # Pick smallest positive t
-    t_sq = None
-    for candidate in [t_sq_2, t_sq_1]:
-        if candidate > 0:
-            t_sq = candidate
-            break
-    if t_sq is None:
-        return None
-
-    tc = math.sqrt(t_sq)
-
-    # Compute launch velocity components
-    vx = dx / tc
-    vy = dy / tc - 0.5 * gravity * tc
-    vz = dz / tc
-
-    return Vector3(vx, vy, vz)</code></pre>
+    // Back-substitute for the launch-velocity components
+    v_x ← Δx / t_c
+    v_y ← Δy / t_c − ½ · g · t_c
+    v_z ← Δz / t_c
+    return (v_x, v_y, v_z)</code></pre>
 
 <h3>6.3 Moving Target (Law of Cosines Approach)</h3>
 <p>For a moving target in 2D, set up a triangle with three edges:</p>
@@ -661,20 +621,20 @@ $$\mathbf{p}(t) = \mathbf{p}_0 + \mathbf{v} t + \frac{1}{2}\mathbf{g} t^2$$
 <h3>7.2 Layered Noise (Octaves)</h3>
 <p>A single layer of Perlin noise produces boring, uniform bumps. Interesting terrain requires detail at <strong>multiple scales</strong>. Layered noise combines octaves with diminishing amplitude:</p>
 
-<pre><code class="language-python">def layered_noise(x, y, octaves=6, persistence=0.5):
-    """Generate layered Perlin noise with multiple octaves."""
-    total = 0.0
-    frequency = 1.0
-    amplitude = 1.0
-    max_value = 0.0
+<pre><code class="language-pseudocode">function layered_noise(x, y, octaves = 6, persistence = 0.5):
+    // Sum several Perlin-noise samples, doubling frequency and halving amplitude each octave
+    total      ← 0
+    frequency  ← 1
+    amplitude  ← 1
+    norm       ← 0
 
-    for i in range(octaves):
-        total += perlin_noise(x * frequency, y * frequency) * amplitude
-        max_value += amplitude
-        amplitude *= persistence  # each octave has less influence
-        frequency *= 2.0          # each octave is higher frequency
+    repeat `octaves` times:
+        total     ← total + perlin_noise(x · frequency, y · frequency) · amplitude
+        norm      ← norm + amplitude
+        amplitude ← amplitude · persistence        // higher octaves contribute less
+        frequency ← frequency · 2                  // higher octaves vary faster
 
-    return total / max_value  # normalize to [0, 1]</code></pre>
+    return total / norm                            // normalised to [0, 1]</code></pre>
 <p>The first octave provides the broad terrain shape (continents, mountain ranges). Each subsequent octave adds finer detail (ridges, erosion patterns, pebbles) with decreasing influence.</p>
 
 <div class="card-concept">
@@ -702,16 +662,12 @@ $$\mathbf{p}(t) = \mathbf{p}_0 + \mathbf{v} t + \frac{1}{2}\mathbf{g} t^2$$
 <p>Mapping functions transform raw noise values into useful terrain features by reshaping the distribution:</p>
 
 <p><strong>Trapezoid function</strong> &mdash; fast, defined by 4 parameters that control ramp-up, plateau, and ramp-down regions. Use to isolate specific height ranges (e.g., only values between 0.6 and 0.8 become mountain peaks):</p>
-<pre><code class="language-python">def trapezoid(value, a, b, c, d):
-    """Trapezoid mapping: ramp up [a,b], plateau [b,c], ramp down [c,d]."""
-    if value <= a or value >= d:
-        return 0.0
-    elif value < b:
-        return (value - a) / (b - a)  # ramp up
-    elif value <= c:
-        return 1.0                     # plateau
-    else:
-        return (d - value) / (d - c)   # ramp down</code></pre>
+<pre><code class="language-pseudocode">function trapezoid(value, a, b, c, d):
+    // 0 outside [a, d];  linear ramp up [a, b];  plateau [b, c];  linear ramp down [c, d]
+    if value ≤ a   or   value ≥ d:  return 0
+    if value &lt; b:                    return (value − a) / (b − a)   // ramp up
+    if value ≤ c:                    return 1                        // plateau
+    else:                            return (d − value) / (d − c)    // ramp down</code></pre>
 
 <p><strong>Curve editor</strong> &mdash; smooth spline-based mapping with arbitrary control points. More expressive than trapezoid but slower to evaluate. Use when trapezoid approximation is too coarse.</p>
 
@@ -733,38 +689,37 @@ $$\mathbf{p}(t) = \mathbf{p}_0 + \mathbf{v} t + \frac{1}{2}\mathbf{g} t^2$$
 
 <h3>8.1 Grid Navigation</h3>
 <p>Discretize the continuous game world using a grid lattice. For each cell, perform an <strong>intersection test</strong> against all obstacles to determine whether the cell is traversable or blocked. The agent then uses A* on this grid to find paths.</p>
-<pre><code class="language-python">def create_grid(world_bounds, cell_size, obstacles):
-    """Build a traversability grid for the game world."""
-    cols = int(world_bounds.width / cell_size)
-    rows = int(world_bounds.height / cell_size)
-    grid = [[True] * cols for _ in range(rows)]
+<pre><code class="language-pseudocode">function create_grid(world_bounds, cell_size, obstacles):
+    // Build a 2-D traversability grid: cell = true if free, false if any obstacle overlaps
+    cols ← ⌊world_bounds.width  / cell_size⌋
+    rows ← ⌊world_bounds.height / cell_size⌋
+    grid ← rows × cols matrix filled with true
 
-    for r in range(rows):
-        for c in range(cols):
-            cell_rect = get_cell_bounds(r, c, cell_size)
-            for obstacle in obstacles:
-                if intersects(cell_rect, obstacle):
-                    grid[r][c] = False
-                    break
+    for each row r, column c:
+        cell_rectangle ← bounds_of_cell(r, c, cell_size)
+        for each obstacle:
+            if obstacle intersects cell_rectangle:
+                grid[r][c] ← false
+                break                          // one collision is enough
     return grid</code></pre>
 
 <h3>8.2 Path Network</h3>
 <p>Connect hand-placed nodes with edges to form a path network. An edge is valid only if a <strong>corridor</strong> of width equal to twice the agent radius is clear of obstacles along its entire length. This ensures the agent can traverse the edge without clipping through geometry.</p>
-<pre><code class="language-python">def is_valid_edge(node_a, node_b, agent_radius, obstacles):
-    """Check if the corridor between two nodes is obstacle-free."""
-    direction = (node_b - node_a).normalized()
-    # Perpendicular offset for corridor width
-    perp = Vector2(-direction.y, direction.x) * agent_radius
+<pre><code class="language-pseudocode">function is_valid_edge(node_a, node_b, agent_radius, obstacles):
+    // An edge is valid only if the full corridor between two waypoints is clear
+    direction   ← unit(node_b − node_a)
+    perp_offset ← rotate_90°(direction) · agent_radius   // perpendicular, agent-radius wide
 
-    # Check four corridor boundary segments
-    corners = [
-        node_a + perp, node_a - perp,
-        node_b + perp, node_b - perp
-    ]
-    for obstacle in obstacles:
-        if obstacle_intersects_corridor(corners, obstacle):
-            return False
-    return True</code></pre>
+    // Four corridor corners (rectangle around the edge)
+    corners ← {node_a + perp_offset,
+               node_a − perp_offset,
+               node_b + perp_offset,
+               node_b − perp_offset}
+
+    for each obstacle:
+        if obstacle intersects the corridor formed by corners:
+            return false
+    return true</code></pre>
 
 <h3>8.3 Nav Mesh</h3>
 <p>Build a navigation mesh using greedy triangulation:</p>
@@ -817,37 +772,34 @@ $$\mathbf{p}(t) = \mathbf{p}_0 + \mathbf{v} t + \frac{1}{2}\mathbf{g} t^2$$
     <li>Works best when agents are roughly uniformly distributed; degenerates if all agents cluster in one cell</li>
 </ul>
 
-<pre><code class="language-python"># Bin lattice spatial partitioning
-class BinLattice:
-    def __init__(self, world_size, cell_size):
-        self.cell_size = cell_size
-        self.cols = int(world_size[0] / cell_size) + 1
-        self.rows = int(world_size[1] / cell_size) + 1
-        self.grid = [[] for _ in range(self.cols * self.rows)]
+<pre><code class="language-pseudocode">// BinLattice — uniform spatial grid for O(n) neighbour queries
+// Each cell stores a list of agents that fell into it this frame.
 
-    def clear(self):
-        for cell in self.grid:
-            cell.clear()
+structure BinLattice(world_size, cell_size):
+    cell_size ← cell_size
+    cols      ← ⌊world_size.x / cell_size⌋ + 1
+    rows      ← ⌊world_size.y / cell_size⌋ + 1
+    grid      ← array of (cols × rows) empty lists
 
-    def insert(self, agent):
-        cx = int(agent.pos.x / self.cell_size)
-        cy = int(agent.pos.y / self.cell_size)
-        self.grid[cy * self.cols + cx].append(agent)
+method clear():
+    for each cell in grid:  empty the cell
 
-    def get_neighbors(self, agent, radius):
-        cx = int(agent.pos.x / self.cell_size)
-        cy = int(agent.pos.y / self.cell_size)
-        neighbors = []
-        for dy in range(-1, 2):
-            for dx in range(-1, 2):
-                nx, ny = cx + dx, cy + dy
-                if 0 <= nx < self.cols and 0 <= ny < self.rows:
-                    for other in self.grid[ny * self.cols + nx]:
-                        if other is not agent:
-                            dist = (other.pos - agent.pos).length()
-                            if dist < radius:
-                                neighbors.append(other)
-        return neighbors</code></pre>
+method insert(agent):
+    cx ← ⌊agent.position.x / cell_size⌋
+    cy ← ⌊agent.position.y / cell_size⌋
+    append agent to grid[cy, cx]
+
+method get_neighbours(agent, radius):
+    cx ← ⌊agent.position.x / cell_size⌋
+    cy ← ⌊agent.position.y / cell_size⌋
+    result ← empty list
+    for dy ∈ {−1, 0, +1}, dx ∈ {−1, 0, +1}:           // check 3×3 cells around the agent
+        (nx, ny) ← (cx + dx, cy + dy)
+        if (nx, ny) is inside the grid:
+            for each other ∈ grid[ny, nx]:
+                if other ≠ agent  and  |other.position − agent.position| &lt; radius:
+                    append other to result
+    return result</code></pre>
 
 <h3>9.3 Formations</h3>
 <p>Formations arrange agents into geometric patterns while moving as a group:</p>
@@ -898,30 +850,23 @@ class BinLattice:
     <li><strong>Foveal vs. peripheral vision</strong> &mdash; inner cone (narrow, high acuity) detects details and identifies targets; outer cone (wide, low acuity) detects movement but not identity</li>
 </ul>
 
-<pre><code class="language-python">import math
+<pre><code class="language-pseudocode">function can_see(agent, target, max_range, fov_half_angle, obstacles):
+    to_target ← target.position − agent.position
+    distance  ← |to_target|
 
-def can_see(agent, target, max_range, fov_half_angle, obstacles):
-    """Check if agent can see target with range, FOV, and occlusion."""
-    to_target = target.pos - agent.pos
-    distance = to_target.length()
+    // 1. Range
+    if distance &gt; max_range:  return false
 
-    # Range check
-    if distance > max_range:
-        return False
+    // 2. Field of view
+    direction ← to_target / distance
+    angle     ← arccos( clamp(agent.forward · direction, −1, +1) )
+    if angle &gt; fov_half_angle:  return false
 
-    # FOV check
-    to_target_norm = to_target.normalize()
-    dot = agent.forward.dot(to_target_norm)
-    angle = math.acos(max(-1, min(1, dot)))
-    if angle > fov_half_angle:
-        return False
+    // 3. Occlusion
+    hit ← raycast(agent.eye_position, direction, distance, obstacles)
+    if hit exists and hit.distance &lt; distance:  return false      // line of sight blocked
 
-    # Occlusion raycast
-    hit = raycast(agent.eye_pos, to_target_norm, distance, obstacles)
-    if hit and hit.distance < distance:
-        return False  # Something blocks the view
-
-    return True</code></pre>
+    return true</code></pre>
 
 <h3>10.3 Light Level &amp; Stealth</h3>
 <p>In stealth games, detection depends on the target's illumination:</p>
@@ -998,39 +943,29 @@ $$\text{aimPoint} = \text{target} + \mathcal{N}(0, \sigma^2) \cdot \hat{x} + \ma
     <li><strong>Stickiness</strong> &mdash; once a random choice is made, keep it for a duration to prevent erratic behavior (e.g., random decision is re-evaluated every 5 seconds, not every frame)</li>
 </ul>
 
-<pre><code class="language-python">class DecisionNode:
-    def __init__(self, test_fn, true_branch, false_branch):
-        self.test = test_fn
-        self.true_branch = true_branch
-        self.false_branch = false_branch
+<pre><code class="language-pseudocode">// DecisionNode holds a predicate and two child branches; ActionNode holds an action label
+structure DecisionNode { test, true_branch, false_branch }
+structure ActionNode   { action }
 
-    def evaluate(self, context):
-        if self.test(context):
-            return self.true_branch.evaluate(context)
-        else:
-            return self.false_branch.evaluate(context)
+function evaluate(node, context):
+    if node is an ActionNode:
+        return node.action
+    if node.test(context):
+        return evaluate(node.true_branch , context)
+    else:
+        return evaluate(node.false_branch, context)
 
-class ActionNode:
-    def __init__(self, action):
-        self.action = action
-
-    def evaluate(self, context):
-        return self.action
-
-# Example: enemy decision tree
-tree = DecisionNode(
-    lambda ctx: ctx['health'] < 30,
-    ActionNode('flee'),            # low health -> flee
-    DecisionNode(
-        lambda ctx: ctx['enemy_visible'],
-        DecisionNode(
-            lambda ctx: ctx['distance'] < 10,
-            ActionNode('melee_attack'),   # close range
-            ActionNode('ranged_attack')   # far range
-        ),
-        ActionNode('patrol')       # no enemy visible
-    )
-)</code></pre>
+// Example: enemy decision tree
+tree ← DecisionNode(
+        test         = (context.health &lt; 30),
+        true_branch  = ActionNode("flee"),                                     // low health → flee
+        false_branch = DecisionNode(
+                         test         = context.enemy_visible,
+                         true_branch  = DecisionNode(
+                                         test         = (context.distance &lt; 10),
+                                         true_branch  = ActionNode("melee_attack"),
+                                         false_branch = ActionNode("ranged_attack")),
+                         false_branch = ActionNode("patrol")))</code></pre>
 
 <h3>11.2 Rule-Based Systems</h3>
 <p>A set of <strong>if-then rules</strong> evaluated against a working memory (database of facts):</p>
@@ -1066,33 +1001,32 @@ tree = DecisionNode(
     <li>Each state has: <code>enter()</code> (setup), <code>update()</code> (per-frame logic), <code>exit()</code> (cleanup)</li>
 </ul>
 
-<pre><code class="language-python">class State:
-    def enter(self, agent): pass
-    def update(self, agent, dt): pass
-    def exit(self, agent): pass
+<pre><code class="language-pseudocode">// A State is any object that implements three callbacks
+interface State:
+    enter (agent)         // one-shot setup on entry
+    update(agent, Δt)     // called once per frame while active
+    exit  (agent)         // one-shot teardown on exit
 
-class PatrolState(State):
-    def enter(self, agent):
-        agent.set_animation('walk')
+state PatrolState:
+    enter(agent):
+        agent.set_animation("walk")
         agent.pick_patrol_point()
-
-    def update(self, agent, dt):
+    update(agent, Δt):
         if agent.can_see_player():
-            agent.change_state(ChaseState())
-        elif agent.reached_patrol_point():
+            transition agent to ChaseState
+        else if agent.reached_patrol_point():
             agent.pick_patrol_point()
-        agent.move_toward(agent.patrol_target, dt)
+        agent.move_toward(agent.patrol_target, Δt)
 
-class ChaseState(State):
-    def enter(self, agent):
-        agent.set_animation('run')
-
-    def update(self, agent, dt):
+state ChaseState:
+    enter(agent):
+        agent.set_animation("run")
+    update(agent, Δt):
         if not agent.can_see_player():
-            agent.change_state(SearchState())
-        elif agent.in_attack_range():
-            agent.change_state(AttackState())
-        agent.move_toward(agent.player.pos, dt)</code></pre>
+            transition agent to SearchState
+        else if agent.in_attack_range():
+            transition agent to AttackState
+        agent.move_toward(agent.player.position, Δt)</code></pre>
 
 <h3>11.5 Advanced FSM Variants</h3>
 <ul>
@@ -1124,44 +1058,37 @@ class ChaseState(State):
     <li><strong>Leaf nodes</strong> &mdash; conditions (check world state) or actions (perform behavior), returning Success, Failure, or <strong>Running</strong> (still in progress)</li>
 </ul>
 
-<pre><code class="language-python"># Behavior tree node types
-class Selector:
-    """Try children until one succeeds (OR logic)."""
-    def __init__(self, children):
-        self.children = children
+<pre><code class="language-pseudocode">// Behavior-tree nodes return one of three statuses: SUCCESS, FAILURE, RUNNING
 
-    def tick(self, blackboard):
-        for child in self.children:
-            status = child.tick(blackboard)
-            if status != 'FAILURE':
-                return status  # SUCCESS or RUNNING
-        return 'FAILURE'
+node Selector(children):                     // OR / fallback — succeed on first SUCCESS
+    function tick(blackboard):
+        for each child in children:
+            status ← child.tick(blackboard)
+            if status ≠ FAILURE:
+                return status                  // SUCCESS or RUNNING propagates up
+        return FAILURE
 
-class Sequence:
-    """Run children until one fails (AND logic)."""
-    def __init__(self, children):
-        self.children = children
+node Sequence(children):                     // AND — succeed only if every child succeeds
+    function tick(blackboard):
+        for each child in children:
+            status ← child.tick(blackboard)
+            if status ≠ SUCCESS:
+                return status                  // short-circuit on FAILURE or RUNNING
+        return SUCCESS
 
-    def tick(self, blackboard):
-        for child in self.children:
-            status = child.tick(blackboard)
-            if status != 'SUCCESS':
-                return status  # FAILURE or RUNNING
-        return 'SUCCESS'
-
-# Example: Guard behavior tree
-guard_bt = Selector([
-    Sequence([  # Combat behavior
-        Condition(lambda bb: bb['enemy_visible']),
-        Condition(lambda bb: bb['has_ammo']),
-        Action('attack_enemy')
+// Example: a guard agent's behavior tree
+guard_bt ← Selector([
+    Sequence([   // Combat: visible enemy AND we have ammo → attack
+        Condition( blackboard.enemy_visible ),
+        Condition( blackboard.has_ammo ),
+        Action   ( "attack_enemy" )
     ]),
-    Sequence([  # Investigate behavior
-        Condition(lambda bb: bb['heard_noise']),
-        Action('move_to_noise_source'),
-        Action('look_around')
+    Sequence([   // Investigate: a noise was heard → walk over and look around
+        Condition( blackboard.heard_noise ),
+        Action   ( "move_to_noise_source" ),
+        Action   ( "look_around" )
     ]),
-    Action('patrol')  # Default: patrol
+    Action("patrol")                         // Default fallback
 ])</code></pre>
 
 <h3>11.7 Behavior Tree Concepts</h3>
@@ -1238,55 +1165,39 @@ $$\text{IG}(S, A) = H(S) - \sum_{v \in \text{values}(A)} \frac{|S_v|}{|S|} H(S_v
     <li>Recurse on each subset; stop when all examples have the same class or no attributes remain</li>
 </ol>
 
-<pre><code class="language-python">import math
-from collections import Counter
+<pre><code class="language-pseudocode">function entropy(labels):
+    // H(S) = − Σ p_c · log₂(p_c)
+    counts ← histogram of class labels
+    total  ← |labels|
+    return − Σ over classes c of  (counts[c] / total) · log₂(counts[c] / total)
 
-def entropy(labels):
-    """Calculate entropy of a label distribution."""
-    counts = Counter(labels)
-    total = len(labels)
-    return -sum(
-        (c / total) * math.log2(c / total)
-        for c in counts.values() if c > 0
-    )
+function info_gain(data, labels, attribute):
+    // IG(S, A) = H(S) − Σ_v (|S_v| / |S|) · H(S_v)
+    H_total ← entropy(labels)
+    weighted ← 0
+    for each value v of attribute over the data:
+        S_v         ← rows where data[row, attribute] = v
+        labels_v    ← labels restricted to S_v
+        weighted    ← weighted + (|S_v| / |labels|) · entropy(labels_v)
+    return H_total − weighted
 
-def info_gain(data, labels, attribute_idx):
-    """Calculate information gain for splitting on an attribute."""
-    total_entropy = entropy(labels)
-    values = set(row[attribute_idx] for row in data)
+function build_tree(data, labels, attributes):
+    // Base cases
+    if all labels are equal:
+        return that single label                              // pure node
+    if attributes is empty:
+        return majority class of labels                       // no more features to split on
 
-    weighted_entropy = 0
-    for v in values:
-        subset_labels = [
-            labels[i] for i, row in enumerate(data)
-            if row[attribute_idx] == v
-        ]
-        weighted_entropy += (len(subset_labels) / len(labels)) * entropy(subset_labels)
+    // Greedy split: pick the attribute with the highest information gain
+    best_attr ← argmax over a ∈ attributes of info_gain(data, labels, a)
+    remaining ← attributes \ {best_attr}
 
-    return total_entropy - weighted_entropy
-
-def build_tree(data, labels, attributes):
-    """Build decision tree using ID3."""
-    # Base cases
-    if len(set(labels)) == 1:
-        return labels[0]  # Pure node
-    if not attributes:
-        return Counter(labels).most_common(1)[0][0]  # Majority vote
-
-    # Find best attribute
-    gains = {a: info_gain(data, labels, a) for a in attributes}
-    best_attr = max(gains, key=gains.get)
-
-    tree = {'attribute': best_attr, 'branches': {}}
-    remaining = [a for a in attributes if a != best_attr]
-
-    for value in set(row[best_attr] for row in data):
-        subset_idx = [i for i, row in enumerate(data) if row[best_attr] == value]
-        subset_data = [data[i] for i in subset_idx]
-        subset_labels = [labels[i] for i in subset_idx]
-        tree['branches'][value] = build_tree(subset_data, subset_labels, remaining)
-
-    return tree</code></pre>
+    node ← { attribute = best_attr, branches = {} }
+    for each value v of best_attr in the data:
+        subset_data    ← rows where data[row, best_attr] = v
+        subset_labels  ← labels of those rows
+        node.branches[v] ← build_tree(subset_data, subset_labels, remaining)
+    return node</code></pre>
 
 <h3>12.2 ID4 &mdash; Live/Incremental Learning</h3>
 <p><strong>ID4</strong> extends ID3 for online (incremental) learning &mdash; updating the tree as new examples arrive without rebuilding from scratch:</p>
@@ -1328,35 +1239,32 @@ def build_tree(data, labels, attributes):
     <li><strong>Window size trade-off</strong> &mdash; larger $n$ captures more context but requires exponentially more training data and may overfit to specific sequences</li>
 </ul>
 
-<pre><code class="language-python">from collections import defaultdict
+<pre><code class="language-pseudocode">// N-gram predictor: P(action_t | action_{t−n+1}, …, action_{t−1})
+structure NGramPredictor(n):
+    n        ← n
+    counts   ← map  context → (map  action → integer count)
+    history  ← empty list of past actions
 
-class NGramPredictor:
-    def __init__(self, n=3):
-        self.n = n
-        self.counts = defaultdict(lambda: defaultdict(int))
-        self.history = []
+method observe(action):
+    append action to history
+    if length(history) ≥ n:
+        context ← last (n − 1) actions BEFORE this one
+        increment counts[context][action]
 
-    def observe(self, action):
-        self.history.append(action)
-        if len(self.history) >= self.n:
-            context = tuple(self.history[-self.n:-1])
-            self.counts[context][action] += 1
+method predict():
+    if length(history) &lt; n − 1:
+        return none                                       // not enough history yet
+    context ← last (n − 1) actions
+    if context not in counts:
+        return none                                       // unseen context
+    return action with the maximum count for context
 
-    def predict(self):
-        if len(self.history) < self.n - 1:
-            return None
-        context = tuple(self.history[-(self.n-1):])
-        if context not in self.counts:
-            return None
-        actions = self.counts[context]
-        return max(actions, key=actions.get)
-
-# Usage: predict player's next move
-predictor = NGramPredictor(n=3)
-for move in player_moves:
-    prediction = predictor.predict()
-    if prediction:
-        ai_counter = counter_move(prediction)
+// Typical usage: predict the player's next move, then counter it
+predictor ← new NGramPredictor(n = 3)
+for each move in player_moves:
+    prediction ← predictor.predict()
+    if prediction ≠ none:
+        ai_response ← counter_move(prediction)
     predictor.observe(move)</code></pre>
 
 <p><strong>Hierarchical N-grams:</strong> Try the longest context first; if insufficient data, back off to shorter contexts. E.g., try trigram prediction &rarr; if unseen context, fall back to bigram &rarr; fall back to unigram.</p>
@@ -1398,41 +1306,31 @@ $$Q(s, a) \leftarrow Q(s, a) + \alpha \left[ r + \gamma \max_{a'} Q(s', a') - Q(
     <li>$\gamma$ = discount factor (0&ndash;1); higher values prioritize future rewards</li>
 </ul>
 
-<pre><code class="language-python">import random
-from collections import defaultdict
+<pre><code class="language-pseudocode">structure QLearningAgent(actions, α = 0.1, γ = 0.9, ε = 0.1):
+    Q       ← table mapping (state, action) → 0     // value function, initially zero
+    actions ← list of legal actions
+    α, γ, ε ← learning rate, discount, exploration probability
 
-class QLearningAgent:
-    def __init__(self, actions, alpha=0.1, gamma=0.9, epsilon=0.1):
-        self.Q = defaultdict(lambda: defaultdict(float))
-        self.actions = actions
-        self.alpha = alpha      # learning rate
-        self.gamma = gamma      # discount factor
-        self.epsilon = epsilon  # exploration rate
+method choose_action(state):
+    // ε-greedy: explore with probability ε, otherwise exploit current best
+    if uniform_random() &lt; ε:
+        return random choice from actions
+    return argmax over a in actions of Q[state, a]
 
-    def choose_action(self, state):
-        # Epsilon-greedy exploration
-        if random.random() < self.epsilon:
-            return random.choice(self.actions)
-        q_values = self.Q[state]
-        if not q_values:
-            return random.choice(self.actions)
-        return max(q_values, key=q_values.get)
+method learn(state, action, reward, next_state):
+    best_next ← max over a of Q[next_state, a]      (or 0 if next_state unseen)
+    TD_error  ← reward + γ · best_next − Q[state, action]
+    Q[state, action] ← Q[state, action] + α · TD_error
 
-    def learn(self, state, action, reward, next_state):
-        # Q-learning update rule
-        max_next_q = max(self.Q[next_state].values()) if self.Q[next_state] else 0
-        td_error = reward + self.gamma * max_next_q - self.Q[state][action]
-        self.Q[state][action] += self.alpha * td_error
-
-# Example: AI learns combat tactics
-agent = QLearningAgent(actions=['attack', 'defend', 'heal', 'flee'])
-for episode in range(1000):
-    state = env.reset()
-    while not env.done:
-        action = agent.choose_action(state)
-        next_state, reward = env.step(action)
+// Example: an AI agent learns combat tactics over 1000 episodes
+agent ← new QLearningAgent(actions = ["attack", "defend", "heal", "flee"])
+for episode ← 1 to 1000:
+    state ← env.reset()
+    repeat until episode terminates:
+        action ← agent.choose_action(state)
+        (next_state, reward) ← env.step(action)
         agent.learn(state, action, reward, next_state)
-        state = next_state</code></pre>
+        state ← next_state</code></pre>
 
 <div class="card-caution">
 <strong>State representation matters:</strong> Q-learning requires a discrete state space. For continuous game states, discretize features into bins (e.g., health: low/medium/high, distance: close/medium/far). Too many states leads to sparse Q-tables and slow convergence; too few loses important distinctions.
@@ -1515,44 +1413,35 @@ for episode in range(1000):
     </li>
 </ul>
 
-<pre><code class="language-python">def l_system(axiom, rules, iterations):
-    """Generate L-system string by iterating production rules."""
-    current = axiom
-    for _ in range(iterations):
-        next_str = []
-        for ch in current:
-            next_str.append(rules.get(ch, ch))
-        current = ''.join(next_str)
+<pre><code class="language-pseudocode">function l_system(axiom, rules, iterations):
+    // Parallel string-rewriting: each iteration replaces every symbol simultaneously
+    current ← axiom
+    repeat iterations times:
+        next_string ← empty string
+        for each symbol s in current:
+            if s ∈ rules:
+                append rules[s] to next_string
+            else:
+                append s to next_string                      // symbols without a rule are kept
+        current ← next_string
     return current
 
-# Koch snowflake
-koch = l_system('F', {'F': 'F+F-F-F+F'}, iterations=4)
+// Koch snowflake:    axiom F,  rule F → F+F−F−F+F,   4 iterations
+// Fractal plant:     axiom X,  rules { X → F+[[X]−X]−F[−FX]+X,  F → FF },  6 iterations
 
-# Fractal plant
-plant = l_system('X', {
-    'X': 'F+[[X]-X]-F[-FX]+X',
-    'F': 'FF'
-}, iterations=6)
-
-# Stochastic L-system: multiple rules per symbol with probabilities
-import random
-def stochastic_l_system(axiom, rules, iterations):
-    current = axiom
-    for _ in range(iterations):
-        next_str = []
-        for ch in current:
-            if ch in rules:
-                # rules[ch] = [(prob, replacement), ...]
-                r = random.random()
-                cumulative = 0
-                for prob, replacement in rules[ch]:
-                    cumulative += prob
-                    if r <= cumulative:
-                        next_str.append(replacement)
-                        break
+function stochastic_l_system(axiom, rules, iterations):
+    // Each symbol may have several possible replacements with probabilities summing to 1
+    // i.e. rules[s] = [(p₁, repl₁), (p₂, repl₂), …]
+    current ← axiom
+    repeat iterations times:
+        next_string ← empty string
+        for each symbol s in current:
+            if s ∈ rules:
+                pick one (probability p, replacement) from rules[s] weighted by p
+                append replacement to next_string
             else:
-                next_str.append(ch)
-        current = ''.join(next_str)
+                append s to next_string
+        current ← next_string
     return current</code></pre>
 
 <h3>13.6 Search-Based PCG</h3>
@@ -1584,57 +1473,44 @@ def stochastic_l_system(axiom, rules, iterations):
     <li><strong>Repeat</strong> until all cells are collapsed or a contradiction is reached (backtrack if so)</li>
 </ol>
 
-<pre><code class="language-python">import random, math
-from collections import defaultdict
+<pre><code class="language-pseudocode">// Wave Function Collapse — constraint propagation on a tile grid
 
-class WFC:
-    def __init__(self, width, height, tiles, adjacency_rules):
-        self.w, self.h = width, height
-        self.tiles = tiles
-        self.rules = adjacency_rules  # {(tile, direction): set of valid neighbors}
-        # Each cell starts with all tiles possible
-        self.grid = [[set(tiles) for _ in range(width)] for _ in range(height)]
+structure WFC(width, height, tiles, adjacency_rules):
+    grid ← (height × width) array; each cell starts as the full set of tiles
+    rules ← adjacency_rules                       // (tile, direction) → set of allowed neighbour tiles
 
-    def entropy(self, x, y):
-        n = len(self.grid[y][x])
-        return math.log2(n) if n > 1 else 0
+method entropy(x, y):
+    n ← |grid[y, x]|
+    return log₂(n)  if n &gt; 1  else 0              // collapsed cells have 0 entropy
 
-    def find_min_entropy(self):
-        min_e, best = float('inf'), None
-        for y in range(self.h):
-            for x in range(self.w):
-                e = self.entropy(x, y)
-                if 0 < e < min_e:
-                    min_e = e
-                    best = (x, y)
-        return best
+method find_min_entropy():
+    // Return the uncollapsed cell with the fewest remaining options (break ties arbitrarily)
+    return argmin over (x, y) of entropy(x, y), restricted to cells with entropy &gt; 0
 
-    def collapse(self, x, y):
-        tile = random.choice(list(self.grid[y][x]))
-        self.grid[y][x] = {tile}
-        self.propagate(x, y)
+method collapse(x, y):
+    // Pick a single tile (uniform or weighted), then propagate the constraint
+    tile ← random choice from grid[y, x]
+    grid[y, x] ← {tile}
+    propagate(x, y)
 
-    def propagate(self, x, y):
-        stack = [(x, y)]
-        while stack:
-            cx, cy = stack.pop()
-            for dx, dy, direction in [(0,-1,'N'),(1,0,'E'),(0,1,'S'),(-1,0,'W')]:
-                nx, ny = cx + dx, cy + dy
-                if 0 <= nx < self.w and 0 <= ny < self.h:
-                    valid = set()
-                    for tile in self.grid[cy][cx]:
-                        valid |= self.rules.get((tile, direction), set())
-                    before = len(self.grid[ny][nx])
-                    self.grid[ny][nx] &= valid
-                    if len(self.grid[ny][nx]) < before:
-                        stack.append((nx, ny))
+method propagate(x_start, y_start):
+    stack ← {(x_start, y_start)}
+    while stack is not empty:
+        (cx, cy) ← pop from stack
+        for each neighbour direction (dx, dy, label) ∈ {N, E, S, W}:
+            (nx, ny) ← (cx + dx, cy + dy)
+            if (nx, ny) inside the grid:
+                allowed ← ⋃ over tile in grid[cy, cx] of rules[(tile, label)]
+                before  ← |grid[ny, nx]|
+                grid[ny, nx] ← grid[ny, nx] ∩ allowed
+                if |grid[ny, nx]| changed:
+                    push (nx, ny) onto stack    // its neighbours must now be re-checked
 
-    def generate(self):
-        while True:
-            cell = self.find_min_entropy()
-            if cell is None:
-                break
-            self.collapse(*cell)</code></pre>
+method generate():
+    repeat:
+        cell ← find_min_entropy()
+        if cell is none: stop                   // all cells collapsed
+        collapse(cell)</code></pre>
 
 <h3>13.8 Player Modeling &amp; Adaptive Content</h3>
 <p>Adapt generated content to individual players:</p>
@@ -1699,24 +1575,21 @@ $$\mathbf{a}_{\text{cam}} = k_s (\mathbf{p}_{\text{ideal}} - \mathbf{p}_{\text{c
 <strong>Spring-Damped Chase Camera:</strong> A spring-damped chase camera models the camera as a mass connected to the player by a virtual spring and dashpot, governed by $\mathbf{a} = k_s(\mathbf{p}_{\text{ideal}} - \mathbf{p}_{\text{cam}}) - k_d \mathbf{v}_{\text{cam}}$. The spring constant $k_s$ controls responsiveness (how quickly the camera catches up) while the damping constant $k_d$ suppresses oscillation. This second-order system produces smooth, physically plausible camera motion that avoids both the rigidity of hard-attached cameras and the sluggishness of pure interpolation.
 </div>
 
-<pre><code class="language-python">class ChaseCamera:
-    def __init__(self, offset, stiffness=5.0, damping=3.0):
-        self.offset = offset       # Desired offset from target (e.g., [0, 5, -10])
-        self.stiffness = stiffness
-        self.damping = damping
-        self.velocity = Vector3(0, 0, 0)
+<pre><code class="language-pseudocode">structure ChaseCamera(offset, stiffness k_s = 5, damping k_d = 3):
+    offset    ← offset                         // desired displacement from the target, e.g. (0, 5, −10)
+    velocity  ← (0, 0, 0)
+    position  ← starting position
 
-    def update(self, target_pos, target_forward, dt):
-        # Compute ideal position behind target
-        ideal = target_pos + target_forward * self.offset.z + Vector3(0, self.offset.y, 0)
+method update(target_position, target_forward, Δt):
+    // 1. Where would the camera like to be this frame?
+    ideal ← target_position + target_forward · offset.z + (0, offset.y, 0)
 
-        # Spring-damper acceleration
-        displacement = ideal - self.position
-        accel = self.stiffness * displacement - self.damping * self.velocity
+    // 2. Spring-damper acceleration:  a = k_s · (ideal − position) − k_d · velocity
+    a ← k_s · (ideal − position) − k_d · velocity
 
-        # Integrate
-        self.velocity += accel * dt
-        self.position += self.velocity * dt
+    // 3. Semi-implicit Euler integration
+    velocity ← velocity + a · Δt
+    position ← position + velocity · Δt
 
         # Always look at target
         self.look_at = target_pos + Vector3(0, 1.5, 0)  # Slightly above center</code></pre>
@@ -1768,25 +1641,23 @@ $$\mathbf{a}_{\text{cam}} = k_s (\mathbf{p}_{\text{ideal}} - \mathbf{p}_{\text{c
 
 $$\text{minimax}(s) = \begin{cases} \text{eval}(s) & \text{if } s \text{ is terminal or depth limit} \\ \max_{a} \text{minimax}(\text{result}(s, a)) & \text{if MAX's turn} \\ \min_{a} \text{minimax}(\text{result}(s, a)) & \text{if MIN's turn} \end{cases}$$
 
-<pre><code class="language-python">def minimax(state, depth, is_maximizing):
-    if depth == 0 or state.is_terminal():
-        return state.evaluate()
+<pre><code class="language-pseudocode">function minimax(state, depth, is_maximizing):
+    if depth = 0  or  state is terminal:
+        return evaluate(state)
 
     if is_maximizing:
-        best = float('-inf')
-        for move in state.get_moves():
-            state.make_move(move)
-            val = minimax(state, depth - 1, False)
-            state.undo_move(move)
-            best = max(best, val)
+        best ← −∞
+        for each move ∈ legal_moves(state):
+            make_move(state, move)
+            best ← max( best, minimax(state, depth − 1, false) )
+            undo_move(state, move)
         return best
     else:
-        best = float('inf')
-        for move in state.get_moves():
-            state.make_move(move)
-            val = minimax(state, depth - 1, True)
-            state.undo_move(move)
-            best = min(best, val)
+        best ← +∞
+        for each move ∈ legal_moves(state):
+            make_move(state, move)
+            best ← min( best, minimax(state, depth − 1, true) )
+            undo_move(state, move)
         return best</code></pre>
 
 <p><strong>Complexity:</strong> $O(b^d)$ where $b$ is the branching factor and $d$ is the depth. Chess has $b \approx 35$ and $d \approx 80$ for a full game, making exhaustive search impossible.</p>
@@ -1799,33 +1670,30 @@ $$\text{minimax}(s) = \begin{cases} \text{eval}(s) & \text{if } s \text{ is term
     <li>Prune when $\alpha \geq \beta$ (the current branch cannot produce a better result for the player whose turn it is)</li>
 </ul>
 
-<pre><code class="language-python">def alpha_beta(state, depth, alpha, beta, is_maximizing):
-    if depth == 0 or state.is_terminal():
-        return state.evaluate()
+<pre><code class="language-pseudocode">function alpha_beta(state, depth, α, β, is_maximizing):
+    if depth = 0  or  state is terminal:
+        return evaluate(state)
 
     if is_maximizing:
-        value = float('-inf')
-        for move in state.get_moves():
-            state.make_move(move)
-            value = max(value, alpha_beta(state, depth - 1, alpha, beta, False))
-            state.undo_move(move)
-            alpha = max(alpha, value)
-            if alpha >= beta:
-                break  # Beta cutoff - MIN won't allow this
+        value ← −∞
+        for each move ∈ legal_moves(state):
+            make_move(state, move)
+            value ← max( value, alpha_beta(state, depth − 1, α, β, false) )
+            undo_move(state, move)
+            α ← max(α, value)
+            if α ≥ β: break               // β-cutoff: MIN would never let MAX reach this branch
         return value
     else:
-        value = float('inf')
-        for move in state.get_moves():
-            state.make_move(move)
-            value = min(value, alpha_beta(state, depth - 1, alpha, beta, True))
-            state.undo_move(move)
-            beta = min(beta, value)
-            if alpha >= beta:
-                break  # Alpha cutoff - MAX won't allow this
+        value ← +∞
+        for each move ∈ legal_moves(state):
+            make_move(state, move)
+            value ← min( value, alpha_beta(state, depth − 1, α, β, true) )
+            undo_move(state, move)
+            β ← min(β, value)
+            if α ≥ β: break               // α-cutoff: MAX would never let MIN reach this branch
         return value
 
-# Usage
-best_score = alpha_beta(root_state, depth=6, alpha=float('-inf'), beta=float('inf'), is_maximizing=True)</code></pre>
+// Top-level call:  alpha_beta(root_state, depth = 6, α = −∞, β = +∞, is_maximizing = true)</code></pre>
 
 <p><strong>Performance:</strong> With optimal move ordering, alpha-beta reduces the search from $O(b^d)$ to $O(b^{d/2})$, effectively doubling the searchable depth. Move ordering heuristics (e.g., try captures first in chess) are critical for achieving this.</p>
 
@@ -1884,64 +1752,60 @@ $$\text{UCT}(v) = \frac{w_v}{n_v} + C \sqrt{\frac{\ln N_p}{n_v}}$$
 <strong>UCT Exploitation-Exploration Balance:</strong> The UCT formula $\frac{w}{n} + C\sqrt{\frac{\ln N}{n}}$ explicitly balances two competing objectives. The first term (exploitation) favors nodes with high win rates, directing search toward promising moves. The second term (exploration) favors rarely-visited nodes, ensuring no branch is permanently ignored. The constant $C$ controls this trade-off: lower $C$ produces deeper, more focused search while higher $C$ produces broader, more exploratory search. UCT is provably optimal in the limit, converging to the minimax value as iterations increase.
 </div>
 
-<pre><code class="language-python">import math, random
+<pre><code class="language-pseudocode">structure MCTSNode:
+    state            // game state at this node
+    parent           // parent node (none for root)
+    move             // move from parent that produced this state
+    children         ← empty list
+    wins             ← 0
+    visits           ← 0
+    untried_moves    ← legal_moves(state)        // moves not yet expanded
 
-class MCTSNode:
-    def __init__(self, state, parent=None, move=None):
-        self.state = state
-        self.parent = parent
-        self.move = move
-        self.children = []
-        self.wins = 0
-        self.visits = 0
-        self.untried_moves = state.get_moves()
+method uct_value(c = √2):
+    if visits = 0:  return +∞                    // always expand unvisited children first
+    exploitation ← wins / visits                 // average reward so far
+    exploration  ← c · √( ln(parent.visits) / visits )
+    return exploitation + exploration
 
-    def uct_value(self, c=1.414):
-        if self.visits == 0:
-            return float('inf')
-        exploitation = self.wins / self.visits
-        exploration = c * math.sqrt(math.log(self.parent.visits) / self.visits)
-        return exploitation + exploration
+method best_child(c = √2):
+    return argmax over child ∈ children of child.uct_value(c)
 
-    def best_child(self, c=1.414):
-        return max(self.children, key=lambda n: n.uct_value(c))
+function mcts(root_state, iterations = 1000):
+    root ← MCTSNode(state = root_state)
 
-def mcts(root_state, iterations=1000):
-    root = MCTSNode(root_state)
+    repeat `iterations` times:
+        node  ← root
+        state ← copy of root_state
 
-    for _ in range(iterations):
-        node = root
-        state = root_state.copy()
+        // 1. SELECTION — descend the tree using UCT until reaching a node with unexpanded moves
+        while node.untried_moves is empty  and  node.children is not empty:
+            node ← node.best_child()
+            make_move(state, node.move)
 
-        # 1. Selection - traverse tree using UCT
-        while not node.untried_moves and node.children:
-            node = node.best_child()
-            state.make_move(node.move)
+        // 2. EXPANSION — add one previously-untried child
+        if node.untried_moves is not empty:
+            move ← random pick from node.untried_moves
+            remove move from node.untried_moves
+            make_move(state, move)
+            child ← MCTSNode(state = copy of state, parent = node, move = move)
+            append child to node.children
+            node  ← child
 
-        # 2. Expansion - add one child
-        if node.untried_moves:
-            move = random.choice(node.untried_moves)
-            node.untried_moves.remove(move)
-            state.make_move(move)
-            child = MCTSNode(state.copy(), parent=node, move=move)
-            node.children.append(child)
-            node = child
+        // 3. SIMULATION — random rollout to a terminal state
+        sim ← copy of state
+        while sim is not terminal:
+            make_move(sim, random pick from legal_moves(sim))
+        result ← outcome(sim)                                          // 1 = win, 0 = loss
 
-        # 3. Simulation - random rollout
-        sim_state = state.copy()
-        while not sim_state.is_terminal():
-            sim_state.make_move(random.choice(sim_state.get_moves()))
-        result = sim_state.get_result()  # 1 = win, 0 = loss
+        // 4. BACKPROPAGATION — update stats along the path, flipping the perspective each level
+        while node ≠ none:
+            node.visits ← node.visits + 1
+            node.wins   ← node.wins   + result
+            node        ← node.parent
+            result      ← 1 − result                                   // alternate viewpoint
 
-        # 4. Backpropagation - update stats
-        while node is not None:
-            node.visits += 1
-            node.wins += result
-            node = node.parent
-            result = 1 - result  # Flip perspective
-
-    # Return most-visited child's move
-    return max(root.children, key=lambda c: c.visits).move</code></pre>
+    // Choose the most-visited move from the root (robust child)
+    return argmax over child ∈ root.children of child.visits  → child.move</code></pre>
 
 <div class="card-concept">
 <strong>Why MCTS revolutionized Go:</strong> Traditional minimax with alpha-beta failed for Go because the branching factor (~250) is too large and no good evaluation function existed. MCTS sidesteps both problems: it uses random rollouts instead of evaluation functions, and UCT focuses search on the most promising moves. AlphaGo combined MCTS with neural network policy/value networks to defeat world champions.
