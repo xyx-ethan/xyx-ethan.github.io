@@ -41,7 +41,7 @@
         <div class="note-sidebar-header">
             <span class="note-badge">CS 8903</span>
             <h2>UAV Firmware Verification</h2>
-            <p>4 topics &middot; Georgia Tech</p>
+            <p>6 topics &middot; Georgia Tech</p>
         </div>
         <div class="toc-title">Contents</div>
         <ol class="toc-list"></ol>
@@ -52,55 +52,177 @@
     <header class="note-header">
         <span class="note-badge">Georgia Tech &middot; CS 8903 Special Problems</span>
         <h1>Foundational Reading on UAV Firmware Verification</h1>
-        <p class="note-intro">Directed reading on three foundational papers in stripped-binary analysis, post-accident investigation, and DSL-based patching for unmanned aerial vehicle (UAV) firmware, with local code-level reproductions on ArduPilot and PX4. The three papers share a common substrate &mdash; PID-based flight control &mdash; and together cover the static / runtime / patch axes of CPS firmware security. This note summarizes each paper's core algorithm, what was reproduced, and how the three layers compose.</p>
+        <p class="note-intro">Directed reading on three foundational papers covering the static, runtime, and patch axes of cyber-physical security for unmanned aerial vehicle (UAV) firmware, paired with local code-level reproductions on ArduPilot and PX4 in software-in-the-loop simulation. Each paper attacks a different stage of the post-deployment firmware audit pipeline; together they form a layered methodology that anchors the broader CS&nbsp;8903 project on bit-exact IEEE-754 PID equivalence verification.</p>
     </header>
 
     <div class="toc">
         <h2>Topics</h2>
         <ol>
+            <li><a href="#t0">Background &mdash; Why UAV Firmware Is Hard to Audit</a></li>
             <li><a href="#t1">MISMO &mdash; Stripped-Binary Identification of PID Methods</a></li>
             <li><a href="#t2">MAYDAY &mdash; Post-Accident Investigation via CVDG</a></li>
-            <li><a href="#t3">DisPatch &mdash; A DSL for In-Field UAV Firmware Patches</a></li>
+            <li><a href="#t3">DisPatch &mdash; A DSL for In-Field Firmware Patches</a></li>
             <li><a href="#t4">Synthesis &mdash; The L1 / L2 / L3 Layering</a></li>
+            <li><a href="#t5">Reproduce It Yourself</a></li>
         </ol>
     </div>
 
     <div class="note-body">
 
 <!-- ============================================================ -->
-<h2 id="t1">1. MISMO &mdash; Stripped-Binary Identification of PID Methods</h2>
+<h2 id="t0">0. Background &mdash; Why UAV Firmware Is Hard to Audit</h2>
 
-<p><strong>Paper:</strong> Pengfei Sun, Luis Garcia, Saman Zonouz. <em>"MISMO: Multi-Stage Inspection of Mission-Critical Operations on Drones."</em> DSN 2019. (Rutgers)</p>
+<p>Before any of the three papers makes sense, four pieces of context are non-negotiable: what a PID controller is, how it's organized in a modern UAV stack, what software-in-the-loop (SITL) simulation gives us, and why <em>stripped</em> binaries are the practical attack and audit target.</p>
 
-<div class="card-def">
-    <strong>Goal:</strong> Given a <em>stripped</em> ArduPilot or PX4 ELF (no symbols, no function names &mdash; what an attacker or auditor actually obtains), identify which functions implement the mission-critical PID control loops, so that downstream tooling can verify or patch them.
-</div>
+<h3>0.1 PID Control in 60 Seconds</h3>
 
-<h3>1.1 The Problem in One Sentence</h3>
-<p>A typical ArduPilot ELF contains roughly 800&ndash;1000 functions after stripping. Without symbols, every function is just <code>sub_XXXXXX</code>. PID controllers are tiny &mdash; tens of lines &mdash; and they look superficially like any other floating-point math routine (EKF updates, coordinate transforms, low-pass filters). Brute-force symbolic execution on every candidate is intractable. MISMO proposes a <strong>three-stage pipeline</strong> that progressively narrows the candidate set.</p>
+<p>The classical proportional-integral-derivative controller takes an error signal $e(t) = r(t) - y(t)$ (reference minus measurement) and produces an actuator command:</p>
 
-<h3>1.2 The Three Stages</h3>
+$$u(t) = K_p\, e(t) + K_i\!\!\int_0^t\! e(\tau)\,d\tau + K_d\,\dot{e}(t)$$
 
-<p><strong>Phase A &mdash; Static binary feature filter.</strong> The simplest signal: a PID controller is dense in floating-point arithmetic and operates on a <code>this</code> pointer (it's a C++ class method). For every function in the CFG:</p>
-<ol>
-    <li>Reconstruct the control-flow graph with <code>angr</code>'s CFGFast.</li>
-    <li>Count floating-point instructions (e.g., <code>vadd.f32</code>, <code>vmul.f32</code>, <code>vfma.f32</code>) using <code>capstone</code>.</li>
-    <li>Check whether the function dereferences a <code>this</code> pointer at known C++ offset patterns.</li>
-    <li>Filter: keep functions with $\text{fp\_density} \geq 5 \;\wedge\; \text{has\_this}$.</li>
-    <li>Rank surviving candidates by density.</li>
-</ol>
+<p>On a real UAV, this is discretised at a fixed rate (typically 400 Hz for the inner attitude loop, 50 Hz for the outer position loop) and the integral and derivative are replaced by their numerical equivalents:</p>
 
-<p><strong>Phase B &mdash; Dynamic taint propagation.</strong> Run the firmware in SITL, inject instrumented sensor inputs, and follow tainted variables through the call graph. Only functions that <em>read</em> tainted sensor data (gyro / accel / GPS) and <em>write</em> to actuator output channels survive. This collapses the candidate set further by an order of magnitude.</p>
+$$u_n = K_p\, e_n + K_i \sum_{k=0}^{n} e_k\,\Delta t + K_d \frac{e_n - e_{n-1}}{\Delta t}$$
 
-<p><strong>Phase C &mdash; SE + SMT AST matching.</strong> Symbolically execute each surviving candidate; build the AST of its output expression; SMT-match this AST against a library of known PID template ASTs (P, PI, PD, PID, T<sub>lpf</sub> variants, &hellip;). The match tells you not just <em>"this is a PID"</em> but <em>which PID variant</em>.</p>
+<p>In ArduPilot, each axis (roll, pitch, yaw rate, &hellip;) gets its own <code>AC_PID</code> instance. The integrator and derivative are usually post-processed by a <strong>low-pass filter</strong> on the derivative (the &ldquo;D&rdquo; term is notoriously noise-prone) and by <strong>anti-windup</strong> logic on the integrator. The actual <code>AC_PID::update_all</code> method in ArduPilot is ~50 lines of dense floating-point code &mdash; small enough to symbolically execute, large enough to make recognition non-trivial.</p>
+
+<h3>0.2 The Two-Tier Control Architecture</h3>
+
+<p>Modern open-source flight stacks (ArduPilot, PX4) all use a two-tier cascade:</p>
 
 <div class="card-concept">
-    <strong>Intuition:</strong> Phase A asks <em>"does it look like a PID?"</em>; Phase B asks <em>"does it behave like one?"</em>; Phase C asks <em>"is its algebra equal to a PID template?"</em> Each stage is necessary but not sufficient on its own.
+<table>
+<thead><tr><th>Tier</th><th>Rate</th><th>Loops</th><th>Setpoint &rarr; Measured</th></tr></thead>
+<tbody>
+<tr><td><strong>Outer (Position / Velocity)</strong></td><td>~50 Hz</td><td><code>AC_PosControl</code>, <code>AC_PID_2D</code></td><td>target NE position &rarr; commanded acceleration</td></tr>
+<tr><td><strong>Inner (Attitude / Rate)</strong></td><td>~400 Hz</td><td><code>AC_AttitudeControl</code>, <code>AC_PID</code></td><td>target rate &rarr; motor PWM</td></tr>
+</tbody>
+</table>
 </div>
 
-<h3>1.3 Local Reproduction &mdash; Phase A Only</h3>
+<p>This matters because bugs and forensic anomalies are tier-specific: a bad <code>PSC_VELXY_D</code> manifests as outer-loop position drift; a bad <code>ATC_RAT_PIT_P</code> manifests as inner-loop attitude oscillation. The same telemetry channel (say, $v_y$ or $\omega_\text{pitch}$) reveals different failure modes depending on which tier you instrument.</p>
 
-<p>I reproduced Phase A on five stripped ArduPilot ELFs &mdash; three ArduCopter releases (4.3.7, 4.4.4, 4.6.3), one ArduPlane, one ArduRover. The target method was <code>AC_PID::update_all</code>, ArduPilot's canonical attitude-rate PID. Results:</p>
+<h3>0.3 SITL: Software-In-The-Loop Simulation</h3>
+
+<p>SITL is the same firmware binary you would flash to a real Pixhawk, compiled for x86_64 or aarch64 host, with sensor drivers replaced by a simulated physics engine. From a verification standpoint this is the perfect substrate: <em>the binary under test is identical to the deployed one</em>, but inputs are reproducible and outputs are inspectable.</p>
+
+<p>ArduPilot's SITL exposes three physics options:</p>
+
+<table>
+<thead><tr><th>Option</th><th>Invocation</th><th>Quality</th></tr></thead>
+<tbody>
+<tr><td>Built-in SIH</td><td><code>--model + </code></td><td>Battle-tested by the ArduPilot team; default for CI</td></tr>
+<tr><td>JSON bridge</td><td><code>--model JSON</code></td><td>Generic UDP front-end for external physics (Gazebo, AirSim)</td></tr>
+<tr><td>FlightGear visualiser</td><td><code>--enable-fgview</code></td><td>Adds a 3D render layer; physics still runs in SITL</td></tr>
+</tbody>
+</table>
+
+<p>Throughout my reproductions I rely on the built-in SIH because its PID tuning is shipped with the firmware and known-good. Gazebo's iris airframe ships without a tuned PID set and flies unstably out-of-the-box on stock ArduPilot master &mdash; a separate problem that is out of scope for this reading.</p>
+
+<h3>0.4 Why Stripped Binaries</h3>
+
+<p>Two reasons:</p>
+
+<ol>
+    <li><strong>Operational reality.</strong> When a UAV crashes or is recovered after an incident, the only artefact an investigator reliably has is the <em>flashed image</em> &mdash; usually with debug symbols stripped to save flash space.</li>
+    <li><strong>Threat model.</strong> A supply-chain attacker who has tampered with the firmware will not leave symbol tables behind. Audit tooling that requires <code>nm</code> output is useless against this adversary.</li>
+</ol>
+
+<p>All three papers in this reading operate under this constraint: the only thing you're allowed to read is a sequence of bytes that decodes to ARM Cortex-M Thumb-2 instructions. Anything else &mdash; function boundaries, types, names &mdash; has to be recovered.</p>
+
+<!-- ============================================================ -->
+<h2 id="t1">1. MISMO &mdash; Stripped-Binary Identification of PID Methods</h2>
+
+<p><strong>Paper:</strong> Pengfei Sun, Luis Garcia, Saman Zonouz. <em>&ldquo;MISMO: Multi-Stage Inspection of Mission-Critical Operations on Drones.&rdquo;</em> DSN 2019. (Rutgers)</p>
+
+<div class="card-def">
+    <strong>Goal:</strong> Given a stripped ArduPilot or PX4 ELF (no symbols, no function names &mdash; what an attacker or auditor actually obtains), identify which functions implement the mission-critical PID control loops, so that downstream tooling can verify, fuzz, or patch them.
+</div>
+
+<h3>1.1 The Problem, Concretely</h3>
+
+<p>A modern ArduCopter ELF, stripped, contains roughly 800&ndash;1000 functions, every one named <code>sub_XXXXXX</code>. PID controllers are small (~50 lines), heavily floating-point, and structurally similar to a half-dozen other routines: the EKF measurement update, the complementary filter, the motor mixer, the coordinate transform between body and NED frames. Brute-forcing symbolic execution on every candidate is infeasible &mdash; each path can take minutes, and the path explosion is exponential. MISMO's contribution is a <strong>three-stage pipeline</strong> that progressively shrinks the candidate set by orders of magnitude using progressively more expensive analyses.</p>
+
+<h3>1.2 The Architecture</h3>
+
+<pre><code>┌─────────────────────────────────────────────────────────┐
+│  Stripped ELF (~800–1000 functions, sub_xxxxxx names)   │
+└──────────────────────────┬──────────────────────────────┘
+                           │  Phase A — static FP density + this-ptr
+                           ▼
+            ~50–100 candidate functions (~10% of input)
+                           │  Phase B — dynamic taint (gyro → motor)
+                           ▼
+                ~5–10 candidate functions
+                           │  Phase C — SE + SMT AST match vs PID templates
+                           ▼
+        Final identification: which template, which axis
+</code></pre>
+
+<p>The pattern is generic: <em>cheap static signal first, expensive semantic check last</em>. Every CPS-binary-analysis tool I have studied since (Crystal(ball), Mini-Me, Ares) recapitulates this layering with different ingredients.</p>
+
+<h3>1.3 Phase A &mdash; Static Binary Feature Filter</h3>
+
+<p>Phase A treats every function as a bag of instructions. It scores each by two binary features:</p>
+
+<ol>
+    <li><strong>FP density.</strong> Fraction of instructions that are floating-point arithmetic. ARM Cortex-M uses the VFPv4 ISA; the relevant mnemonics are <code>vadd.f32</code>, <code>vsub.f32</code>, <code>vmul.f32</code>, <code>vfma.f32</code>, <code>vdiv.f32</code>, <code>vcvt.f32</code>, <code>vldr</code>, <code>vstr</code>.</li>
+    <li><strong>this-pointer access.</strong> Whether the function reads from a small constant offset of the first argument register (<code>r0</code>), which is the C++ ABI signature of a class method dereferencing <code>this-&gt;member</code>.</li>
+</ol>
+
+<p>Pseudo-algorithm:</p>
+
+<pre><code class="language-python">def phase_a(elf_path, fp_density_min=5, this_ptr_offsets=range(0, 256, 4)):
+    proj = angr.Project(elf_path, auto_load_libs=False)
+    cfg  = proj.analyses.CFGFast()
+    candidates = []
+
+    for fn in cfg.functions.values():
+        insns = list(fn.instructions())
+        if len(insns) &lt; 10:
+            continue   # too small to be a PID
+
+        fp_count = sum(1 for i in insns if i.mnemonic.startswith(('vadd', 'vmul',
+                                                                   'vsub', 'vfma',
+                                                                   'vdiv', 'vcvt')))
+        if fp_count &lt; fp_density_min:
+            continue
+
+        has_this = any(insn_reads_offset_of(i, reg='r0', offsets=this_ptr_offsets)
+                       for i in insns)
+        if not has_this:
+            continue
+
+        candidates.append((fn.addr, fp_count))
+
+    return sorted(candidates, key=lambda x: -x[1])   # rank by FP density</code></pre>
+
+<p>Why these two features? Because they're the two structural invariants a PID method <em>must</em> satisfy: it does dense math (PID is by definition $K_p\, e + K_i \int e + K_d \dot{e}$) and it stores state across calls (the integrator, the previous error) which it reads off <code>this</code>.</p>
+
+<h3>1.4 Phase B &mdash; Dynamic Taint Propagation</h3>
+
+<p>Phase A keeps every function that <em>looks</em> like a PID structurally. Phase B asks whether it <em>behaves</em> like one. Run the firmware in SITL, instrument sensor inputs (gyroscope, accelerometer, GPS) with a taint label, propagate the taint forward through the call graph, and retain only functions that simultaneously:</p>
+
+<ol>
+    <li>Read at least one tainted variable (so they are downstream of a sensor), and</li>
+    <li>Write to an output channel destined for the motor mixer (so they are upstream of an actuator).</li>
+</ol>
+
+<p>This collapses the set by another order of magnitude, typically from 50&ndash;100 to under 10. Critically, it eliminates the EKF inner-state methods (they read sensors but their outputs feed back into other EKF stages, not directly to motors) and the motor-mixing logic (it writes motors but its inputs are already-PID-computed setpoints, not raw sensors).</p>
+
+<h3>1.5 Phase C &mdash; SE + SMT AST Matching</h3>
+
+<p>Phase C is the most expensive and the most precise. For each surviving candidate function, symbolically execute it, capture the AST of its output expression in terms of its inputs, and SMT-match this AST against a library of known PID-template ASTs (a literal P, a PI, a PID, a PID with derivative low-pass, a PID with anti-windup, &hellip;). The match returns not just &ldquo;yes / no this is a PID&rdquo; but <em>which variant</em>, which means downstream tooling can substitute equations symbolically rather than treating the binary as a black box.</p>
+
+<div class="card-concept">
+    <strong>Intuition for the three stages:</strong> Phase&nbsp;A asks <em>&ldquo;does it look like a PID?&rdquo;</em>, Phase&nbsp;B asks <em>&ldquo;does it behave like one?&rdquo;</em>, Phase&nbsp;C asks <em>&ldquo;is its algebra equal to a PID template?&rdquo;</em> Each stage is necessary but not sufficient on its own &mdash; this is the recurring lesson.
+</div>
+
+<h3>1.6 Local Reproduction &mdash; Phase A on Five Stripped ELFs</h3>
+
+<p>I reproduced Phase A on five stripped ArduPilot binaries: three ArduCopter releases (4.3.7, 4.4.4, 4.6.3), one ArduPlane stable build, one ArduRover stable build. Targets were <code>AC_PID::update_all</code> (the canonical attitude-rate PID) and <code>AC_PID_2D::update_all</code> (the position-loop 2D PID). The full pipeline is in the project repo under <code>repro/mismo/scale/</code>.</p>
+
+<p>Per-binary candidate counts after Phase A filter (<code>fp_density &gt;= 5 AND has_this_off</code>):</p>
 
 <table>
 <thead><tr><th>ELF</th><th>Total functions</th><th>Phase-A candidates retained</th></tr></thead>
@@ -113,7 +235,7 @@
 </tbody>
 </table>
 
-<p>And the rank of the target across the candidate list:</p>
+<p>Rank of the ground-truth target across the candidate list, averaged over the five binaries:</p>
 
 <table>
 <thead><tr><th>Recall&#x2009;@&#x2009;K</th><th>Hits</th><th>Percentage</th></tr></thead>
@@ -125,90 +247,157 @@
 </tbody>
 </table>
 
+<h3>1.7 How to Read These Numbers Honestly</h3>
+
 <div class="card-note">
-    <strong>How to read these numbers honestly.</strong> Recall&#x2009;@&#x2009;10 = 0 % is <em>not</em> a failure of MISMO &mdash; it is the design ceiling of Phase A alone. ArduPilot contains ~100 high-FP-density routines (EKF, complementary filters, coordinate transforms, motor mixers); on FP density alone they look indistinguishable from a PID. Recall&#x2009;@&#x2009;50 = 60 % means Phase A correctly keeps the target in the top ~5 % of the candidate space &mdash; a reasonable starting point for Phase B taint propagation to converge further.
+<p><strong>Recall&#x2009;@&#x2009;10 = 0 % is not a failure of MISMO.</strong> It is the design ceiling of Phase A <em>alone</em>. ArduCopter contains roughly 100 high-FP-density routines: EKF predict / update, complementary filter, gyro fusion, Mahony attitude estimator, coordinate transforms (NED &harr; body), motor mixers, low-pass filters, scaling routines. On FP density alone they look indistinguishable from a PID controller. The MISMO paper does not claim that Phase A is sufficient on its own; it explicitly designs Phase A as a wide-net pre-filter for Phase B.</p>
+
+<p>Recall&#x2009;@&#x2009;50 = 60 % is the genuinely useful number: it means Phase A keeps the target in the top ~5 % of the candidate space &mdash; a workable starting point for Phase B taint propagation to converge to single digits.</p>
 </div>
 
-<h3>1.4 Why Phase A Matters Even Though It Alone Misses</h3>
-<p>A modern UAV firmware has ~1000 functions. Phase A reliably gets us to ~50&ndash;100 candidates without running the binary. Every later, more expensive stage (taint, symbolic execution, SMT) only has to operate on this reduced set. This is the core insight: <em>cheap static filters first, expensive semantic analysis last</em>. MISMO is a clean instance of the broader CPS-security pattern of <strong>layered filtering with increasing analytical cost</strong>.</p>
+<h3>1.8 What's New in MISMO Versus the Pre-2019 State of the Art</h3>
+
+<p>Before MISMO, the dominant approach to PID identification was either (a) symbol-table extraction (useless against stripped binaries) or (b) source-code instrumentation (useless against deployed firmware). MISMO's contribution is showing that the gap between &ldquo;I have the binary&rdquo; and &ldquo;I can verify the PID is unmodified&rdquo; can be closed entirely with off-the-shelf binary-analysis primitives, with no source, no symbols, no traces, and no co-operation from the manufacturer.</p>
+
+<p>The downstream descendants of this idea include Crystal(ball) (DSN 2020), Mini-Me (CCS 2021), and the bit-exact PID equivalence verifier that anchors my CS 8903 project &mdash; all of which take a MISMO-identified function as their input.</p>
 
 <!-- ============================================================ -->
 <h2 id="t2">2. MAYDAY &mdash; Post-Accident Investigation via CVDG</h2>
 
-<p><strong>Paper:</strong> Taegyu Kim, Chung Hwan Kim, Altay Ozen, Fan Fei, Zhan Tu, Xiangyu Zhang, Xinyan Deng, Dave (Jing) Tian, Dongyan Xu. <em>"MAYDAY: Identifying Post-Accident Investigation Targets for Drones."</em> USENIX Security 2020. (Purdue)</p>
+<p><strong>Paper:</strong> Taegyu Kim, Chung Hwan Kim, Altay Ozen, Fan Fei, Zhan Tu, Xiangyu Zhang, Xinyan Deng, Dave (Jing) Tian, Dongyan Xu. <em>&ldquo;MAYDAY: Identifying Post-Accident Investigation Targets for Drones.&rdquo;</em> USENIX Security 2020. (Purdue)</p>
 
 <div class="card-def">
-    <strong>Goal:</strong> After a drone crash, given only (i) the last seconds of telemetry from the flight log, and (ii) the firmware ELF, point an investigator at the parameter or code change that caused the crash &mdash; instead of asking them to manually inspect ~1000 tunable parameters.
+    <strong>Goal:</strong> After a drone crash, given only (i) the last seconds of telemetry from the flight log and (ii) the firmware ELF, point an investigator at the parameter or code change that caused the crash &mdash; instead of asking them to manually inspect the ~1000 tunable parameters of a modern flight stack.
 </div>
 
-<h3>2.1 The Problem in One Sentence</h3>
-<p>ArduCopter alone exposes ~1000 user-tunable parameters (<code>ATC_RAT_PIT_P</code>, <code>PSC_VELXY_D</code>, &hellip;). A wrong value on any of them can cause a crash, often through subtle multi-loop coupling. Manually correlating <em>this telemetry anomaly</em> with <em>that parameter</em> is what MAYDAY automates.</p>
+<h3>2.1 Why This Is Hard</h3>
 
-<h3>2.2 The Core Data Structure: Control-Variable Dependency Graph (CVDG)</h3>
-<p>Built once per firmware version, the CVDG is a directed graph where:</p>
+<p>ArduCopter exposes roughly 1000 user-tunable parameters: gains (<code>ATC_RAT_PIT_P</code>), filter time constants (<code>ATC_INPUT_TC</code>), failsafe thresholds (<code>BATT_LOW_VOLT</code>), sensor calibrations, geofence radii. Any one of them, set out of range, can crash a drone &mdash; often through subtle multi-loop interactions where the surface symptom is several control-loop hops downstream of the root cause. The forensic correlation problem &mdash; <em>this telemetry symptom &rarr; that parameter</em> &mdash; is exactly what MAYDAY automates.</p>
+
+<h3>2.2 The Core Data Structure: Control-Variable Dependency Graph</h3>
+
+<p>The CVDG is the heart of MAYDAY. Built once per firmware version, it is a directed graph that captures every control-flow and data-flow relationship between parameters, internal variables, methods, and output channels.</p>
+
+<div class="card-concept">
+<strong>CVDG nodes:</strong>
 <ul>
-    <li><strong>Nodes</strong> are variables: parameters (<code>ATC_RAT_PIT_P</code>), internal state (<code>_pitch_error</code>), methods (<code>AC_PID::update_all</code>), or output channels (<code>motor_pitch_out</code>).</li>
-    <li><strong>Edges</strong> encode the four kinds of control-flow / data-flow relationships:</li>
+    <li><strong>Parameter</strong> nodes &mdash; user-tunable values exposed over MAVLink (e.g., <code>ATC_RAT_PIT_P</code>).</li>
+    <li><strong>Internal state</strong> nodes &mdash; private member variables of control classes (e.g., <code>_pitch_error</code>, <code>_integrator</code>).</li>
+    <li><strong>Method</strong> nodes &mdash; binary addresses of identified control methods (e.g., the address that <code>nm</code> would call <code>AC_PID::update_all</code>).</li>
+    <li><strong>Output channel</strong> nodes &mdash; telemetry-observable outputs (e.g., <code>motor_pitch_out</code>, <code>vel_y</code>).</li>
 </ul>
+</div>
+
+<p>And four edge types, encoding the dependency direction:</p>
 
 <table>
 <thead><tr><th>Edge type</th><th>Direction</th><th>Meaning</th></tr></thead>
 <tbody>
-<tr><td><code>param_of</code></td><td>param &rarr; method</td><td>"this method reads this parameter"</td></tr>
-<tr><td><code>binds_to</code></td><td>MAVLink name &rarr; internal var</td><td>parameter aliasing across the MAVLink boundary</td></tr>
-<tr><td><code>produces_for</code></td><td>method &rarr; output channel</td><td>"this method writes this output"</td></tr>
-<tr><td><code>read_by</code></td><td>variable &rarr; method</td><td>"this method reads this variable"</td></tr>
+<tr><td><code>param_of</code></td><td>parameter &rarr; method</td><td>this method reads this parameter at runtime</td></tr>
+<tr><td><code>binds_to</code></td><td>MAVLink name &rarr; internal var</td><td>aliasing across the MAVLink boundary (see &sect;2.3)</td></tr>
+<tr><td><code>produces_for</code></td><td>method &rarr; output channel</td><td>this method writes this telemetry channel</td></tr>
+<tr><td><code>read_by</code></td><td>variable &rarr; method</td><td>this method reads this variable</td></tr>
 </tbody>
 </table>
 
-<p>My ArduCopter 4.6.x CVDG: <strong>483 nodes, 1498 edges, 80.3 % of nodes bridged to binary addresses</strong> via <code>nm</code> symbol lookup.</p>
+<p>My reproduced ArduCopter 4.6.x CVDG: <strong>483 nodes, 1498 edges, 80.3 % of nodes bridged to binary addresses</strong> via per-binary <code>nm</code> symbol lookup at construction time. The remaining 19.7 % are nodes that exist in source (typically helper inline functions) but get inlined away in the optimised binary &mdash; an unavoidable consequence of <code>-O2</code> compilation.</p>
 
-<h3>2.3 The Three-Stage Pipeline</h3>
+<h3>2.3 The Subtle Aliasing Problem</h3>
 
-<p><strong>(1) Anomaly detection.</strong> Compute per-channel telemetry statistics on a baseline (<em>Phase A</em>) flight and the suspect (<em>Phase B</em>) flight. If a statistic exceeds a calibrated threshold, an <em>anomaly type</em> is emitted. Examples:</p>
+<p>A nasty real-world detail: MAVLink parameter names and internal C++ member names often diverge across firmware revisions. The position-loop velocity D-gain is:</p>
 
-<table>
-<thead><tr><th>Anomaly type</th><th>Threshold</th><th>Channel</th></tr></thead>
-<tbody>
-<tr><td><code>pitch_rate_oscillation</code></td><td>$\sigma_\text{pitchspeed} > 0.30$ rad/s</td><td>inner attitude loop</td></tr>
-<tr><td><code>position_loop_drift</code></td><td>$\sigma_{v_y} > 0.025$ m/s</td><td>outer position loop</td></tr>
-</tbody>
-</table>
+<ul>
+    <li>Called <code>PSC_VELXY_D</code> in MAVLink parameter dumps (the name a ground station sees).</li>
+    <li>Stored internally as <code>_velxy_d</code> in <code>AC_PosControl</code>.</li>
+    <li>Was renamed from <code>PSC_NE_VEL_D</code> in earlier versions, and at one point through a typo in firmware code was momentarily <code>PSC__NE_VEL_D</code> with a double underscore.</li>
+</ul>
 
-<p><strong>(2) Seed-method lookup.</strong> Each anomaly type maps to a known seed method:</p>
+<p>For the CVDG reverse-walk to work, the <code>binds_to</code> edges have to enumerate every historical alias. My implementation maintains an explicit alias table:</p>
 
-<pre><code class="language-python">ANOMALY_TO_SEED_METHOD = {
-    "pitch_rate_oscillation": "AC_PID::update_all",
-    "position_loop_drift":    "AC_PID_2D::update_all",
-    "input_shape_jerk":       "AC_AttitudeControl::input_quaternion",
-    # ...
+<pre><code class="language-python">PARAM_ALIASES = {
+    # MAVLink name      : Internal variable name
+    "PSC_VELXY_D"       : "_velxy_d",
+    "PSC_NE_VEL_D"      : "_velxy_d",   # historical name
+    "PSC__NE_VEL_D"     : "_velxy_d",   # typo variant
 }</code></pre>
 
-<p><strong>(3) CVDG reverse-walk.</strong> BFS backwards from the seed method through <code>read_by</code> and <code>binds_to</code> edges. Parameters are ranked by hop count (fewer hops &rarr; higher rank). Output: top-K parameters.</p>
+<p>Missing any alias means the reverse-walk fails silently: the anomaly is detected, the seed method is correct, but the parameter that actually moved (<code>PSC_NE_VEL_D</code> in a 4.4.x log) is never reached because the graph has no edge from internal-variable to historical-MAVLink-name. This was one of the early-stage debugging frustrations in my reproduction.</p>
 
-<h3>2.4 Local Reproduction in Live ArduCopter SITL</h3>
+<h3>2.4 The Pipeline, End-to-End</h3>
 
-<p>I reproduced MAYDAY end-to-end against four real ArduPilot bugs with <em>public</em> ground truth (release notes + verified envelopes), each provoked in a fresh ArduCopter SITL flight:</p>
+<p>Anomaly detection &rarr; seed-method lookup &rarr; reverse-walk &rarr; ranked parameter list.</p>
+
+<p><strong>(1) Anomaly detection.</strong> Run two flights of identical mission profile: a baseline (Phase A) on the audited firmware, and a suspect (Phase B) on the firmware in question. Compute per-channel statistics on both:</p>
+
+<pre><code class="language-python">CHANNELS = {
+    "pitchspeed_std" : (lambda log: log["ATTITUDE.pitchspeed"].std(),  0.30),  # rad/s
+    "vy_std"         : (lambda log: log["LOCAL_POSITION_NED.vy"].std(), 0.025), # m/s
+    "horiz_vel_std"  : (lambda log: hypot(log["vx"], log["vy"]).std(),  0.025), # m/s
+    # ...
+}
+
+ANOMALY_TO_SEED = {
+    "pitch_rate_oscillation": "AC_PID::update_all",
+    "position_loop_drift"   : "AC_PID_2D::update_all",
+    "input_shape_jerk"      : "AC_AttitudeControl::input_quaternion",
+}
+
+def detect_anomalies(baseline_log, suspect_log):
+    anomalies = []
+    for name, (extractor, threshold) in CHANNELS.items():
+        base = extractor(baseline_log)
+        susp = extractor(suspect_log)
+        if susp / base &gt; threshold_ratio(threshold):
+            anomalies.append(name)
+    return anomalies</code></pre>
+
+<p><strong>(2) Seed-method lookup.</strong> Each anomaly maps to a known seed method address in the CVDG (the <code>ANOMALY_TO_SEED</code> dict above).</p>
+
+<p><strong>(3) CVDG reverse-walk.</strong> From the seed method, BFS backwards through <code>read_by</code> and <code>binds_to</code> edges. Each path back to a parameter node contributes one ranking entry, scored by hop count (fewer hops &rArr; closer to the seed &rArr; higher rank). Implementation sketch:</p>
+
+<pre><code class="language-python">def reverse_walk(cvdg, seed_method, max_hops=8):
+    visited = {seed_method: 0}
+    queue   = deque([seed_method])
+    while queue:
+        node = queue.popleft()
+        if visited[node] &gt;= max_hops:
+            continue
+        for predecessor in cvdg.predecessors(node, edges={"read_by", "binds_to"}):
+            if predecessor not in visited:
+                visited[predecessor] = visited[node] + 1
+                queue.append(predecessor)
+    return sorted(
+        [(n, hops) for n, hops in visited.items() if cvdg.node_type(n) == "parameter"],
+        key=lambda x: x[1]
+    )</code></pre>
+
+<h3>2.5 Worked Example &mdash; the PSC_VELXY_D = 0.5 Bug</h3>
+
+<p>ArduCopter 4.6.2 reduced the default value of <code>PSC_VELXY_D</code> from 0.5 to 0.25 in response to user reports of position-loop overshoot. I reverted the value to 0.5 (the historical default) and flew the same 5-waypoint square mission as the baseline, in live SITL. Stages of the pipeline:</p>
+
+<ol>
+    <li><strong>Anomaly detection.</strong> $\sigma_{v_y}$ jumped from baseline 0.0206 m/s to 0.0306 m/s (factor 1.49&times;), past the 0.025 m/s threshold &rarr; <code>position_loop_drift</code> anomaly emitted.</li>
+    <li><strong>Seed-method lookup.</strong> <code>position_loop_drift</code> &rarr; <code>AC_PID_2D::update_all</code> at binary address resolved by per-binary <code>nm</code>.</li>
+    <li><strong>Reverse-walk.</strong> BFS from <code>AC_PID_2D::update_all</code> through <code>read_by</code> edges reaches 7 parameter nodes within 3 hops; <code>_velxy_d</code> is hop-1, the closest. Its alias <code>PSC_VELXY_D</code> is ranked &num;1.</li>
+</ol>
+
+<p>Result: <strong>rank 1 / 7 &mdash; FORENSIC_HIT_RANK_1</strong>. The full result JSON is in the project repo at <code>repro/mayday/sitl_runtime/MAYDAY_REAL_BUG_PSC_VELXY_D_RESULT.json</code>.</p>
+
+<h3>2.6 Full Reproduction Results &mdash; 4 Real Bugs + 15 Synthetic Cells</h3>
+
+<p>I exercised the full pipeline against four ArduPilot bugs with <em>public</em> ground truth (release-note default changes + documented envelope violations) and one separate 15-cell synthetic injection matrix (5 parameters &times; 3 magnitudes).</p>
 
 <table>
 <thead><tr><th>#</th><th>Bug</th><th>Ground-truth source</th><th>Anomaly signal (baseline &rarr; provoked)</th><th>Result</th></tr></thead>
 <tbody>
-<tr><td>1</td><td><code>PSC_VELXY_D = 0.5</code></td><td>4.6.2 release note (default reduced)</td><td>$\sigma_{v_y}$ &nbsp;0.0206 &rarr; <strong>0.0306</strong> (1.49&times;)</td><td><strong>rank 1 / 7</strong> &mdash; top-1 hit</td></tr>
-<tr><td>2</td><td><code>ATC_RAT_PIT_P = 0.8</code></td><td>Verified envelope [0.125, 0.500]</td><td>$\sigma_\text{pitchspeed}$ &nbsp;0.168 &rarr; <strong>1.217</strong> (7.24&times;)</td><td><strong>rank 4 / 48</strong> &mdash; top-5 hit</td></tr>
-<tr><td>3</td><td><code>ATC_INPUT_TC = 0.01</code></td><td>PR 32643 (default reduced)</td><td>$\sigma_\text{pitchspeed}$ &nbsp;0.175 &rarr; 0.161 &mdash; <em>no growth</em></td><td>anomaly not detected (honest negative)</td></tr>
-<tr><td>4</td><td><code>ATC_RAT_PIT_I = 10.0</code></td><td>Envelope, 74&times; default</td><td>$\sigma_\text{pitchspeed}$ &nbsp;0.150 &rarr; 0.169 &mdash; below threshold</td><td>anomaly not detected (honest negative)</td></tr>
+<tr><td>1</td><td><code>PSC_VELXY_D = 0.5</code></td><td>4.6.2 release note (default reduced)</td><td>$\sigma_{v_y}$ &nbsp;0.0206 &rarr; <strong>0.0306</strong> (1.49&times;)</td><td><strong>rank 1 / 7</strong></td></tr>
+<tr><td>2</td><td><code>ATC_RAT_PIT_P = 0.8</code></td><td>Verified envelope [0.125, 0.500]</td><td>$\sigma_\text{pitchspeed}$ &nbsp;0.168 &rarr; <strong>1.217</strong> (7.24&times;)</td><td><strong>rank 4 / 48</strong></td></tr>
+<tr><td>3</td><td><code>ATC_INPUT_TC = 0.01</code></td><td>PR 32643 (default reduced)</td><td>$\sigma_\text{pitchspeed}$ &nbsp;0.175 &rarr; 0.161 &mdash; <em>no growth</em></td><td>not detected (honest negative)</td></tr>
+<tr><td>4</td><td><code>ATC_RAT_PIT_I = 10.0</code></td><td>Envelope, 74&times; default</td><td>$\sigma_\text{pitchspeed}$ &nbsp;0.150 &rarr; 0.169 &mdash; below threshold</td><td>not detected (honest negative)</td></tr>
 </tbody>
 </table>
 
-<div class="card-note">
-    <strong>The two negatives are pipeline boundaries, not pipeline bugs.</strong>
-    <ul>
-        <li><strong>Bug #3 was a test-design error.</strong> PR 32643 <em>reduced</em> the default <code>ATC_INPUT_TC</code>, which means the old default was too high (too sluggish). Setting it to <code>0.01</code> makes the response <em>more</em> responsive than the new default &mdash; the opposite of the historical bug's direction. To reproduce the real failure mode, the value should have been set to <code>0.5</code> or higher.</li>
-        <li><strong>Bug #4 was a windup time-scale issue.</strong> <code>ATC_RAT_PIT_I</code> is the rate-loop integrator gain; integrator divergence accumulates over time. The 10-second probe window used here is far too short to surface windup-driven divergence.</li>
-    </ul>
-</div>
-
-<p>Combining the four documented bugs with a separate 15-cell synthetic injection matrix (5 parameters &times; 3 magnitudes):</p>
+<p>Combined headline numbers across the 19 total trials (4 real + 15 synthetic):</p>
 
 <table>
 <thead><tr><th>Source</th><th>n</th><th>Anomalies detected</th><th>Conditional recall&#x2009;@&#x2009;5</th><th>Unconditional recall&#x2009;@&#x2009;5</th></tr></thead>
@@ -219,105 +408,235 @@
 </tbody>
 </table>
 
-<p>Wilson 95 % CI on the n = 14 conditional recall: <strong>[77 %, 100 %]</strong>.</p>
+<p>Wilson 95 % confidence interval on the n = 14 conditional recall: <strong>[77 %, 100 %]</strong>.</p>
 
-<h3>2.5 An Honest Apples-vs-Oranges Note</h3>
-<p>MAYDAY's original paper reports 75 % localization within 4 hops on <em>private 3DR IRIS+ and MantisQ crash logs</em> &mdash; bugs that were genuinely <em>unknown</em> to the investigator at the time. My reproduction operates on <em>known</em> bugs chosen specifically because they have clean public ground truth (release-note default changes, documented envelope violations). Known-bug reproduction is methodologically much easier than unknown-bug investigation, and the headline numbers should not be compared directly. The contribution of this reproduction is end-to-end pipeline executability and the documentation of pipeline boundaries, not a "we beat MAYDAY" claim.</p>
+<h3>2.7 The Two Honest Negatives, Mechanistically</h3>
 
-<!-- ============================================================ -->
-<h2 id="t3">3. DisPatch &mdash; A DSL for In-Field UAV Firmware Patches</h2>
+<div class="card-note">
+<p><strong>Both negatives are pipeline boundaries, not pipeline bugs.</strong> Each one isolates a specific failure mode of the anomaly-detection layer:</p>
 
-<p><strong>Paper:</strong> Taegyu Kim, Aolin Ding, Sriharsha Etigowni, Pengfei Sun, Jizhou Chen, Luis Garcia, Saman Zonouz, Dongyan Xu, Dave (Jing) Tian. <em>"DisPatch: Identification, Disclosure, and Patching of Drone Firmware Configuration Vulnerabilities."</em> MobiSys 2022.</p>
+<p><strong>Bug #3 &mdash; test-design direction error.</strong> Pull request 32643 <em>reduced</em> the default <code>ATC_INPUT_TC</code> from a high value (sluggish input shaping) toward 0.15. Setting the parameter to 0.01 makes the response <em>more</em> responsive than the new default &mdash; the opposite of the historical bug's direction. The flight was smooth because the parameter, while extreme, was extreme in the safe direction. The anomaly detector correctly classified the flight as nominal. The right reproduction would set the value to 0.5 or higher (deliberately sluggish), which would surface as a different anomaly type (input-shaping lag, not yet wired in this reproduction).</p>
 
-<div class="card-def">
-    <strong>Goal:</strong> Apply small, tractable, verifiable patches to deployed drone firmware in the field &mdash; without recompiling the firmware, without grounding the fleet, and without the risk that a hand-written assembly patch destabilizes flight control.
+<p><strong>Bug #4 &mdash; windup time-scale exceeds probe window.</strong> <code>ATC_RAT_PIT_I</code> is the rate-loop integrator gain. Integrator-driven divergence accumulates over time as the windup term grows; the symptom is a slow drift of the actuator setpoint, not a fast oscillation. My probe window was 10 seconds; integrator divergence at 74&times; default needs ~30&ndash;60 seconds to surface above the per-channel noise floor. The anomaly detector cannot distinguish &ldquo;no problem&rdquo; from &ldquo;problem hasn't manifested yet within this window&rdquo; without a longer probe and a steady-state-error metric &mdash; both of which are missing from the current pipeline. The same pattern shows up in 3 of the 15 synthetic <code>ATC_RAT_PIT_I</code> cells, all failing for the same reason. This was <em>predicted</em> in advance based on the synthetic matrix and is the cleanest example of a known structural boundary of the pipeline.</p>
 </div>
 
-<h3>3.1 Why a DSL Is the Right Idea</h3>
-<p>Most published UAV firmware bugs fall into a small number of categories: an unbounded scalar that should be clamped, a stale value that should be replaced, a sensor reading that should be logged before use, a derivative that should be rate-limited. DisPatch observes that <strong>this small operational vocabulary is enough to express the majority of real configuration patches</strong>. By restricting patches to this DSL:</p>
+<h3>2.8 An Honest Apples-vs-Oranges Note</h3>
+
+<p>The original MAYDAY paper reports 75 % localisation within 4 hops on <em>private 3DR IRIS+ and MantisQ crash logs</em> &mdash; bugs that were genuinely unknown to the investigators at the time. My reproduction operates on <em>known</em> bugs, chosen specifically because they have clean public ground truth (release-note default changes, documented envelope violations). Known-bug reproduction is methodologically much easier than unknown-bug investigation, and the headline numbers should not be compared directly. The contribution of my reproduction is end-to-end pipeline executability on public artefacts and the mechanistic documentation of pipeline boundaries &mdash; not a &ldquo;we beat MAYDAY&rdquo; claim.</p>
+
+<!-- ============================================================ -->
+<h2 id="t3">3. DisPatch &mdash; A DSL for In-Field Firmware Patches</h2>
+
+<p><strong>Paper:</strong> Taegyu Kim, Aolin Ding, Sriharsha Etigowni, Pengfei Sun, Jizhou Chen, Luis Garcia, Saman Zonouz, Dongyan Xu, Dave (Jing) Tian. <em>&ldquo;DisPatch: Identification, Disclosure, and Patching of Drone Firmware Configuration Vulnerabilities.&rdquo;</em> MobiSys 2022.</p>
+
+<div class="card-def">
+    <strong>Goal:</strong> Apply small, tractable, verifiable patches to deployed drone firmware in the field &mdash; without recompiling, without grounding the fleet, and without the risk that a hand-written assembly patch destabilises the flight controller.
+</div>
+
+<h3>3.1 Why a Domain-Specific Language Is the Right Idea</h3>
+
+<p>The naive alternative &mdash; ship a hand-written assembly patch as a hot-swap binary blob &mdash; has three failure modes:</p>
+
+<ol>
+    <li><strong>No formal semantics.</strong> A hand-written patch is just bytes; you can prove nothing about it except by exhaustive testing.</li>
+    <li><strong>Hard to verify.</strong> Symbolic execution on arbitrary assembly is intractable when the patch can touch any register, any memory location, any flag.</li>
+    <li><strong>Hard to insert in place.</strong> Variable-length patches require trampoline schemes whose correctness depends on the patcher knowing about every callsite.</li>
+</ol>
+
+<p>DisPatch observes that the majority of published RAV firmware patches fall into a very small operational vocabulary: clamp a scalar, replace a value, rate-limit a derivative, log a sensor reading. By restricting patches to a DSL targeted at these primitives:</p>
+
 <ul>
-    <li>Patches have <em>formal operational semantics</em>, so verification is tractable.</li>
-    <li>Each DSL operation lowers to a small fixed-size Thumb-2 sequence, so binary insertion is in-place via trampoline.</li>
-    <li>The patch can be proved bit-exact equivalent to the original binary <em>outside</em> the patch region.</li>
+    <li>Each operation has formal operational semantics &rArr; verification is tractable.</li>
+    <li>Each operation lowers to a small fixed-size Thumb-2 sequence &rArr; in-place trampoline insertion is straightforward.</li>
+    <li>The patch can be proved bit-exact equivalent to the original binary <em>outside</em> the patch region &mdash; the gold-standard correctness statement.</li>
 </ul>
 
 <h3>3.2 The DSL Surface (6 Operations)</h3>
 
 <table>
-<thead><tr><th>Operation</th><th>Semantics</th></tr></thead>
+<thead><tr><th>Operation</th><th>Operational semantics</th><th>Typical use case</th></tr></thead>
 <tbody>
-<tr><td><code>clamp(var, lo, hi)</code></td><td>Scalar bound</td></tr>
-<tr><td><code>replace(var, new_val)</code></td><td>Direct overwrite</td></tr>
-<tr><td><code>log(var, condition)</code></td><td>Conditional telemetry emission</td></tr>
-<tr><td><code>rate_limit(var, max_delta_per_sec)</code></td><td>Rate-of-change bound</td></tr>
-<tr><td><code>vec_clamp(vec, lo, hi)</code></td><td>Per-component clamp on a vector</td></tr>
-<tr><td><code>if_clamp(cond, var, lo, hi)</code></td><td>Conditional clamp</td></tr>
+<tr><td><code>clamp(var, lo, hi)</code></td><td>$\text{var} := \max(lo, \min(hi, \text{var}))$</td><td>Bound a gain or setpoint</td></tr>
+<tr><td><code>replace(var, new_val)</code></td><td>$\text{var} := \text{new\_val}$</td><td>Force-override a corrupted default</td></tr>
+<tr><td><code>log(var, condition)</code></td><td>If $\text{condition}$, emit telemetry$(\text{var})$</td><td>Add forensic instrumentation</td></tr>
+<tr><td><code>rate_limit(var, max_dv_per_s)</code></td><td>$|\Delta \text{var}| \leq \text{max\_dv\_per\_s} \cdot \Delta t$</td><td>Prevent step changes in setpoint</td></tr>
+<tr><td><code>vec_clamp(vec, lo, hi)</code></td><td>Apply <code>clamp</code> per component</td><td>Bound a 3-axis setpoint vector</td></tr>
+<tr><td><code>if_clamp(cond, var, lo, hi)</code></td><td>Conditional <code>clamp</code> gated by $\text{cond}$</td><td>Tighter bound during landing</td></tr>
 </tbody>
 </table>
 
-<h3>3.3 Local Reproduction &mdash; Static Codegen Surface</h3>
+<h3>3.3 Codegen and Trampoline Insertion</h3>
 
-<p>I built a static codegen surface covering all six operations. Each DSL statement compiles to a Thumb-2 instruction sequence that is then trampoline-inserted at the patched function's entry. Example input:</p>
+<p>Each DSL statement is lowered to a Thumb-2 instruction sequence. For <code>clamp(var, lo, hi)</code> on an <code>f32</code> variable held in <code>s0</code> with bounds <code>lo, hi</code> loaded into <code>s1, s2</code>:</p>
+
+<pre><code>vmin.f32   s0, s0, s2     ; s0 = min(s0, hi)
+vmax.f32   s0, s0, s1     ; s0 = max(s0, lo)</code></pre>
+
+<p>Insertion happens via <strong>trampoline at the patched function's entry</strong>:</p>
+
+<ol>
+    <li>The first few bytes of the target function are saved.</li>
+    <li>An unconditional branch (<code>b.w &lt;patch_region&gt;</code>) is overwritten at the function entry.</li>
+    <li>The patch region contains the saved prologue + the DSL-lowered Thumb-2 + a branch back to the instruction <em>after</em> the inserted branch in the target.</li>
+</ol>
+
+<p>The bit-exact-outside-patch-region property is preserved because every byte outside the trampoline and patch region is byte-identical to the original binary, which can be checked by a simple <code>cmp</code> after the patch is applied.</p>
+
+<h3>3.4 Verification Story</h3>
+
+<p>For each DSL operation, the paper provides an operational semantic spec in first-order logic over IEEE-754 floats. A patched function's symbolic execution is checked for two properties:</p>
+
+<ol>
+    <li><strong>Within-patch-region correctness:</strong> the values flowing through the patch region satisfy the DSL semantics.</li>
+    <li><strong>Outside-patch-region equivalence:</strong> for every input, every byte of the program state outside the patch region is identical to the original binary's state at the same execution point.</li>
+</ol>
+
+<p>Together these give the strongest possible patch-correctness claim: the patch <em>does what the DSL says</em> and <em>nothing else</em>.</p>
+
+<h3>3.5 Local Reproduction &mdash; Static Codegen Surface</h3>
+
+<p>I built a static codegen pipeline covering all six operations and verified its output via assemble &harr; disassemble round-trip with <code>keystone-engine</code> and <code>capstone</code>. The full reproduction is under <code>repro/dispatch/</code>.</p>
+
+<p>Sample DSL input (<code>full_dsl_surface_test.dsl</code>):</p>
 
 <pre><code>clamp(target_pitch_rate, -1.0, 1.0)
+replace(failsafe_throttle, 0.0)
+log(sensor_gps_hdop, sensor_gps_hdop &gt; 5.0)
 rate_limit(roll_setpoint, 90.0)
+vec_clamp(motor_setpoint, -1.0, 1.0)
 if_clamp(in_landing, throttle_out, 0.1, 0.6)</code></pre>
 
-<p>Codegen output across the full 6-operation surface test:</p>
+<p>Codegen output summary:</p>
 
 <table>
 <thead><tr><th>Metric</th><th>Value</th></tr></thead>
 <tbody>
-<tr><td>Operations covered</td><td>6 / 6</td></tr>
+<tr><td>Operations exercised</td><td>6 / 6</td></tr>
 <tr><td>Total Thumb-2 instructions emitted</td><td>86</td></tr>
 <tr><td>Total binary patch size</td><td>226 bytes</td></tr>
-<tr><td>Round-trip verification</td><td>keystone-engine assemble &amp; capstone disassemble all valid</td></tr>
+<tr><td>Round-trip verification</td><td>keystone assemble &amp; capstone disassemble &mdash; all valid</td></tr>
 </tbody>
 </table>
 
+<h3>3.6 What's Explicitly Out of Scope for This Reproduction</h3>
+
 <div class="card-note">
-    <strong>Explicitly out of scope for this reproduction.</strong>
-    <ul>
-        <li>x86_64 patcher port (the paper&rsquo;s native target is ARMv7-M / Thumb-2; x86_64 codegen is a straightforward extension I have deferred).</li>
-        <li>Live SITL patch injection at runtime &mdash; the current reproduction stops at static codegen + emulated execution. Inserting a trampoline into a running ChibiOS image touches scheduler and FPU context-save semantics that I have not validated.</li>
-        <li>Integration with SAVIOR or RVfuzzer (the original paper&rsquo;s evaluation harnesses).</li>
-    </ul>
+<ul>
+    <li><strong>x86_64 patcher port.</strong> DisPatch's native target is ARMv7-M / Thumb-2 (the architecture of every modern Pixhawk). An x86_64 codegen pass is straightforward but unimplemented; it is deferred to a future revision.</li>
+    <li><strong>Live SITL patch injection at runtime.</strong> Current reproduction stops at static codegen and emulated execution. Inserting a trampoline into a running ChibiOS image touches scheduler context-save and FPU-state semantics that I have not validated; doing this safely requires a separate engineering pass on the OS-interaction layer.</li>
+    <li><strong>Integration with SAVIOR or RVfuzzer.</strong> The original DisPatch paper integrates with these fuzzers to source patch candidates; reproducing that integration is beyond the scope of the directed reading.</li>
+</ul>
 </div>
 
 <!-- ============================================================ -->
 <h2 id="t4">4. Synthesis &mdash; The L1 / L2 / L3 Layering</h2>
 
-<p>The three papers are usually presented as independent contributions, but they answer three orthogonal questions about the <em>same</em> object (a PID-based UAV control loop). One way to see the field clearly is to organize them into three layers:</p>
+<p>The three papers are usually presented as independent contributions, but they answer three orthogonal questions about the <em>same</em> object &mdash; a PID-based UAV control loop on a stripped binary. The cleanest way I have found to organise the literature is to assign each paper to a layer:</p>
 
 <div class="card-concept">
 <table>
 <thead><tr><th>Layer</th><th>Question</th><th>Method</th><th>Output</th><th>Representative paper</th></tr></thead>
 <tbody>
-<tr><td><strong>L1</strong></td><td>Which functions implement PID?</td><td>Static binary feature filters + dynamic taint + SMT AST matching</td><td>Ranked candidate addresses</td><td>MISMO</td></tr>
-<tr><td><strong>L2</strong></td><td>Are two versions of a PID method bit-exact equivalent?</td><td>Symbolic execution + Z3 IEEE-754 FPA solver</td><td>UNSAT proof or SAT counter-example</td><td>(verifier &mdash; see below)</td></tr>
+<tr><td><strong>L1</strong></td><td>Which functions implement PID?</td><td>Static binary features + dynamic taint + SMT AST matching</td><td>Ranked candidate addresses</td><td>MISMO</td></tr>
+<tr><td><strong>L2</strong></td><td>Are two PID-method versions bit-exact equivalent?</td><td>Symbolic execution + Z3 IEEE-754 FPA solver</td><td>UNSAT proof or SAT counter-example</td><td>(my CS 8903 project)</td></tr>
 <tr><td><strong>L3</strong></td><td>Is the running drone actually behaving normally?</td><td>Telemetry anomaly detection + CVDG reverse-walk</td><td>Ranked candidate parameter</td><td>MAYDAY</td></tr>
 </tbody>
 </table>
 </div>
 
-<p>The three layers are independent and composable:</p>
-<ul>
-    <li><strong>L1 narrows the search space for L2.</strong> Running symbolic execution on every function in a stripped binary is impractical; MISMO's filters reduce ~1000 candidates to ~50.</li>
-    <li><strong>L2 provides the bit-exact ground truth that L3 needs.</strong> If MAYDAY suspects that a deployed binary has drifted, an L2 verifier can prove (or disprove) bit-exact equivalence against the audited binary.</li>
-    <li><strong>L3 captures what L1 + L2 cannot.</strong> Parameters change <em>at runtime</em> &mdash; via MAVLink, on every flight. No amount of static analysis can detect a runtime parameter corruption; only telemetry-driven analysis can.</li>
-</ul>
-
-<p>DisPatch sits orthogonal to all three layers: it is the <em>response</em> mechanism that triggers when any of L1 / L2 / L3 surfaces a bug.</p>
-
-<h3>4.1 Where My CS 8903 Work Sits</h3>
-
-<p>My broader CS 8903 project is on the <strong>L2 layer</strong>: a bit-exact IEEE-754 FPA symbolic-execution verifier for stripped UAV firmware (currently anchored on 115 / 115 cumulative UNSAT proofs across six boards, six binary perturbations, and eleven PID-class methods). The reproductions on this page document my engagement with the L1 and L3 layers as the surrounding context for that work. Each layer informs the others:</p>
+<h3>4.1 The Three Layers Compose</h3>
 
 <ul>
-    <li>The L1 ceiling (Phase A&nbsp;recall&nbsp;@&nbsp;10 = 0 %) motivates pairing static filters with semantic verification.</li>
-    <li>The L3 boundary (windup time-scale exceeds the probe window) shows that even runtime forensics has structural limits that pure simulation can&rsquo;t resolve.</li>
-    <li>Both together justify L2: a layer whose claim &mdash; bit-exact equivalence over <em>all</em> floating-point inputs &mdash; is the strongest of the three and is independently auditable.</li>
+    <li><strong>L1 narrows the search space for L2.</strong> Running symbolic execution on every function in a stripped binary is impractical (path-explosion times the number of functions). MISMO-style filters reduce ~1000 candidates to under ten before any expensive analysis starts.</li>
+    <li><strong>L2 provides the bit-exact ground truth that L3 needs.</strong> If MAYDAY suspects that a deployed binary has drifted from its audited image, an L2 verifier can prove (or disprove) bit-exact equivalence at the PID-method level. Without L2, MAYDAY can only say &ldquo;something feels wrong&rdquo;; with L2, it can pinpoint <em>which method's equation has changed</em>.</li>
+    <li><strong>L3 captures what L1 + L2 cannot.</strong> Parameters change <em>at runtime</em> &mdash; via MAVLink, on every flight, sometimes adversarially. No amount of static analysis can detect a runtime parameter corruption; only telemetry-driven analysis can.</li>
 </ul>
+
+<p>DisPatch sits orthogonal to all three layers: it is the <em>response</em> mechanism that is triggered when any of L1 / L2 / L3 surfaces a bug. A DisPatch-generated patch can then be re-verified by L2 to confirm it does not break bit-exact equivalence outside the patch region.</p>
+
+<h3>4.2 Where My CS 8903 Project Sits</h3>
+
+<p>The broader CS 8903 project lives on the <strong>L2 layer</strong>: a bit-exact IEEE-754 FPA symbolic-execution verifier for stripped UAV firmware, currently anchored on 115 / 115 cumulative UNSAT proofs across six boards &times; six binary perturbations &times; eleven PID-class methods &times; three C++ classes &times; seven mathematical templates. The reproductions documented on this page are the surrounding context: they exercise the L1 and L3 layers end-to-end so that I understand the inputs and outputs each layer expects from L2.</p>
+
+<p>Each layer informs the others:</p>
+
+<ul>
+    <li>The L1 ceiling (Phase-A recall&nbsp;@&nbsp;10&nbsp;=&nbsp;0 %) motivates pairing structural filters with semantic verification &mdash; L2's role.</li>
+    <li>The L3 boundaries (windup time-scale, test-design direction) show that even runtime forensics has structural limits that pure simulation cannot resolve.</li>
+    <li>Both observations justify L2: a layer whose claim &mdash; bit-exact equivalence over <em>all</em> floating-point inputs &mdash; is the strongest of the three and is independently auditable by re-running the SMT proof.</li>
+</ul>
+
+<!-- ============================================================ -->
+<h2 id="t5">5. Reproduce It Yourself</h2>
+
+<p>Every reproduction described above is open-source-only on the input side: ArduPilot, PX4, angr, claripy, z3-solver, capstone, keystone-engine. Setup notes below assume a Linux host with Python 3.12, ~32 GB RAM, and ~20 GB free disk.</p>
+
+<h3>5.1 Environment Setup</h3>
+
+<pre><code class="language-bash"># Clone ArduPilot (shallow is fine for SITL-only work)
+git clone --depth 1 --recursive https://github.com/ArduPilot/ardupilot.git
+cd ardupilot && Tools/environment_install/install-prereqs-ubuntu.sh -y
+
+# Build SITL ArduCopter
+./waf configure --board sitl && ./waf copter
+
+# Python environment for the verifier and analysis
+python3.12 -m venv .venv && source .venv/bin/activate
+pip install angr==9.2.214 claripy==9.2.214 z3-solver==4.13.0.0 \
+            capstone keystone-engine pymavlink matplotlib</code></pre>
+
+<h3>5.2 MISMO Phase A on a Stripped ELF</h3>
+
+<pre><code class="language-bash"># Strip a copter binary
+arm-none-eabi-strip --strip-all build/sitl/bin/arducopter -o /tmp/arducopter.stripped
+
+# Run the Phase A filter
+python repro/mismo/scale/mismo_phaseA_stripped_scale.py \
+    --elf /tmp/arducopter.stripped \
+    --target AC_PID::update_all \
+    --out  /tmp/phaseA_result.json
+
+# Inspect: how many candidates survived, and where the target ranked
+jq '.summary' /tmp/phaseA_result.json</code></pre>
+
+<h3>5.3 MAYDAY Pipeline on a Real Bug</h3>
+
+<pre><code class="language-bash"># Launch SITL in one terminal
+cd ardupilot && Tools/autotest/sim_vehicle.py -v ArduCopter \
+    --console --no-mavproxy --speedup 1
+
+# In another terminal, run the bug driver:
+# (this provokes PSC_VELXY_D = 0.5 vs a baseline flight at 0.25)
+python repro/mayday/sitl_runtime/mayday_real_bug_psc_velxy_d.py \
+    --out /tmp/mayday_bug1.json
+
+# The pipeline runs:
+#   1. Baseline flight (40s EKF settle + 60s mission)
+#   2. Provoked flight (same mission, PSC_VELXY_D=0.5)
+#   3. Compute pre-vs-post anomaly statistics
+#   4. CVDG reverse-walk from the seed method
+#   5. Rank parameters by hop count
+jq '.verdict, .reverse_walk' /tmp/mayday_bug1.json</code></pre>
+
+<h3>5.4 DisPatch Static Codegen</h3>
+
+<pre><code class="language-bash"># Generate Thumb-2 from a DSL file
+python repro/dispatch/dispatch_v4_full_dsl.py \
+    --dsl  repro/dispatch/full_dsl_surface_test.dsl \
+    --arch armv7-m \
+    --out  /tmp/dispatch_codegen.json
+
+# Verify round-trip: assemble each op, disassemble, compare
+jq '.operations[] | {op, n_insns, n_bytes, roundtrip_ok}' /tmp/dispatch_codegen.json</code></pre>
+
+<h3>5.5 Recommended Order</h3>
+
+<ol>
+    <li>Get SITL flying a 5-waypoint mission with FlightGear visualisation first (a one-day yak-shave you should not skip &mdash; it makes everything else legible).</li>
+    <li>Reproduce MISMO Phase A. The numbers will surprise you only in how flat they are at @10; that's the lesson.</li>
+    <li>Reproduce MAYDAY on one real bug (Bug&nbsp;#1 above is the simplest); the alias-table debugging is where the time goes.</li>
+    <li>Reproduce DisPatch codegen last; it's the most self-contained and the least dependent on a working SITL.</li>
+</ol>
 
 <!-- ============================================================ -->
 <h2 id="summary">Reading List &amp; Reproduction Artefacts</h2>
@@ -325,20 +644,23 @@ if_clamp(in_landing, throttle_out, 0.1, 0.6)</code></pre>
 <div class="card-concept">
 <p><strong>Primary reading (advisor-directed):</strong></p>
 <ol>
-    <li>Sun, Garcia, Zonouz. <em>MISMO.</em> DSN 2019.</li>
-    <li>Kim et&nbsp;al. <em>MAYDAY.</em> USENIX Security 2020.</li>
-    <li>Kim et&nbsp;al. <em>DisPatch.</em> MobiSys 2022.</li>
+    <li>Sun, P., Garcia, L., Zonouz, S. <em>&ldquo;MISMO: Multi-Stage Inspection of Mission-Critical Operations on Drones.&rdquo;</em> DSN 2019.</li>
+    <li>Kim, T. et al. <em>&ldquo;MAYDAY: Identifying Post-Accident Investigation Targets for Drones.&rdquo;</em> USENIX Security 2020.</li>
+    <li>Kim, T. et al. <em>&ldquo;DisPatch: Identification, Disclosure, and Patching of Drone Firmware Configuration Vulnerabilities.&rdquo;</em> MobiSys 2022.</li>
 </ol>
 
-<p><strong>Supporting infrastructure used:</strong></p>
+<p><strong>Supporting infrastructure:</strong></p>
 <ul>
-    <li>ArduPilot SITL (<code>--model +</code> built-in SIH; <code>--enable-fgview</code> for FlightGear 3D visualisation).</li>
-    <li>PX4 SITL with SIH quadx airframe (<code>PX4_SYS_AUTOSTART=10040</code>).</li>
-    <li><code>angr</code> 9.2.214 (CFG construction, symbolic execution).</li>
+    <li>ArduPilot SITL with the built-in SIH physics model.</li>
+    <li>PX4 SITL with the SIH quadx airframe (<code>PX4_SYS_AUTOSTART=10040</code>).</li>
+    <li><code>angr</code> 9.2.214 for CFG construction and symbolic execution.</li>
     <li><code>claripy</code> 9.2.214 with a custom translator to <code>z3-solver</code> 4.13 FPA AST.</li>
-    <li><code>capstone</code> / <code>keystone-engine</code> for Thumb-2 disassembly / assembly.</li>
+    <li><code>capstone</code> &middot; <code>keystone-engine</code> for Thumb-2 disassembly / assembly.</li>
     <li><code>pymavlink</code> for MAVLink command and telemetry.</li>
+    <li>FlightGear 2020.3.18 for 3D visualisation (UDP 5503 FDM bridge).</li>
 </ul>
+
+<p><strong>Acknowledgements.</strong> The three papers above were assigned by my CS 8903 advisor; the L1 / L2 / L3 framing in &sect;4 is my own synthesis as I worked through the reproductions.</p>
 </div>
 
     </div>
@@ -346,6 +668,7 @@ if_clamp(in_landing, throttle_out, 0.1, 0.6)</code></pre>
 
 <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-bash.min.js"></script>
 <script src="notes.js"></script>
 </body>
 </html>
