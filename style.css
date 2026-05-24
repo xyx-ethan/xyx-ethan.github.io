@@ -1975,12 +1975,9 @@ section h2 {
 
 /* ===== Print ===== */
 @media print {
-    body { background: #fff; color: #1e293b; }
     .sidebar, .home-nav, .overlay, .scroll-top { display: none; }
     main { margin-left: 0; padding: 0; max-width: 100%; }
-    .card { background: #fff; border: 1px solid #ccc; border-left: 3px solid #999; }
     .card:hover { transform: none; box-shadow: none; }
     .fade-in { opacity: 1; transform: none; }
-    section h2 { color: #1e293b; }
     footer { display: none; }
 }
