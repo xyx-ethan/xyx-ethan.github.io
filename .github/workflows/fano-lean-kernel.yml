@@ -1,0 +1,81 @@
+name: Fano Lean kernel certificate
+
+on:
+  push:
+    branches:
+      - scratch/fano-lean-kernel-2026-09-03
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  kernel:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+
+      - name: Reconstruct isolated Lean project
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat .ci/fano-lean/part-*.b64 | tr -d '\r\n' | base64 --decode > /tmp/fano-project.tar.gz
+          echo '1fcc4fc6695769893d75fb0d017a2cc175506c54cecda4fa69d926544f5cf29c  /tmp/fano-project.tar.gz' | sha256sum --check
+          mkdir -p .ci/fano-lean/project
+          tar -xzf /tmp/fano-project.tar.gz -C .ci/fano-lean/project
+          find .ci/fano-lean/project -maxdepth 2 -type f -print | sort
+
+      - name: Install pinned Elan release
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --location --retry 3 \
+            https://github.com/leanprover/elan/releases/download/v4.2.4/elan-x86_64-unknown-linux-gnu.tar.gz \
+            --output /tmp/elan.tar.gz
+          echo '42b94d4244e8353142c456ec0e4ca6528fd898a6c604d4059f494e706e431f63  /tmp/elan.tar.gz' | sha256sum --check
+          tar -xzf /tmp/elan.tar.gz -C /tmp
+          /tmp/elan-init -y --default-toolchain none
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+      - name: Build and kernel-check the certificate
+        shell: bash
+        working-directory: .ci/fano-lean/project
+        run: |
+          set -euo pipefail
+          set -o pipefail
+          {
+            echo '=== pinned inputs ==='
+            cat lean-toolchain
+            cat lakefile.toml
+            echo '=== install pinned Lean toolchain ==='
+            elan toolchain install "$(cat lean-toolchain)"
+            echo '=== versions ==='
+            lean --version
+            lake --version
+            echo '=== resolve pinned Mathlib dependency ==='
+            lake update
+            echo '=== obtain Mathlib cache ==='
+            lake exe cache get
+            echo '=== kernel build ==='
+            lake build
+            echo '=== explicit root re-elaboration and #print axioms ==='
+            lake env lean FanoCertificate.lean
+          } 2>&1 | tee LEAN_KERNEL_BUILD.log
+          if grep -q 'sorryAx' LEAN_KERNEL_BUILD.log; then
+            echo 'ERROR: sorryAx appears in #print axioms output' >&2
+            exit 1
+          fi
+          grep -q 'fano_open_convex_code_certificate' LEAN_KERNEL_BUILD.log
+          echo 'LEAN_KERNEL_BUILD_PASS' | tee -a LEAN_KERNEL_BUILD.log
+
+      - name: Upload kernel evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: fano-lean-kernel-evidence
+          path: |
+            .ci/fano-lean/project/LEAN_KERNEL_BUILD.log
+            .ci/fano-lean/project/lake-manifest.json
+            .ci/fano-lean/project/FanoCertificate.lean
+          if-no-files-found: warn
