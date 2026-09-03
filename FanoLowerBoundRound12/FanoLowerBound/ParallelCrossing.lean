@@ -118,6 +118,7 @@ theorem parallel_crossing_of_lineMap_parameters
     (ha : a ∈ Ioo (0 : ℝ) 1) (hb : b ∈ Ioo (0 : ℝ) 1)
     (hp₂eq : p₂ = lineMap p₁ p₃ a)
     (hqeq : q = lineMap c p₂ b)
+    (hcq : c ≠ q)
     (hp₁edge : p₁ ∉ line[ℝ, c, q])
     (hp₃edge : p₃ ∉ line[ℝ, c, q]) :
     ∃ ε₀ : ℝ, 0 < ε₀ ∧
@@ -138,11 +139,6 @@ theorem parallel_crossing_of_lineMap_parameters
   have hεb1a : ε < b * (1 - a) := by
     dsimp [ε₀] at hεlt
     nlinarith [hb.1, hb.2, ha.1, ha.2]
-  have hcq : c ≠ q := by
-    intro hcq
-    apply hp₁edge
-    rw [← hcq]
-    exact left_mem_affineSpan_pair ℝ c c
   constructor
   · apply strictTriangleCombination_mem_sweptTriangleInterior hcq hp₁edge
     refine ⟨ε / a, (1 - b) * ε / (b * a), 1 - ε / (b * a), ?_, ?_, ?_, ?_, ?_⟩
@@ -180,7 +176,8 @@ theorem parallelLine_crosses_doubleSweptTriangles
   rcases ((sbtw_iff_mem_image_Ioo_and_ne).1 hp₂).1 with ⟨a, ha, haeq⟩
   rcases ((sbtw_iff_mem_image_Ioo_and_ne).1 hq).1 with ⟨b, hb, hbeq⟩
   have hedges := base_endpoints_not_mem_edgeLine hp₂ hq hc
-  exact parallel_crossing_of_lineMap_parameters ha hb haeq.symm hbeq.symm hedges.1 hedges.2
+  exact parallel_crossing_of_lineMap_parameters ha hb haeq.symm hbeq.symm
+    hq.left_ne.symm hedges.1 hedges.2
 
 /-- The weak boundary interface cannot in general be upgraded to strict
 betweenness: the selected boundary point may equal the exterior endpoint. -/
