@@ -12,14 +12,15 @@ import FanoLowerBound.DirectSixPointBranches
 import FanoLowerBound.SixPointRadonComplete
 import FanoLowerBound.SunflowerSegment
 import FanoLowerBound.BoundaryExit
+import FanoLowerBound.DoubleTriangle
 
 /-!
-# Fano lower-bound Round 18
+# Fano lower-bound Round 19
 
-This kernel target retains the complete six-point strict `2--3` Radon lemma and
-the sunflower segment deduction, and adds the exact last-exterior parameter
-lemma for an open set along a segment from an exterior point to an interior
-point.
+This kernel target retains the complete six-point strict `2--3` Radon lemma,
+the sunflower segment deduction, and the last-exterior parameter theorem. It
+adds the two swept-triangle inclusions used immediately before the parallel-
+line step of the open-convex sunflower line-core proof.
 -/
 
 #print axioms FanoLowerBound.ordered_ratio_circuit_core
@@ -55,3 +56,6 @@ point.
 #print axioms FanoLowerBound.sunflower_segment_of_everyLineMeetingThreeHitsCore
 #print axioms FanoLowerBound.exists_boundaryPoint_between_inside_outside
 #print axioms FanoLowerBound.exists_lastOutsideParameter
+#print axioms FanoLowerBound.sweptTriangleInterior_subset_of_openEdge
+#print axioms FanoLowerBound.doubleSweptTriangleInterior_subset_petals
+#print axioms FanoLowerBound.exists_boundaryPoint_with_doubleTriangleInclusions
