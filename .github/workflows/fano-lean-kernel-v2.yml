@@ -1,41 +1,13 @@
-name: Fano Lean kernel certificate v2
+name: Fano Lean kernel certificate v2 (archived)
 
 on:
-  push:
-    branches:
-      - fano-lean-kernel-20260903
   workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
-  kernel-check:
+  archived:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
-    env:
-      LEAN_NUM_THREADS: 2
     steps:
-      - uses: actions/checkout@v4
-      - name: Bootstrap pinned Lean and generate Lake manifest
-        working-directory: research/fano-odim4-lean
-        shell: bash
-        run: |
-          curl -sSfL https://elan.lean-lang.org/elan-init.sh | sh -s -- -y --default-toolchain none
-          source "$HOME/.elan/env"
-          lake update
-      - name: Build and independently check Lean certificate
-        uses: leanprover/lean-action@v1
-        with:
-          lake-package-directory: research/fano-odim4-lean
-          auto-config: false
-          build: true
-          test: false
-          lint: false
-          use-mathlib-cache: true
-          use-github-cache: false
-          leanchecker: true
-          nanoda: true
-          nanoda-allow-sorry: false
-          axiom-audit: true
-          axiom-audit-root: FanoOdim4
+      - run: echo "Superseded by the versioned final kernel workflow."
