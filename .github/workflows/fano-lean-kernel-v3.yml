@@ -44,11 +44,10 @@ jobs:
             echo "COMMIT $GITHUB_SHA"
             echo "BEGIN_LAKE_BUILD"
             lake build
-            status=$?
-            echo "END_LAKE_BUILD STATUS=$status"
-            exit $status
+            echo $? > /tmp/fano-lake-build-status
           } > CI_BUILD_LOG.txt 2>&1
-          status=$?
+          status=$(cat /tmp/fano-lake-build-status)
+          echo "END_LAKE_BUILD STATUS=$status" >> CI_BUILD_LOG.txt
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
           git add CI_BUILD_LOG.txt lake-manifest.json
