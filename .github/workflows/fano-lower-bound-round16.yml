@@ -34,6 +34,7 @@ jobs:
           test -s FanoLowerBoundRound12/FanoLowerBound/SixPointRatioPairs.lean
           test -s FanoLowerBoundRound12/FanoLowerBound/AllPositiveSixPointRadon.lean
           test -s FanoLowerBoundRound12/FanoLowerBound/OnePositiveRebase.lean
+          test -s FanoLowerBoundRound12/FanoLowerBound/OnePositiveRebaseOther.lean
           if grep -R -nE '(^|[^[:alnum:]_])(sorry|admit|by\?|exact\?|unsafe)([^[:alnum:]_]|$)' \
               FanoLowerBoundRound12 --include='*.lean'; then
             echo 'forbidden Lean placeholder or unsafe declaration found' >&2
@@ -55,6 +56,7 @@ jobs:
             FanoLowerBoundRound12/FanoLowerBound/SixPointRatioPairs.lean \
             FanoLowerBoundRound12/FanoLowerBound/AllPositiveSixPointRadon.lean \
             FanoLowerBoundRound12/FanoLowerBound/OnePositiveRebase.lean \
+            FanoLowerBoundRound12/FanoLowerBound/OnePositiveRebaseOther.lean \
             > FanoLowerBoundRound12/LEAN_SOURCE_SHA256SUMS
 
       - name: Install pinned Elan
@@ -115,4 +117,5 @@ jobs:
             FanoLowerBoundRound12/FanoLowerBound/SixPointRatioPairs.lean
             FanoLowerBoundRound12/FanoLowerBound/AllPositiveSixPointRadon.lean
             FanoLowerBoundRound12/FanoLowerBound/OnePositiveRebase.lean
+            FanoLowerBoundRound12/FanoLowerBound/OnePositiveRebaseOther.lean
           if-no-files-found: warn
