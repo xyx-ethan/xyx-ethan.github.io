@@ -123,9 +123,9 @@ theorem onePositive0_sixPoint_hasStrictRadon23
     rfl
   have hasum0 := b.sum_coord_apply_eq_one (p 4)
   have hasum : a0 + a1 + a2 + a3 = 1 := by
-    rw [← hasum0]
-    rw [sum_fin4]
-    rfl
+    calc
+      a0 + a1 + a2 + a3 = ∑ i, b.coord i (p 4) := by rw [sum_fin4]
+      _ = 1 := hasum0
   have ha0' : 0 < a0 := by simpa [a0, b] using ha0
   have ha1' : a1 < 0 := by simpa [a1, b] using ha1
   have ha2' : a2 < 0 := by simpa [a2, b] using ha2
@@ -136,12 +136,16 @@ theorem onePositive0_sixPoint_hasStrictRadon23
     rw [sum_fin4]
     dsimp [w]
     field_simp [ha0ne] <;> linarith [hasum]
+  have h00 : (1 / a0) * a0 = 1 := by field_simp [ha0ne]
+  have h01 : (1 / a0) * a1 + (-a1) / a0 = 0 := by field_simp [ha0ne]
+  have h02 : (1 / a0) * a2 + (-a2) / a0 = 0 := by field_simp [ha0ne]
+  have h03 : (1 / a0) * a3 + (-a3) / a0 = 0 := by field_simp [ha0ne]
   have hwcomb : ∑ i, w i • b' i = p' 4 := by
     rw [sum_fin4]
     change (1 / a0) • p 4 + ((-a1) / a0) • p 1 +
         ((-a2) / a0) • p 2 + ((-a3) / a0) • p 3 = p 0
     rw [hq]
-    field_simp [ha0ne]
+    simp only [smul_add, smul_smul]
     module
   have hapos' : ∀ i : Fin 4, 0 < b'.coord i (p' 4) := by
     intro i
