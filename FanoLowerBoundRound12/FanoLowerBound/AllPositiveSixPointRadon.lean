@@ -65,24 +65,30 @@ theorem allPositive_sixPoint_strictRadon23
     simpa [c] using b.sum_coord_apply_eq_one (p 5)
 
   have hmul (i : Fin 4) : a i * t i = c i := by
-    dsimp [a, c, t, sixPointRatio]
+    dsimp [a, c, t, sixPointRatio, b]
     field_simp [fifth_coord_ne_zero p hgp i]
+    ring
 
   have hqperm : p 4 = ∑ j, a (σ j) • b (σ j) := by
-    rw [Equiv.sum_comp σ]
-    exact hq0
+    calc
+      p 4 = ∑ i, a i • b i := hq0
+      _ = ∑ j, a (σ j) • b (σ j) := by
+        simpa using
+          (Equiv.sum_comp σ (fun i : Fin 4 => a i • b i)).symm
   have hrperm : p 5 = ∑ j, (a (σ j) * t (σ j)) • b (σ j) := by
     calc
-      p 5 = ∑ j, c (σ j) • b (σ j) := by
-        rw [Equiv.sum_comp σ]
-        exact hr0
+      p 5 = ∑ i, c i • b i := hr0
+      _ = ∑ j, c (σ j) • b (σ j) := by
+        simpa using
+          (Equiv.sum_comp σ (fun i : Fin 4 => c i • b i)).symm
       _ = ∑ j, (a (σ j) * t (σ j)) • b (σ j) := by
         apply Finset.sum_congr rfl
         intro j hj
         rw [hmul]
   have haperm : ∑ j, a (σ j) = 1 := by
-    rw [Equiv.sum_comp σ]
-    exact ha0
+    calc
+      ∑ j, a (σ j) = ∑ i, a i := Equiv.sum_comp σ a
+      _ = 1 := ha0
   have hatperm : ∑ j, a (σ j) * t (σ j) = 1 := by
     calc
       ∑ j, a (σ j) * t (σ j) = ∑ j, c (σ j) := by
@@ -109,7 +115,9 @@ theorem allPositive_sixPoint_strictRadon23
   have ha : a (σ 0) + a (σ 1) + a (σ 2) + a (σ 3) = 1 := by
     calc
       a (σ 0) + a (σ 1) + a (σ 2) + a (σ 3) =
-          ∑ j, a (σ j) := (sum_fin4 _).symm
+          ∑ j : Fin 4, a (σ j) := by
+            symm
+            exact sum_fin4 (fun j : Fin 4 => a (σ j))
       _ = 1 := haperm
   have hat :
       a (σ 0) * t (σ 0) + a (σ 1) * t (σ 1) +
@@ -117,7 +125,9 @@ theorem allPositive_sixPoint_strictRadon23
     calc
       a (σ 0) * t (σ 0) + a (σ 1) * t (σ 1) +
           a (σ 2) * t (σ 2) + a (σ 3) * t (σ 3) =
-        ∑ j, a (σ j) * t (σ j) := (sum_fin4 _).symm
+        ∑ j : Fin 4, a (σ j) * t (σ j) := by
+          symm
+          exact sum_fin4 (fun j : Fin 4 => a (σ j) * t (σ j))
       _ = 1 := hatperm
 
   have haσ0 : 0 < a (σ 0) := by simpa [a, b] using hapos (σ 0)
