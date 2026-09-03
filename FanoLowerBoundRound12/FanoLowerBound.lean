@@ -21,15 +21,14 @@ import FanoLowerBound.FanoForcingTable
 import FanoLowerBound.FanoRadonForcing
 import FanoLowerBound.FanoIndexNormalization
 import FanoLowerBound.SixChosenFanoLines
+import FanoLowerBound.GeneralPositionSelection
 
 /-!
-# Fano lower-bound Round 25
+# Fano lower-bound Round 26
 
-This kernel target retains the complete six-point strict `2--3` Radon lemma,
-the fully general open-convex sunflower line-core theorem, the 210-record Fano
-forcing theorem, and arbitrary order normalization. It additionally consumes
-the existential `HasStrictRadon23` witness on any six chosen Fano maximal-word
-labels and derives the fivefold contradiction.
+This kernel target retains the complete strict-Radon, sunflower, finite Fano-forcing,
+index-normalization, and six-chosen-lines chain. It additionally selects representatives
+from six nonempty open subsets of `ℝ³` so that every four are affinely independent.
 -/
 
 #print axioms FanoLowerBound.ordered_ratio_circuit_core
@@ -102,3 +101,7 @@ labels and derives the fivefold contradiction.
 #print axioms FanoLowerBound.arbitraryOrderedFive_strictRadon_contradicts_noFiveDistinctActive
 #print axioms FanoLowerBound.sixChosenFanoLines_hasStrictRadon_contradiction
 #print axioms FanoLowerBound.sixChosenFanoLines_generalPosition_contradiction
+#print axioms FanoLowerBound.IsOpen.exists_mem_not_mem_proper_affineSubspace
+#print axioms FanoLowerBound.IsOpen.exists_mem_avoid_affineSubspaces
+#print axioms FanoLowerBound.every_fin4_emb_fin6_factors
+#print axioms FanoLowerBound.exists_six_generalPosition_representatives
