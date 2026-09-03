@@ -1,0 +1,88 @@
+name: Fano lower-bound Round 12 direct kernel certificate
+
+on:
+  push:
+    branches:
+      - scratch/fano-lower-bound-round12-2026-09-03
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  kernel:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - name: Checkout isolated temporary branch
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: scratch/fano-lower-bound-round12-2026-09-03
+          fetch-depth: 1
+
+      - name: Audit direct Lean source tree
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s FanoLowerBoundRound12/FanoLowerBound.lean
+          test -s FanoLowerBoundRound12/FanoLowerBound/RatioCircuitCore.lean
+          test -s FanoLowerBoundRound12/FanoLowerBound/RadonNormalization.lean
+          ! grep -R -E '(^|[^[:alnum:]_])(sorry|admit|by\?|exact\?|unsafe)([^[:alnum:]_]|$)' FanoLowerBoundRound12 --include='*.lean'
+          find FanoLowerBoundRound12 -maxdepth 2 -type f -print | sort
+          sha256sum FanoLowerBoundRound12/FanoLowerBound.lean \
+            FanoLowerBoundRound12/FanoLowerBound/RatioCircuitCore.lean \
+            FanoLowerBoundRound12/FanoLowerBound/RadonNormalization.lean \
+            > FanoLowerBoundRound12/LEAN_SOURCE_SHA256SUMS
+
+      - name: Install pinned Elan
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --location --retry 3 \
+            https://github.com/leanprover/elan/releases/download/v4.2.4/elan-x86_64-unknown-linux-gnu.tar.gz \
+            --output /tmp/elan.tar.gz
+          echo '42b94d4244e8353142c456ec0e4ca6528fd898a6c604d4059f494e706e431f63  /tmp/elan.tar.gz' | sha256sum --check
+          tar -xzf /tmp/elan.tar.gz -C /tmp
+          /tmp/elan-init -y --default-toolchain none
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+      - name: Build pinned Lean and Mathlib certificate
+        shell: bash
+        working-directory: FanoLowerBoundRound12
+        run: |
+          set -euo pipefail
+          set -o pipefail
+          {
+            echo '=== pinned inputs ==='
+            cat lean-toolchain
+            cat lakefile.toml
+            echo '=== install toolchain ==='
+            elan toolchain install "$(cat lean-toolchain)"
+            echo '=== versions ==='
+            lean --version
+            lake --version
+            echo '=== resolve Mathlib ==='
+            lake update
+            echo '=== obtain Mathlib cache ==='
+            lake exe cache get
+            echo '=== lake build ==='
+            lake build
+            echo '=== root re-elaboration and axiom report ==='
+            lake env lean FanoLowerBound.lean
+            echo 'LEAN_LOWER_BOUND_ROUND12_DIRECT_PASS'
+          } 2>&1 | tee LEAN_LOWER_BOUND_BUILD.log
+          ! grep -q 'sorryAx' LEAN_LOWER_BOUND_BUILD.log
+
+      - name: Upload lower-bound kernel evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: fano-lower-bound-round12-direct-kernel-evidence
+          path: |
+            FanoLowerBoundRound12/LEAN_LOWER_BOUND_BUILD.log
+            FanoLowerBoundRound12/lake-manifest.json
+            FanoLowerBoundRound12/LEAN_SOURCE_SHA256SUMS
+            FanoLowerBoundRound12/FanoLowerBound.lean
+            FanoLowerBoundRound12/FanoLowerBound/RatioCircuitCore.lean
+            FanoLowerBoundRound12/FanoLowerBound/RadonNormalization.lean
+          if-no-files-found: warn
