@@ -35,14 +35,10 @@ old = """  have hkji : lineContains3 c.k c.j c.i = true := by
       using hijk
 """
 new = """  have hkji : lineContains3 c.k c.j c.i = true := by
-    simp only [lineContains3, Bool.and_eq_true, decide_eq_true_eq,
-      List.nodup_cons, List.mem_cons, List.not_mem_nil] at hijk ⊢
+    simp [lineContains3, List.nodup_cons,
+      Bool.and_comm, Bool.and_left_comm, Bool.and_assoc] at hijk ⊢
     rcases hijk with ⟨hij, hik, hjk, hline⟩
-    refine ⟨?_, ?_, ?_, ?_⟩
-    · exact fun h => hij h.symm
-    · exact fun h => hik h.symm
-    · exact fun h => hjk h.symm
-    · simpa [Bool.and_comm, Bool.and_left_comm, Bool.and_assoc] using hline
+    exact ⟨Ne.symm hij, Ne.symm hik, Ne.symm hjk, hline⟩
 """
 if old not in s:
     raise SystemExit("FanoRadonForcing hkji block not found")
