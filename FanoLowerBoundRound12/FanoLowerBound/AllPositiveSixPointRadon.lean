@@ -67,7 +67,6 @@ theorem allPositive_sixPoint_strictRadon23
   have hmul (i : Fin 4) : a i * t i = c i := by
     dsimp [a, c, t, sixPointRatio, b]
     field_simp [fifth_coord_ne_zero p hgp i]
-    ring
 
   have hqperm : p 4 = ∑ j, a (σ j) • b (σ j) := by
     calc
