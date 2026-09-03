@@ -20,7 +20,7 @@ jobs:
           ref: scratch/fano-lower-bound-round26-2026-09-03
           fetch-depth: 1
 
-      - name: Generate inherited Round 23 and Round 24 Lean sources deterministically
+      - name: Generate inherited and Round 26 Lean sources deterministically
         shell: bash
         working-directory: FanoLowerBoundRound12
         run: |
@@ -52,6 +52,7 @@ jobs:
           )
           p.write_text(s, encoding='utf-8')
           PY
+          python3 apply_round26_source.py
           test -s FanoLowerBound/FanoForcingTable.lean
           test -s FanoLowerBound/FanoRadonForcing.lean
           test -s FanoLowerBound/FanoIndexNormalization.lean
@@ -60,6 +61,7 @@ jobs:
           ! grep -R -q 'native_decide' FanoLowerBound/FanoForcingTable.lean FanoLowerBound/FanoRadonForcing.lean
           ! grep -q '{x₀ x₁ : E}' FanoLowerBound/FanoIndexNormalization.lean
           grep -q '\[TopologicalSpace E\].*\[IsTopologicalAddGroup E\].*\[ContinuousSMul ℝ E\]' FanoLowerBound/FanoIndexNormalization.lean
+          grep -q 'theorem exists_six_generalPosition_representatives' FanoLowerBound/GeneralPositionSelection.lean
 
       - name: Audit direct Lean source tree
         shell: bash
@@ -137,6 +139,7 @@ jobs:
             FanoLowerBoundRound12/LEAN_SOURCE_SHA256SUMS
             FanoLowerBoundRound12/generate_fano_forcing_table.py
             FanoLowerBoundRound12/apply_round23_source.py
+            FanoLowerBoundRound12/apply_round26_source.py
             FanoLowerBoundRound12/FanoLowerBound.lean
             FanoLowerBoundRound12/FanoLowerBound/FanoForcingTable.lean
             FanoLowerBoundRound12/FanoLowerBound/FanoRadonForcing.lean
