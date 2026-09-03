@@ -25,7 +25,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p .ci/fano-lower-bound-round12/project
-          base64 --decode .ci/fano-lower-bound-round12/project.tar.gz.b64 > /tmp/fano-lower-bound-round12.tar.gz
+          cat .ci/fano-lower-bound-round12/part-*.b64 | tr -d '\r\n' | base64 --decode > /tmp/fano-lower-bound-round12.tar.gz
           echo 'ff325daf25dc21b7b893bf1f00e64b3345da8fea2011f9c8153016fdd34ef7d2  /tmp/fano-lower-bound-round12.tar.gz' | sha256sum --check
           tar -xzf /tmp/fano-lower-bound-round12.tar.gz -C .ci/fano-lower-bound-round12/project
           find .ci/fano-lower-bound-round12/project -maxdepth 2 -type f -print | sort
