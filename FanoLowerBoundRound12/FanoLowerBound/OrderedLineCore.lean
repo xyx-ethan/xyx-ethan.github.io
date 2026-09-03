@@ -37,8 +37,7 @@ theorem exists_small_symmetric_points_mem_open
     dsimp [N]
     exact (hU.preimage hfminus).inter (hU.preimage hfplus)
   have h0N : (0 : ℝ) ∈ N := by
-    dsimp [N, fminus, fplus]
-    simpa using ⟨hq, hq⟩
+    constructor <;> simpa [N, fminus, fplus] using hq
   have h0cl : (0 : ℝ) ∈ closure (Ioo (0 : ℝ) ε₀) := by
     rw [closure_Ioo (ne_of_lt hε₀)]
     exact ⟨le_rfl, hε₀.le⟩
@@ -100,7 +99,7 @@ theorem ordered_openConvexThreeSunflower_line_hitsCore
     obtain ⟨ε₀, hε₀, hcross⟩ :=
       parallelLine_crosses_doubleSweptTriangles hp₂btw hqstrict hcline
     obtain ⟨ε, hε, hminusU₂, hplusU₂⟩ :=
-      exists_small_symmetric_points_mem_open hU₂open hqU₂ hε₀
+      exists_small_symmetric_points_mem_open (v := p₃ - p₁) hU₂open hqU₂ hε₀
     have hcrossε := hcross ε hε.1 hε.2
     let v : E := p₃ - p₁
     let xminus : E := q - ε • v
@@ -121,7 +120,7 @@ theorem ordered_openConvexThreeSunflower_line_hitsCore
     have hxplusU₁ : xplus ∈ U₁ := hsun.2.2 ⟨hxplusU₂, hxplusU₃⟩
     have hqmid : Wbtw ℝ xminus q xplus := by
       refine ⟨(1 / 2 : ℝ), by norm_num, ?_⟩
-      dsimp [xminus, xplus]
+      dsimp [xminus, xplus, v]
       rw [lineMap_apply_module]
       module
     have hqU₁ : q ∈ U₁ := hU₁conv.mem_of_wbtw hqmid hxminusU₁ hxplusU₁
