@@ -1,0 +1,57 @@
+name: Fano Lean kernel diagnostic v3
+
+on:
+  push:
+    branches:
+      - fano-lean-kernel-20260903
+    paths:
+      - '.github/workflows/fano-lean-kernel-v3.yml'
+      - 'research/fano-odim4-lean/**/*.lean'
+      - 'research/fano-odim4-lean/lakefile.toml'
+      - 'research/fano-odim4-lean/lean-toolchain'
+      - 'research/fano-odim4-lean/lake-manifest.json'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  kernel-diagnostic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fano-lean-kernel-20260903
+      - name: Install pinned Lean and dependencies
+        working-directory: research/fano-odim4-lean
+        shell: bash
+        run: |
+          curl -sSfL https://elan.lean-lang.org/elan-init.sh | sh -s -- -y --default-toolchain none
+          source "$HOME/.elan/env"
+          lake update
+          lake exe cache get
+      - name: Build and persist diagnostic log
+        working-directory: research/fano-odim4-lean
+        shell: bash
+        run: |
+          source "$HOME/.elan/env"
+          set +e
+          {
+            echo "UTC $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            lean --version
+            lake --version
+            echo "COMMIT $GITHUB_SHA"
+            echo "BEGIN_LAKE_BUILD"
+            lake build
+            status=$?
+            echo "END_LAKE_BUILD STATUS=$status"
+            exit $status
+          } > CI_BUILD_LOG.txt 2>&1
+          status=$?
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add CI_BUILD_LOG.txt lake-manifest.json
+          git commit -m "Record Fano Lean kernel diagnostic" || true
+          git push origin HEAD:fano-lean-kernel-20260903
+          exit $status
