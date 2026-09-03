@@ -10,13 +10,14 @@ import FanoLowerBound.OnePositiveRebase
 import FanoLowerBound.OnePositiveRebaseOther
 import FanoLowerBound.DirectSixPointBranches
 import FanoLowerBound.SixPointRadonComplete
+import FanoLowerBound.SunflowerSegment
 
 /-!
-# Fano lower-bound Round 16
+# Fano lower-bound Round 17
 
-This kernel target closes the six-point strict `2--3` Radon lemma in `ℝ³` by
-combining the four one-positive rebases, six two-positive branches, four
-three-positive branches, and the all-positive sorted-ratio branch.
+This kernel target retains the complete six-point strict `2--3` Radon lemma and
+adds the order-convex sunflower segment deduction: the paper's Lemma 7 follows
+from the line-core property isolated in its Lemma 6.
 -/
 
 #print axioms FanoLowerBound.ordered_ratio_circuit_core
@@ -46,3 +47,7 @@ three-positive branches, and the all-positive sorted-ratio branch.
 #print axioms FanoLowerBound.threePositiveNeg2_sixPoint_hasStrictRadon23
 #print axioms FanoLowerBound.threePositiveNeg3_sixPoint_hasStrictRadon23
 #print axioms FanoLowerBound.sixPoint_generalPosition_hasStrictRadon23
+#print axioms FanoLowerBound.corePoint_on_segment_of_corePoint_on_line
+#print axioms FanoLowerBound.sunflower_segment_of_corePoint_on_segment
+#print axioms FanoLowerBound.sunflower_segment_of_line_hits_core
+#print axioms FanoLowerBound.sunflower_segment_of_everyLineMeetingThreeHitsCore
