@@ -66,11 +66,21 @@ theorem ratio01_ne_of_four_affineIndependent
     rw [ht01] at hscalar
     simp [wR, Fin.sum_univ_succ]
     linarith
-  have hlin : (∑ i, wL i • f i) = ∑ i, wR i • f i := by
+  have hvec' : r - t1 • q + (a2 * (t1 - t2)) • v2 +
+      (a3 * (t1 - t3)) • v3 = 0 := by
     rw [ht01] at hvec
-    simp [f, wL, wR, Fin.sum_univ_succ]
-    module at hvec ⊢
-    exact hvec
+    simpa using hvec
+  have hbase : r = t1 • q + (-(a2 * (t1 - t2))) • v2 +
+      (-(a3 * (t1 - t3))) • v3 := by
+    rw [← sub_eq_zero]
+    calc
+      r - (t1 • q + (-(a2 * (t1 - t2))) • v2 +
+          (-(a3 * (t1 - t3))) • v3) =
+          r - t1 • q + (a2 * (t1 - t2)) • v2 +
+            (a3 * (t1 - t3)) • v3 := by module
+      _ = 0 := hvec'
+  have hlin : (∑ i, wL i • f i) = ∑ i, wR i • f i := by
+    simpa [f, wL, wR, Fin.sum_univ_succ] using hbase
   have hcomb : Finset.univ.affineCombination ℝ f wL =
       Finset.univ.affineCombination ℝ f wR := by
     rw [Finset.univ.affineCombination_eq_linear_combination _ _ hwL]
