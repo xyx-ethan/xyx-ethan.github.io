@@ -16,14 +16,15 @@ import FanoLowerBound.DoubleTriangle
 import FanoLowerBound.ParallelCrossing
 import FanoLowerBound.EndpointBranch
 import FanoLowerBound.OrderedLineCore
+import FanoLowerBound.GeneralLineCore
 
 /-!
-# Fano lower-bound Round 21
+# Fano lower-bound Round 22
 
 This kernel target retains the complete six-point strict `2--3` Radon lemma
-and closes both boundary alternatives in the ordered open-convex sunflower
-line-core argument.  It also assembles them into a theorem for three collinear
-petal points with the second strictly between the first and third.
+and closes the ordered and fully general open-convex sunflower line-core
+arguments.  Coincident hit points and all three strict orders are covered, and
+the resulting line-core theorem is fed back into the sunflower segment lemma.
 -/
 
 #print axioms FanoLowerBound.ordered_ratio_circuit_core
@@ -72,3 +73,10 @@ petal points with the second strictly between the first and third.
 #print axioms FanoLowerBound.endpointBoundary_baseLine_hitsCore
 #print axioms FanoLowerBound.exists_small_symmetric_points_mem_open
 #print axioms FanoLowerBound.ordered_openConvexThreeSunflower_line_hitsCore
+#print axioms FanoLowerBound.real_three_distinct_one_strictly_between
+#print axioms FanoLowerBound.three_distinct_points_on_line_one_strictly_between
+#print axioms FanoLowerBound.line_pair_le_of_mem
+#print axioms FanoLowerBound.IsThreeSunflower.swap₁₂
+#print axioms FanoLowerBound.IsThreeSunflower.swap₂₃
+#print axioms FanoLowerBound.openConvexThreeSunflower_everyLineMeetingThreeHitsCore
+#print axioms FanoLowerBound.openConvexThreeSunflower_segment_forcing
