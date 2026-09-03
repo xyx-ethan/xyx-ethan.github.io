@@ -21,38 +21,25 @@ private theorem sum_fin4 {M : Type*} [AddCommMonoid M] (f : Fin 4 → M) :
   simp
   abel
 
-/-- A strict `2--3` Radon equality on five distinct entries of a six-tuple. -/
+/-- A strict `2--3` Radon equality on five distinct entries of a six-tuple,
+encoded by a permutation of all six entries and a permutation of the four basis slots. -/
 def HasStrictRadon23 (p : Fin 6 → Point3) : Prop :=
-  ∃ e : Fin 5 ↪ Fin 6,
-    StrictRadon23 (p (e 0)) (p (e 1)) (p (e 2)) (p (e 3)) (p (e 4))
+  ∃ τ : Equiv.Perm (Fin 6), ∃ σ : Equiv.Perm (Fin 4),
+    StrictRadon23
+        ((p ∘ τ) (baseEmb (σ 0))) ((p ∘ τ) 5) ((p ∘ τ) 4)
+        ((p ∘ τ) (baseEmb (σ 2))) ((p ∘ τ) (baseEmb (σ 3))) ∨
+    StrictRadon23
+        ((p ∘ τ) (baseEmb (σ 2))) ((p ∘ τ) (baseEmb (σ 3)))
+        ((p ∘ τ) (baseEmb (σ 0))) ((p ∘ τ) 5) ((p ∘ τ) 4)
 
 /-- Transport a strict Radon subconfiguration through a permutation. -/
 theorem hasStrictRadon23_of_comp_perm
     (p : Fin 6 → Point3) (τ : Equiv.Perm (Fin 6))
     (h : HasStrictRadon23 (p ∘ τ)) :
     HasStrictRadon23 p := by
-  rcases h with ⟨e, he⟩
-  let e' : Fin 5 ↪ Fin 6 where
-    toFun := fun i => τ (e i)
-    inj' := τ.injective.comp e.injective
-  refine ⟨e', ?_⟩
-  simpa [e', Function.comp_def] using he
-
-/-- The five selected indices in the first orientation of the all-positive theorem. -/
-def allPositiveEmbLeft (σ : Equiv.Perm (Fin 4)) : Fin 5 ↪ Fin 6 where
-  toFun := ![baseEmb (σ 0), 5, 4, baseEmb (σ 2), baseEmb (σ 3)]
-  inj' := by
-    intro i j h
-    fin_cases i <;> fin_cases j <;>
-      simp_all [baseEmb, Fin.ext_iff]
-
-/-- The five selected indices in the second orientation of the all-positive theorem. -/
-def allPositiveEmbRight (σ : Equiv.Perm (Fin 4)) : Fin 5 ↪ Fin 6 where
-  toFun := ![baseEmb (σ 2), baseEmb (σ 3), baseEmb (σ 0), 5, 4]
-  inj' := by
-    intro i j h
-    fin_cases i <;> fin_cases j <;>
-      simp_all [baseEmb, Fin.ext_iff]
+  rcases h with ⟨ρ, σ, h⟩
+  refine ⟨ρ.trans τ, σ, ?_⟩
+  simpa [Function.comp_def] using h
 
 /-- Package the all-positive theorem as existence of a five-point subconfiguration. -/
 theorem allPositive_sixPoint_hasStrictRadon23
@@ -61,11 +48,9 @@ theorem allPositive_sixPoint_hasStrictRadon23
     (hapos : ∀ i : Fin 4,
       0 < (firstFourAffineBasis p hgp).coord i (p 4)) :
     HasStrictRadon23 p := by
-  rcases allPositive_sixPoint_strictRadon23 p hgp hapos with ⟨σ, h | h⟩
-  · refine ⟨allPositiveEmbLeft σ, ?_⟩
-    simpa [allPositiveEmbLeft, firstFourAffineBasis_apply] using h
-  · refine ⟨allPositiveEmbRight σ, ?_⟩
-    simpa [allPositiveEmbRight, firstFourAffineBasis_apply] using h
+  rcases allPositive_sixPoint_strictRadon23 p hgp hapos with ⟨σ, h⟩
+  refine ⟨Equiv.refl _, σ, ?_⟩
+  simpa [firstFourAffineBasis_apply, Function.comp_def] using h
 
 /-- General position is invariant under reindexing by a permutation. -/
 theorem generalPosition_comp_perm
@@ -74,9 +59,9 @@ theorem generalPosition_comp_perm
     (τ : Equiv.Perm (Fin 6)) :
     ∀ e : Fin 4 ↪ Fin 6, AffineIndependent ℝ ((p ∘ τ) ∘ e) := by
   intro e
-  let e' : Fin 4 ↪ Fin 6 where
-    toFun := fun i => τ (e i)
-    inj' := τ.injective.comp e.injective
+  let e' : Fin 4 ↪ Fin 6 :=
+    { toFun := fun i => τ (e i)
+      inj' := τ.injective.comp e.injective }
   have h := hgp e'
   simpa [e', Function.comp_def] using h
 
@@ -125,7 +110,7 @@ theorem onePositive0_sixPoint_hasStrictRadon23
   let a2 := b.coord 2 (p 4)
   let a3 := b.coord 3 (p 4)
   let p' : Fin 6 → Point3 := p ∘ rebasePerm0
-  let hgp' : ∀ e : Fin 4 ↪ Fin 6, AffineIndependent ℝ (p' ∘ e) := by
+  have hgp' : ∀ e : Fin 4 ↪ Fin 6, AffineIndependent ℝ (p' ∘ e) := by
     simpa [p'] using generalPosition_comp_perm p hgp rebasePerm0
   let b' := firstFourAffineBasis p' hgp'
   let w : Fin 4 → ℝ := ![1 / a0, (-a1) / a0, (-a2) / a0, (-a3) / a0]
@@ -150,11 +135,11 @@ theorem onePositive0_sixPoint_hasStrictRadon23
   have hwsum : ∑ i, w i = 1 := by
     rw [sum_fin4]
     dsimp [w]
-    field_simp [ha0ne]
-    linarith
+    field_simp [ha0ne] <;> linarith [hasum]
   have hwcomb : ∑ i, w i • b' i = p' 4 := by
     rw [sum_fin4]
-    dsimp [w, b', p', rebasePerm0]
+    change (1 / a0) • p 4 + ((-a1) / a0) • p 1 +
+        ((-a2) / a0) • p 2 + ((-a3) / a0) • p 3 = p 0
     rw [hq]
     field_simp [ha0ne]
     module
