@@ -38,10 +38,18 @@ jobs:
           from pathlib import Path
           p = Path('FanoLowerBound/FanoIndexNormalization.lean')
           s = p.read_text(encoding='utf-8')
-          old = '    {x₀ x₁ : E} {P : Nat → E}\n'
-          new = '    {P : Nat → E}\n'
-          if old in s:
-              s = s.replace(old, new, 1)
+          s = s.replace(
+              'variable {E : Type*} [AddCommGroup E] [Module ℝ E]\n',
+              'variable {E : Type*} [AddCommGroup E] [Module ℝ E]\n'
+              '  [TopologicalSpace E] [IsTopologicalAddGroup E] [ContinuousSMul ℝ E]\n',
+              1,
+          )
+          s = s.replace('    {x₀ x₁ : E} {P : Nat → E}\n', '    {P : Nat → E}\n', 1)
+          s = s.replace(
+              'section Topological\n\nvariable [TopologicalSpace E] [IsTopologicalAddGroup E] [ContinuousSMul ℝ E]\n\n',
+              'section Topological\n\n',
+              1,
+          )
           p.write_text(s, encoding='utf-8')
           PY
           test -s FanoLowerBound/FanoForcingTable.lean
@@ -49,6 +57,7 @@ jobs:
           test -s FanoLowerBound/FanoIndexNormalization.lean
           ! grep -R -q 'native_decide' FanoLowerBound/FanoForcingTable.lean FanoLowerBound/FanoRadonForcing.lean
           ! grep -q '{x₀ x₁ : E}' FanoLowerBound/FanoIndexNormalization.lean
+          grep -q '\[TopologicalSpace E\].*\[IsTopologicalAddGroup E\].*\[ContinuousSMul ℝ E\]' FanoLowerBound/FanoIndexNormalization.lean
 
       - name: Audit direct Lean source tree
         shell: bash
