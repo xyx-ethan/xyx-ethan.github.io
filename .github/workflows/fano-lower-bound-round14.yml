@@ -31,6 +31,7 @@ jobs:
           test -s FanoLowerBoundRound12/FanoLowerBound/DirectFivePointRadon.lean
           test -s FanoLowerBoundRound12/FanoLowerBound/RatioDistinctness.lean
           test -s FanoLowerBoundRound12/FanoLowerBound/SixthCoordinates.lean
+          test -s FanoLowerBoundRound12/FanoLowerBound/SixPointRatioPairs.lean
           ! grep -R -E '(^|[^[:alnum:]_])(sorry|admit|by\?|exact\?|unsafe)([^[:alnum:]_]|$)' FanoLowerBoundRound12 --include='*.lean'
           find FanoLowerBoundRound12 -maxdepth 2 -type f -print | sort
           sha256sum FanoLowerBoundRound12/FanoLowerBound.lean \
@@ -40,6 +41,7 @@ jobs:
             FanoLowerBoundRound12/FanoLowerBound/DirectFivePointRadon.lean \
             FanoLowerBoundRound12/FanoLowerBound/RatioDistinctness.lean \
             FanoLowerBoundRound12/FanoLowerBound/SixthCoordinates.lean \
+            FanoLowerBoundRound12/FanoLowerBound/SixPointRatioPairs.lean \
             > FanoLowerBoundRound12/LEAN_SOURCE_SHA256SUMS
 
       - name: Install pinned Elan
@@ -97,4 +99,5 @@ jobs:
             FanoLowerBoundRound12/FanoLowerBound/DirectFivePointRadon.lean
             FanoLowerBoundRound12/FanoLowerBound/RatioDistinctness.lean
             FanoLowerBoundRound12/FanoLowerBound/SixthCoordinates.lean
+            FanoLowerBoundRound12/FanoLowerBound/SixPointRatioPairs.lean
           if-no-files-found: warn
