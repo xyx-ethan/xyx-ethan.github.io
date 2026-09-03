@@ -183,20 +183,23 @@ theorem FanoForcingCert.forcesFivefold
   have hqApexSeg : q ∈ segment ℝ (P c.apex) qedge := by
     rw [hqApexEq]
     exact lineMap_mem_segment ℝ _ _ ⟨hspos.le, hslt.le⟩
-  have hfirst : InThreeCore (U c.i) (U c.j) (U c.k) q :=
+  have hkji : lineContains3 c.k c.j c.i = true := by
+    simpa [lineContains3, Bool.and_comm, Bool.and_left_comm, Bool.and_assoc]
+      using hijk
+  have hfirst : InThreeCore (U c.k) (U c.j) (U c.i) q :=
     openConvexThreeSunflower_segment_forcing
-      (hopen c.i) (hopen c.j) (hopen c.k)
-      (hconv c.i) (hconv c.j) (hconv c.k)
-      (hsun c.i c.j c.k hijk) (hcore c.i c.j c.k hijk)
-      hqUi hqedgeUj (hpoint c.apex c.k hAk) hqApexSeg
+      (hopen c.k) (hopen c.j) (hopen c.i)
+      (hconv c.k) (hconv c.j) (hconv c.i)
+      (hsun c.k c.j c.i hkji) (hcore c.k c.j c.i hkji)
+      (hpoint c.apex c.k hAk) hqedgeUj hqUi hqApexSeg
   have hsecond : InThreeCore (U c.a) (U c.b) (U c.k) q :=
     openConvexThreeSunflower_segment_forcing
       (hopen c.a) (hopen c.b) (hopen c.k)
       (hconv c.a) (hconv c.b) (hconv c.k)
       (hsun c.a c.b c.k habk) (hcore c.a c.b c.k habk)
       (hpoint c.pairA c.a hAa) (hpoint c.pairB c.b hBb)
-      hfirst.2.2 hqPairSeg
-  exact ⟨q, hfirst.1, hfirst.2.1, hfirst.2.2,
+      hfirst.1 hqPairSeg
+  exact ⟨q, hfirst.2.2, hfirst.2.1, hfirst.1,
     hsecond.1, hsecond.2.1, hnodup⟩
 
 /-- Every record in the 210-entry table semantically forces a five-fold point. -/
