@@ -36,21 +36,33 @@ theorem sixPoint_ratio01_ne
   let c3 := b.coord 3 (p 5)
   have hq0 := b.linear_combination_coord_eq_self (p 4)
   have hr0 := b.linear_combination_coord_eq_self (p 5)
-  have hq : p 4 = a0 • b 0 + a1 • b 1 + a2 • b 2 + a3 • b 3 := by
-    symm
-    simpa [a0, a1, a2, a3, Fin.sum_univ_succ] using hq0
-  have hr : p 5 = c0 • b 0 + c1 • b 1 + c2 • b 2 + c3 • b 3 := by
-    symm
-    simpa [c0, c1, c2, c3, Fin.sum_univ_succ] using hr0
+  have hqsum : a0 • b 0 + a1 • b 1 + a2 • b 2 + a3 • b 3 = p 4 := by
+    rw [← hq0]
+    dsimp [a0, a1, a2, a3]
+    simp only [Fin.sum_univ_succ, add_zero]
+  have hrsum : c0 • b 0 + c1 • b 1 + c2 • b 2 + c3 • b 3 = p 5 := by
+    rw [← hr0]
+    dsimp [c0, c1, c2, c3]
+    simp only [Fin.sum_univ_succ, add_zero]
+  have hq : p 4 = a0 • b 0 + a1 • b 1 + a2 • b 2 + a3 • b 3 := hqsum.symm
+  have hr : p 5 = c0 • b 0 + c1 • b 1 + c2 • b 2 + c3 • b 3 := hrsum.symm
   have ha0 := b.sum_coord_apply_eq_one (p 4)
   have hc0 := b.sum_coord_apply_eq_one (p 5)
   have ha : a0 + a1 + a2 + a3 = 1 := by
-    simpa [a0, a1, a2, a3, Fin.sum_univ_succ] using ha0
+    rw [← ha0]
+    dsimp [a0, a1, a2, a3]
+    simp only [Fin.sum_univ_succ, add_zero]
   have hc : c0 + c1 + c2 + c3 = 1 := by
-    simpa [c0, c1, c2, c3, Fin.sum_univ_succ] using hc0
-  have hfour0 := hgp ratioPairEmb01
+    rw [← hc0]
+    dsimp [c0, c1, c2, c3]
+    simp only [Fin.sum_univ_succ, add_zero]
+  have hfun : (![p 5, p 4, b 2, b 3] : Fin 4 → Point3) =
+      p ∘ ratioPairEmb01 := by
+    funext j
+    fin_cases j <;> rfl
   have hfour : AffineIndependent ℝ (![p 5, p 4, b 2, b 3] : Fin 4 → Point3) := by
-    simpa [b, firstFourAffineBasis_apply, baseEmb, ratioPairEmb01] using hfour0
+    rw [hfun]
+    exact hgp ratioPairEmb01
   change c0 / a0 ≠ c1 / a1
   exact ratio01_ne_of_four_affineIndependent
     (b 0) (b 1) (b 2) (b 3) (p 4) (p 5)
