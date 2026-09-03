@@ -34,10 +34,21 @@ jobs:
             FanoLowerBound/FanoForcingTable.lean
           sed -i '3i set_option maxRecDepth 100000\nset_option maxHeartbeats 0' \
             FanoLowerBound/FanoRadonForcing.lean
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('FanoLowerBound/FanoIndexNormalization.lean')
+          s = p.read_text(encoding='utf-8')
+          old = '    {x₀ x₁ : E} {P : Nat → E}\n'
+          new = '    {P : Nat → E}\n'
+          if old in s:
+              s = s.replace(old, new, 1)
+          p.write_text(s, encoding='utf-8')
+          PY
           test -s FanoLowerBound/FanoForcingTable.lean
           test -s FanoLowerBound/FanoRadonForcing.lean
           test -s FanoLowerBound/FanoIndexNormalization.lean
           ! grep -R -q 'native_decide' FanoLowerBound/FanoForcingTable.lean FanoLowerBound/FanoRadonForcing.lean
+          ! grep -q '{x₀ x₁ : E}' FanoLowerBound/FanoIndexNormalization.lean
 
       - name: Audit direct Lean source tree
         shell: bash
