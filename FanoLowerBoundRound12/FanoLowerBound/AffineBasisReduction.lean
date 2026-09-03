@@ -77,13 +77,23 @@ theorem coord_ne_zero_of_replacePoint_affineIndependent
     simp [wq]
   have hwb : ∑ j, wb j = 1 := by
     classical
-    rw [show (∑ j, wb j) = (∑ j, b.coord j q) - b.coord i q by
-      simp [wb, Finset.sum_ite_irrel, Finset.filter_ne'])]
-    simp [hzero]
+    calc
+      ∑ j, wb j = ∑ j, b.coord j q := by
+        apply Finset.sum_congr rfl
+        intro j hj
+        by_cases hji : j = i
+        · subst j
+          simp [wb, hzero]
+        · simp [wb, hji]
+      _ = 1 := b.sum_coord_apply_eq_one q
   have hcombq : Finset.univ.affineCombination ℝ (replacePoint b q i) wq = q := by
     classical
     rw [Finset.univ.affineCombination_eq_linear_combination _ _ hwq]
-    simp [wq, replacePoint]
+    rw [Finset.sum_eq_single i]
+    · simp [wq, replacePoint]
+    · intro j hj hji
+      simp [wq, hji]
+    · simp
   have hcombb : Finset.univ.affineCombination ℝ (replacePoint b q i) wb = q := by
     classical
     rw [Finset.univ.affineCombination_eq_linear_combination _ _ hwb]
@@ -99,7 +109,7 @@ theorem coord_ne_zero_of_replacePoint_affineIndependent
     (affineIndependent_iff_eq_of_fintype_affineCombination_eq ℝ (replacePoint b q i)).1
       hrep wq wb hwq hwb (hcombq.trans hcombb.symm)
   have hi := congrFun heq i
-  simp [wq, wb] at hi
+  norm_num [wq, wb] at hi
 
 /-- The fifth point can replace any one of the first four points without losing affine independence. -/
 theorem replacePoint_fifth_affineIndependent
@@ -108,14 +118,30 @@ theorem replacePoint_fifth_affineIndependent
     (i : Fin 4) :
     AffineIndependent ℝ (replacePoint (firstFourAffineBasis p hgp) (p 4) i) := by
   fin_cases i
-  · simpa [replacePoint, firstFourAffineBasis, baseEmb, replaceEmb0,
-      Function.comp_def] using hgp replaceEmb0
-  · simpa [replacePoint, firstFourAffineBasis, baseEmb, replaceEmb1,
-      Function.comp_def] using hgp replaceEmb1
-  · simpa [replacePoint, firstFourAffineBasis, baseEmb, replaceEmb2,
-      Function.comp_def] using hgp replaceEmb2
-  · simpa [replacePoint, firstFourAffineBasis, baseEmb, replaceEmb3,
-      Function.comp_def] using hgp replaceEmb3
+  · have hfun : replacePoint (firstFourAffineBasis p hgp) (p 4) 0 =
+        p ∘ replaceEmb0 := by
+      funext j
+      fin_cases j <;> rfl
+    rw [hfun]
+    exact hgp replaceEmb0
+  · have hfun : replacePoint (firstFourAffineBasis p hgp) (p 4) 1 =
+        p ∘ replaceEmb1 := by
+      funext j
+      fin_cases j <;> rfl
+    rw [hfun]
+    exact hgp replaceEmb1
+  · have hfun : replacePoint (firstFourAffineBasis p hgp) (p 4) 2 =
+        p ∘ replaceEmb2 := by
+      funext j
+      fin_cases j <;> rfl
+    rw [hfun]
+    exact hgp replaceEmb2
+  · have hfun : replacePoint (firstFourAffineBasis p hgp) (p 4) 3 =
+        p ∘ replaceEmb3 := by
+      funext j
+      fin_cases j <;> rfl
+    rw [hfun]
+    exact hgp replaceEmb3
 
 /-- Every barycentric coordinate of the fifth point with respect to the first four is nonzero. -/
 theorem fifth_coord_ne_zero
