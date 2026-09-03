@@ -80,7 +80,7 @@ theorem ratio01_ne_of_four_affineIndependent
             (a3 * (t1 - t3)) • v3 := by module
       _ = 0 := hvec'
   have hlin : (∑ i, wL i • f i) = ∑ i, wR i • f i := by
-    simpa [f, wL, wR, Fin.sum_univ_succ] using hbase
+    simpa [f, wL, wR, Fin.sum_univ_succ, add_assoc] using hbase
   have hcomb : Finset.univ.affineCombination ℝ f wL =
       Finset.univ.affineCombination ℝ f wR := by
     rw [Finset.univ.affineCombination_eq_linear_combination _ _ hwL]
