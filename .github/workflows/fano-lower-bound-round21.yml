@@ -31,6 +31,7 @@ jobs:
           test -s FanoLowerBoundRound12/FanoLowerBound/DoubleTriangle.lean
           test -s FanoLowerBoundRound12/FanoLowerBound/ParallelCrossing.lean
           test -s FanoLowerBoundRound12/FanoLowerBound/EndpointBranch.lean
+          test -s FanoLowerBoundRound12/FanoLowerBound/OrderedLineCore.lean
           if grep -R -nE '(^|[^[:alnum:]_])(sorry|admit|by\?|exact\?|unsafe)([^[:alnum:]_]|$)' \
               FanoLowerBoundRound12 --include='*.lean'; then
             echo 'forbidden Lean placeholder or unsafe declaration found' >&2
@@ -95,4 +96,5 @@ jobs:
             FanoLowerBoundRound12/LEAN_SOURCE_SHA256SUMS
             FanoLowerBoundRound12/FanoLowerBound.lean
             FanoLowerBoundRound12/FanoLowerBound/EndpointBranch.lean
+            FanoLowerBoundRound12/FanoLowerBound/OrderedLineCore.lean
           if-no-files-found: warn
