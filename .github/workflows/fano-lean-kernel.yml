@@ -20,6 +20,13 @@ jobs:
       LEAN_NUM_THREADS: 2
     steps:
       - uses: actions/checkout@v4
+      - name: Bootstrap pinned Lean and generate Lake manifest
+        working-directory: research/fano-odim4-lean
+        shell: bash
+        run: |
+          curl -sSfL https://elan.lean-lang.org/elan-init.sh | sh -s -- -y --default-toolchain none
+          source "$HOME/.elan/env"
+          lake update
       - name: Build and independently check Lean certificate
         uses: leanprover/lean-action@v1
         with:
