@@ -4,6 +4,7 @@ import FanoLowerBound.AffineBasisReduction
 import FanoLowerBound.DirectFivePointRadon
 import FanoLowerBound.RatioDistinctness
 import FanoLowerBound.SixthCoordinates
+import FanoLowerBound.SixPointRatioPairs
 
 /-!
 # Fano lower-bound Round 14
@@ -11,8 +12,8 @@ import FanoLowerBound.SixthCoordinates
 This kernel target certifies the arithmetic-to-geometry Radon bridge, the
 affine-basis reduction from six-point general position in `ℝ³`, the direct
 strict Radon witnesses for the two-positive and three-positive barycentric
-sign patterns, nonvanishing coordinates for both extra points, and the
-ratio-collision proof of barycentric-ratio distinctness.
+sign patterns, nonvanishing coordinates for both extra points, the generic
+ratio-collision lemma, and its first six-point general-position instance.
 -/
 
 #print axioms FanoLowerBound.ordered_ratio_circuit_core
@@ -24,3 +25,4 @@ ratio-collision proof of barycentric-ratio distinctness.
 #print axioms FanoLowerBound.two_positive_direct_strictRadon23
 #print axioms FanoLowerBound.three_positive_direct_strictRadon23
 #print axioms FanoLowerBound.ratio01_ne_of_four_affineIndependent
+#print axioms FanoLowerBound.sixPoint_ratio01_ne
