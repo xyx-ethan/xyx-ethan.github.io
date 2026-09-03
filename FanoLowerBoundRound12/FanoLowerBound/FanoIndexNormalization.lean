@@ -4,7 +4,7 @@ import FanoLowerBound.FanoRadonForcing
 # Normalizing arbitrary ordered Fano Radon indices
 
 A strict `2--3` Radon equality may arrive with the two-point side in either
-order and the three-point side in any of its six orders.  This module sorts
+order and the three-point side in any of its six orders. This module sorts
 those five pairwise distinct Fano-line labels into the canonical
 `RadonConfig` convention used by the 210-record forcing table and then invokes
 the semantic fivefold-intersection contradiction.
@@ -15,7 +15,6 @@ namespace FanoLowerBound
 open Set
 
 variable {E : Type*} [AddCommGroup E] [Module ℝ E]
-  [TopologicalSpace E] [IsTopologicalAddGroup E] [ContinuousSMul ℝ E]
 
 /-- The two possible orders of the same pair of labels. -/
 def SamePairPermutation (e₀ e₁ x y : Nat) : Prop :=
@@ -61,19 +60,10 @@ theorem canonicalRadonConfig_mem_allRadonConfigs
     ⟨hAB, hxy, hyz, hxA, hxB, hyA, hyB, hzA, hzB⟩
   simp [hcond]
 
-/-- Once pair and triple orders have been certified as permutations of the
-original five labels, the Round 23 canonical forcing theorem applies. -/
-theorem canonicalized_orderedFive_contradicts_noFiveDistinctActive
-    {U : Nat → Set E} {P : Nat → E}
-    (hopen : ∀ n : Nat, IsOpen (U n))
-    (hconv : ∀ n : Nat, Convex ℝ (U n))
-    (hpoint : ∀ line point : Nat,
-      hasPoint line point = true → P line ∈ U point)
-    (hsun : ∀ x y z : Nat,
-      lineContains3 x y z = true → IsThreeSunflower (U x) (U y) (U z))
-    (hcore : ∀ x y z : Nat,
-      lineContains3 x y z = true → ∃ q : E, InThreeCore (U x) (U y) (U z) q)
-    (hno5 : NoFiveDistinctActive U)
+/-- Pair and triple permutation certificates turn an ordered strict Radon
+witness into a canonical member of `allRadonConfigs`. -/
+theorem canonicalized_orderedFive_hasCanonicalConfig
+    {P : Nat → E}
     {A B x y z a b u v w : Nat}
     (hA : A < 7) (hB : B < 7)
     (hx : x < 7) (hy : y < 7) (hz : z < 7)
@@ -83,31 +73,25 @@ theorem canonicalized_orderedFive_contradicts_noFiveDistinctActive
     (hzA : z ≠ A) (hzB : z ≠ B)
     (hpair : SamePairPermutation A B a b)
     (htriple : SameTriplePermutation x y z u v w)
-    (hrad : StrictRadon23 (P a) (P b) (P u) (P v) (P w)) : False := by
+    (hrad : StrictRadon23 (P a) (P b) (P u) (P v) (P w)) :
+    ∃ cfg ∈ allRadonConfigs,
+      StrictRadon23 (P cfg.pairA) (P cfg.pairB)
+        (P cfg.triple0) (P cfg.triple1) (P cfg.triple2) := by
+  let cfg : RadonConfig :=
+    { pairA := A, pairB := B, triple0 := x, triple1 := y, triple2 := z }
+  have hcfg : cfg ∈ allRadonConfigs := by
+    dsimp [cfg]
+    exact canonicalRadonConfig_mem_allRadonConfigs
+      hA hB hx hy hz hAB hxy hyz hxA hxB hyA hyB hzA hzB
   have hradPair : StrictRadon23 (P A) (P B) (P u) (P v) (P w) :=
     hrad.reorderLeft hpair
   have hradCanonical : StrictRadon23 (P A) (P B) (P x) (P y) (P z) :=
     hradPair.reorderRight htriple
-  exact every_fano_radon_config_contradicts_noFiveDistinctActive
-    hopen hconv hpoint hsun hcore hno5
-    ({ pairA := A, pairB := B, triple0 := x, triple1 := y, triple2 := z } :
-      RadonConfig)
-    (canonicalRadonConfig_mem_allRadonConfigs
-      hA hB hx hy hz hAB hxy hyz hxA hxB hyA hyB hzA hzB)
-    hradCanonical
+  exact ⟨cfg, hcfg, by simpa [cfg] using hradCanonical⟩
 
 /-- Sort the three-point side while a canonical pair order is fixed. -/
-private theorem sortedPair_arbitraryTriple_contradicts
-    {U : Nat → Set E} {P : Nat → E}
-    (hopen : ∀ n : Nat, IsOpen (U n))
-    (hconv : ∀ n : Nat, Convex ℝ (U n))
-    (hpoint : ∀ line point : Nat,
-      hasPoint line point = true → P line ∈ U point)
-    (hsun : ∀ x y z : Nat,
-      lineContains3 x y z = true → IsThreeSunflower (U x) (U y) (U z))
-    (hcore : ∀ x y z : Nat,
-      lineContains3 x y z = true → ∃ q : E, InThreeCore (U x) (U y) (U z) q)
-    (hno5 : NoFiveDistinctActive U)
+private theorem sortedPair_arbitraryTriple_hasCanonicalConfig
+    {P : Nat → E}
     {A B a b u v w : Nat}
     (hA : A < 7) (hB : B < 7)
     (hu : u < 7) (hv : v < 7) (hw : w < 7)
@@ -117,67 +101,56 @@ private theorem sortedPair_arbitraryTriple_contradicts
     (hvA : v ≠ A) (hvB : v ≠ B)
     (hwA : w ≠ A) (hwB : w ≠ B)
     (hpair : SamePairPermutation A B a b)
-    (hrad : StrictRadon23 (P a) (P b) (P u) (P v) (P w)) : False := by
+    (hrad : StrictRadon23 (P a) (P b) (P u) (P v) (P w)) :
+    ∃ cfg ∈ allRadonConfigs,
+      StrictRadon23 (P cfg.pairA) (P cfg.pairB)
+        (P cfg.triple0) (P cfg.triple1) (P cfg.triple2) := by
   by_cases huvlt : u < v
   · by_cases hvwlt : v < w
-    · exact canonicalized_orderedFive_contradicts_noFiveDistinctActive
-        hopen hconv hpoint hsun hcore hno5
+    · exact canonicalized_orderedFive_hasCanonicalConfig
         hA hB hu hv hw hAB huvlt hvwlt
         huA huB hvA hvB hwA hwB hpair
         (by simp [SameTriplePermutation]) hrad
     · have hwvlt : w < v := by omega
       by_cases huwlt : u < w
-      · exact canonicalized_orderedFive_contradicts_noFiveDistinctActive
-          hopen hconv hpoint hsun hcore hno5
+      · exact canonicalized_orderedFive_hasCanonicalConfig
           hA hB hu hw hv hAB huwlt hwvlt
           huA huB hwA hwB hvA hvB hpair
           (by simp [SameTriplePermutation]) hrad
       · have hwult : w < u := by omega
-        exact canonicalized_orderedFive_contradicts_noFiveDistinctActive
-          hopen hconv hpoint hsun hcore hno5
+        exact canonicalized_orderedFive_hasCanonicalConfig
           hA hB hw hu hv hAB hwult huvlt
           hwA hwB huA huB hvA hvB hpair
           (by simp [SameTriplePermutation]) hrad
   · have hvult : v < u := by omega
     by_cases huwlt : u < w
-    · exact canonicalized_orderedFive_contradicts_noFiveDistinctActive
-        hopen hconv hpoint hsun hcore hno5
+    · exact canonicalized_orderedFive_hasCanonicalConfig
         hA hB hv hu hw hAB hvult huwlt
         hvA hvB huA huB hwA hwB hpair
         (by simp [SameTriplePermutation]) hrad
     · have hwult : w < u := by omega
       by_cases hvwlt : v < w
-      · exact canonicalized_orderedFive_contradicts_noFiveDistinctActive
-          hopen hconv hpoint hsun hcore hno5
+      · exact canonicalized_orderedFive_hasCanonicalConfig
           hA hB hv hw hu hAB hvwlt hwult
           hvA hvB hwA hwB huA huB hpair
           (by simp [SameTriplePermutation]) hrad
       · have hwvlt : w < v := by omega
-        exact canonicalized_orderedFive_contradicts_noFiveDistinctActive
-          hopen hconv hpoint hsun hcore hno5
+        exact canonicalized_orderedFive_hasCanonicalConfig
           hA hB hw hv hu hAB hwvlt hvult
           hwA hwB hvA hvB huA huB hpair
           (by simp [SameTriplePermutation]) hrad
 
 /-- Any ordered strict Radon equality on five pairwise distinct labels from
-`0,...,6` canonically matches one of the 210 Fano configurations and hence
-contradicts the absence of a fivefold active point. -/
-theorem arbitraryOrderedFive_strictRadon_contradicts_noFiveDistinctActive
-    {U : Nat → Set E} {P : Nat → E}
-    (hopen : ∀ n : Nat, IsOpen (U n))
-    (hconv : ∀ n : Nat, Convex ℝ (U n))
-    (hpoint : ∀ line point : Nat,
-      hasPoint line point = true → P line ∈ U point)
-    (hsun : ∀ x y z : Nat,
-      lineContains3 x y z = true → IsThreeSunflower (U x) (U y) (U z))
-    (hcore : ∀ x y z : Nat,
-      lineContains3 x y z = true → ∃ q : E, InThreeCore (U x) (U y) (U z) q)
-    (hno5 : NoFiveDistinctActive U)
-    {a b u v w : Nat}
+`0,...,6` canonically matches one of the 210 Fano configurations. -/
+theorem arbitraryOrderedFive_strictRadon_hasCanonicalConfig
+    {P : Nat → E} {a b u v w : Nat}
     (ha : a < 7) (hb : b < 7)
     (hu : u < 7) (hv : v < 7) (hw : w < 7)
     (hnodup : [a, b, u, v, w].Nodup)
-    (hrad : StrictRadon23 (P a) (P b) (P u) (P v) (P w)) : False := by
+    (hrad : StrictRadon23 (P a) (P b) (P u) (P v) (P w)) :
+    ∃ cfg ∈ allRadonConfigs,
+      StrictRadon23 (P cfg.pairA) (P cfg.pairB)
+        (P cfg.triple0) (P cfg.triple1) (P cfg.triple2) := by
   have hab : a ≠ b := by
     intro h
     subst b
@@ -219,21 +192,50 @@ theorem arbitraryOrderedFive_strictRadon_contradicts_noFiveDistinctActive
     subst w
     simpa using hnodup
   by_cases hablt : a < b
-  · exact sortedPair_arbitraryTriple_contradicts
-      hopen hconv hpoint hsun hcore hno5
+  · exact sortedPair_arbitraryTriple_hasCanonicalConfig
       ha hb hu hv hw hablt huv huw hvw
-      hau hbu hav hbv haw hbw
+      (by omega) (by omega) (by omega) (by omega) (by omega) (by omega)
       (by simp [SamePairPermutation]) hrad
   · have hbalt : b < a := by omega
-    exact sortedPair_arbitraryTriple_contradicts
-      hopen hconv hpoint hsun hcore hno5
+    exact sortedPair_arbitraryTriple_hasCanonicalConfig
       hb ha hu hv hw hbalt huv huw hvw
       (by omega) (by omega) (by omega) (by omega) (by omega) (by omega)
       (by simp [SamePairPermutation]) hrad
 
+section Topological
+
+variable [TopologicalSpace E] [IsTopologicalAddGroup E] [ContinuousSMul ℝ E]
+
+/-- Combining index normalization with the Round 23 forcing theorem removes
+all pair/triple ordering assumptions from the fivefold contradiction. -/
+theorem arbitraryOrderedFive_strictRadon_contradicts_noFiveDistinctActive
+    {U : Nat → Set E} {P : Nat → E}
+    (hopen : ∀ n : Nat, IsOpen (U n))
+    (hconv : ∀ n : Nat, Convex ℝ (U n))
+    (hpoint : ∀ line point : Nat,
+      hasPoint line point = true → P line ∈ U point)
+    (hsun : ∀ x y z : Nat,
+      lineContains3 x y z = true → IsThreeSunflower (U x) (U y) (U z))
+    (hcore : ∀ x y z : Nat,
+      lineContains3 x y z = true → ∃ q : E, InThreeCore (U x) (U y) (U z) q)
+    (hno5 : NoFiveDistinctActive U)
+    {a b u v w : Nat}
+    (ha : a < 7) (hb : b < 7)
+    (hu : u < 7) (hv : v < 7) (hw : w < 7)
+    (hnodup : [a, b, u, v, w].Nodup)
+    (hrad : StrictRadon23 (P a) (P b) (P u) (P v) (P w)) : False := by
+  obtain ⟨cfg, hcfg, hradCanonical⟩ :=
+    arbitraryOrderedFive_strictRadon_hasCanonicalConfig
+      ha hb hu hv hw hnodup hrad
+  exact every_fano_radon_config_contradicts_noFiveDistinctActive
+    hopen hconv hpoint hsun hcore hno5 cfg hcfg hradCanonical
+
+end Topological
+
 #print axioms StrictRadon23.reorderLeft
 #print axioms canonicalRadonConfig_mem_allRadonConfigs
-#print axioms canonicalized_orderedFive_contradicts_noFiveDistinctActive
+#print axioms canonicalized_orderedFive_hasCanonicalConfig
+#print axioms arbitraryOrderedFive_strictRadon_hasCanonicalConfig
 #print axioms arbitraryOrderedFive_strictRadon_contradicts_noFiveDistinctActive
 
 end FanoLowerBound
