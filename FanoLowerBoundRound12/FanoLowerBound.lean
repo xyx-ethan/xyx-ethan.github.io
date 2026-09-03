@@ -19,15 +19,16 @@ import FanoLowerBound.OrderedLineCore
 import FanoLowerBound.GeneralLineCore
 import FanoLowerBound.FanoForcingTable
 import FanoLowerBound.FanoRadonForcing
+import FanoLowerBound.FanoIndexNormalization
 
 /-!
-# Fano lower-bound Round 23
+# Fano lower-bound Round 24
 
-This kernel target retains the complete six-point strict `2--3` Radon lemma
-and the fully general open-convex sunflower line-core theorem. It additionally
-connects the complete 210-record Fano incidence table to the strict Radon and
-sunflower segment theorems, forcing a five-fold active point for every
-canonical 2-side/3-side Radon configuration.
+This kernel target retains the complete six-point strict `2--3` Radon lemma,
+the fully general open-convex sunflower line-core theorem, and the 210-record
+Fano forcing theorem.  It additionally normalizes an arbitrary ordered
+five-label strict Radon witness to the canonical pair/triple ordering and
+invokes the Round 23 five-fold contradiction.
 -/
 
 #print axioms FanoLowerBound.ordered_ratio_circuit_core
@@ -93,3 +94,7 @@ canonical 2-side/3-side Radon configuration.
 #print axioms FanoLowerBound.all_fano_forcing_records_forceFivefold
 #print axioms FanoLowerBound.every_fano_radon_config_forcesFivefold
 #print axioms FanoLowerBound.every_fano_radon_config_contradicts_noFiveDistinctActive
+#print axioms FanoLowerBound.StrictRadon23.reorderLeft
+#print axioms FanoLowerBound.canonicalRadonConfig_mem_allRadonConfigs
+#print axioms FanoLowerBound.canonicalized_orderedFive_contradicts_noFiveDistinctActive
+#print axioms FanoLowerBound.arbitraryOrderedFive_strictRadon_contradicts_noFiveDistinctActive
