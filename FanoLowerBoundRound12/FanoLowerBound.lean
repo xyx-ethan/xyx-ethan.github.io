@@ -8,12 +8,13 @@ import FanoLowerBound.SixPointRatioPairs
 import FanoLowerBound.AllPositiveSixPointRadon
 import FanoLowerBound.OnePositiveRebase
 import FanoLowerBound.OnePositiveRebaseOther
+import FanoLowerBound.DirectSixPointBranches
 
 /-!
 # Fano lower-bound Round 16
 
-This kernel target adds all four one-positive barycentric rebase branches to
-the previously certified all-positive six-point branch.
+This kernel target certifies all four one-positive rebases and all ten direct
+two-positive/three-positive barycentric branches.
 -/
 
 #print axioms FanoLowerBound.ordered_ratio_circuit_core
@@ -32,3 +33,13 @@ the previously certified all-positive six-point branch.
 #print axioms FanoLowerBound.onePositive1_sixPoint_hasStrictRadon23
 #print axioms FanoLowerBound.onePositive2_sixPoint_hasStrictRadon23
 #print axioms FanoLowerBound.onePositive3_sixPoint_hasStrictRadon23
+#print axioms FanoLowerBound.twoPositive01_sixPoint_hasStrictRadon23
+#print axioms FanoLowerBound.twoPositive02_sixPoint_hasStrictRadon23
+#print axioms FanoLowerBound.twoPositive03_sixPoint_hasStrictRadon23
+#print axioms FanoLowerBound.twoPositive12_sixPoint_hasStrictRadon23
+#print axioms FanoLowerBound.twoPositive13_sixPoint_hasStrictRadon23
+#print axioms FanoLowerBound.twoPositive23_sixPoint_hasStrictRadon23
+#print axioms FanoLowerBound.threePositiveNeg0_sixPoint_hasStrictRadon23
+#print axioms FanoLowerBound.threePositiveNeg1_sixPoint_hasStrictRadon23
+#print axioms FanoLowerBound.threePositiveNeg2_sixPoint_hasStrictRadon23
+#print axioms FanoLowerBound.threePositiveNeg3_sixPoint_hasStrictRadon23
