@@ -9,12 +9,14 @@ import FanoLowerBound.AllPositiveSixPointRadon
 import FanoLowerBound.OnePositiveRebase
 import FanoLowerBound.OnePositiveRebaseOther
 import FanoLowerBound.DirectSixPointBranches
+import FanoLowerBound.SixPointRadonComplete
 
 /-!
 # Fano lower-bound Round 16
 
-This kernel target certifies all four one-positive rebases and all ten direct
-two-positive/three-positive barycentric branches.
+This kernel target closes the six-point strict `2--3` Radon lemma in `ℝ³` by
+combining the four one-positive rebases, six two-positive branches, four
+three-positive branches, and the all-positive sorted-ratio branch.
 -/
 
 #print axioms FanoLowerBound.ordered_ratio_circuit_core
@@ -43,3 +45,4 @@ two-positive/three-positive barycentric branches.
 #print axioms FanoLowerBound.threePositiveNeg1_sixPoint_hasStrictRadon23
 #print axioms FanoLowerBound.threePositiveNeg2_sixPoint_hasStrictRadon23
 #print axioms FanoLowerBound.threePositiveNeg3_sixPoint_hasStrictRadon23
+#print axioms FanoLowerBound.sixPoint_generalPosition_hasStrictRadon23
