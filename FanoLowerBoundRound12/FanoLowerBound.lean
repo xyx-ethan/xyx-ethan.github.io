@@ -17,14 +17,17 @@ import FanoLowerBound.ParallelCrossing
 import FanoLowerBound.EndpointBranch
 import FanoLowerBound.OrderedLineCore
 import FanoLowerBound.GeneralLineCore
+import FanoLowerBound.FanoForcingTable
+import FanoLowerBound.FanoRadonForcing
 
 /-!
-# Fano lower-bound Round 22
+# Fano lower-bound Round 23
 
 This kernel target retains the complete six-point strict `2--3` Radon lemma
-and closes the ordered and fully general open-convex sunflower line-core
-arguments.  Coincident hit points and all three strict orders are covered, and
-the resulting line-core theorem is fed back into the sunflower segment lemma.
+and the fully general open-convex sunflower line-core theorem. It additionally
+connects the complete 210-record Fano incidence table to the strict Radon and
+sunflower segment theorems, forcing a five-fold active point for every
+canonical 2-side/3-side Radon configuration.
 -/
 
 #print axioms FanoLowerBound.ordered_ratio_circuit_core
@@ -80,3 +83,13 @@ the resulting line-core theorem is fed back into the sunflower segment lemma.
 #print axioms FanoLowerBound.IsThreeSunflower.swap₂₃
 #print axioms FanoLowerBound.openConvexThreeSunflower_everyLineMeetingThreeHitsCore
 #print axioms FanoLowerBound.openConvexThreeSunflower_segment_forcing
+#print axioms FanoLowerBound.fano_forcing_certificate_count
+#print axioms FanoLowerBound.all_fano_forcing_certificates_valid
+#print axioms FanoLowerBound.fano_forcing_table_complete
+#print axioms FanoLowerBound.all_fano_forcing_certificates_geom_valid
+#print axioms FanoLowerBound.FanoForcingCert.geomValid_of_mem
+#print axioms FanoLowerBound.StrictRadon23.reorderRight
+#print axioms FanoLowerBound.FanoForcingCert.forcesFivefold
+#print axioms FanoLowerBound.all_fano_forcing_records_forceFivefold
+#print axioms FanoLowerBound.every_fano_radon_config_forcesFivefold
+#print axioms FanoLowerBound.every_fano_radon_config_contradicts_noFiveDistinctActive
