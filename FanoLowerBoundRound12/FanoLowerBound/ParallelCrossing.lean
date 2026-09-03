@@ -53,7 +53,7 @@ theorem strictTriangleCombination_mem_sweptTriangleInterior
     intro hpy
     apply hp
     rw [hpy]
-    exact hyedge.mem_affineSpan
+    exact hyedge.1.mem_affineSpan
   have hAs : 1 - s = A := by
     dsimp [s]
     linarith
@@ -87,26 +87,26 @@ theorem base_endpoints_not_mem_edgeLine
   · intro hp₁cq
     have hp₂cq : p₂ ∈ line[ℝ, c, q] := hq.right_mem_affineSpan
     have h12cq : line[ℝ, p₁, p₂] = line[ℝ, c, q] :=
-      affineSpan_pair_eq_of_mem_of_mem_of_ne hp₁cq hp₂cq hp₂.left_ne.symm
+      affineSpan_pair_eq_of_mem_of_mem_of_ne hp₁cq hp₂cq hp₂.left_ne
     have hc12 : c ∈ line[ℝ, p₁, p₂] := by
       rw [h12cq]
       exact left_mem_affineSpan_pair ℝ c q
     have h12base : line[ℝ, p₁, p₂] = line[ℝ, p₁, p₃] :=
       affineSpan_pair_eq_of_mem_of_mem_of_ne
-        (left_mem_affineSpan_pair ℝ p₁ p₃) hp₂.mem_affineSpan hp₂.left_ne.symm
+        (left_mem_affineSpan_pair ℝ p₁ p₃) hp₂.1.mem_affineSpan hp₂.left_ne
     apply hc
     rw [← h12base]
     exact hc12
   · intro hp₃cq
     have hp₂cq : p₂ ∈ line[ℝ, c, q] := hq.right_mem_affineSpan
     have h32cq : line[ℝ, p₃, p₂] = line[ℝ, c, q] :=
-      affineSpan_pair_eq_of_mem_of_mem_of_ne hp₃cq hp₂cq hp₂.right_ne.symm
+      affineSpan_pair_eq_of_mem_of_mem_of_ne hp₃cq hp₂cq hp₂.right_ne
     have hc32 : c ∈ line[ℝ, p₃, p₂] := by
       rw [h32cq]
       exact left_mem_affineSpan_pair ℝ c q
     have h32base : line[ℝ, p₃, p₂] = line[ℝ, p₁, p₃] :=
       affineSpan_pair_eq_of_mem_of_mem_of_ne
-        (right_mem_affineSpan_pair ℝ p₁ p₃) hp₂.mem_affineSpan hp₂.right_ne.symm
+        (right_mem_affineSpan_pair ℝ p₁ p₃) hp₂.1.mem_affineSpan hp₂.right_ne
     apply hc
     rw [← h32base]
     exact hc32
@@ -128,7 +128,7 @@ theorem parallel_crossing_of_lineMap_parameters
   let ε₀ : ℝ := b * a * (1 - a)
   have hε₀ : 0 < ε₀ := by
     dsimp [ε₀]
-    positivity
+    exact mul_pos (mul_pos hb.1 ha.1) (sub_pos.2 ha.2)
   refine ⟨ε₀, hε₀, ?_⟩
   intro ε hε hεlt
   have hba : 0 < b * a := mul_pos hb.1 ha.1
@@ -177,7 +177,7 @@ theorem parallelLine_crosses_doubleSweptTriangles
   rcases ((sbtw_iff_mem_image_Ioo_and_ne).1 hq).1 with ⟨b, hb, hbeq⟩
   have hedges := base_endpoints_not_mem_edgeLine hp₂ hq hc
   exact parallel_crossing_of_lineMap_parameters ha hb haeq.symm hbeq.symm
-    hq.left_ne.symm hedges.1 hedges.2
+    hq.left_ne hedges.1 hedges.2
 
 /-- The weak boundary interface cannot in general be upgraded to strict
 betweenness: the selected boundary point may equal the exterior endpoint. -/
