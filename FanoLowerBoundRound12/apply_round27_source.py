@@ -27,6 +27,20 @@ if old not in s:
     raise SystemExit("lineContains3 source block not found")
 p.write_text(s.replace(old, new, 1), encoding="utf-8")
 
+p = Path("FanoLowerBound/FanoRadonForcing.lean")
+s = p.read_text(encoding="utf-8")
+old = """  have hkji : lineContains3 c.k c.j c.i = true := by
+    simpa [lineContains3, Bool.and_comm, Bool.and_left_comm, Bool.and_assoc]
+      using hijk
+"""
+new = """  have hkji : lineContains3 c.k c.j c.i = true := by
+    simpa [lineContains3, ne_comm, Bool.and_comm, Bool.and_left_comm, Bool.and_assoc]
+      using hijk
+"""
+if old not in s:
+    raise SystemExit("FanoRadonForcing hkji source block not found")
+p.write_text(s.replace(old, new, 1), encoding="utf-8")
+
 p = Path("FanoLowerBound.lean")
 s = p.read_text(encoding="utf-8")
 marker = "import FanoLowerBound.GeneralPositionSelection\n"
