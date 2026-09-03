@@ -53,11 +53,16 @@ theorem ordered_ratio_circuit_strictRadon23
     have hsum : t1 + (-c2) + (-c3) = S := by
       dsimp [c0, c2, c3, S] at *
       linarith
+    have hvec' : r - t1 • q + c0 • v0 + c2 • v2 + c3 • v3 = 0 := by
+      simpa [c0, c2, c3] using hvec
     have hcomb : c0 • v0 + (1 : ℝ) • r =
         t1 • q + (-c2) • v2 + (-c3) • v3 := by
-      dsimp [c0, c2, c3] at *
-      module at hvec ⊢
-      exact hvec
+      rw [← sub_eq_zero]
+      calc
+        (c0 • v0 + (1 : ℝ) • r) -
+              (t1 • q + (-c2) • v2 + (-c3) • v3) =
+            r - t1 • q + c0 • v0 + c2 • v2 + c3 • v3 := by module
+        _ = 0 := hvec'
     left
     refine ⟨c0 / S, 1 / S, t1 / S, (-c2) / S, (-c3) / S,
       div_pos hc0' hS, div_pos zero_lt_one hS, div_pos ht1pos hS,
@@ -81,11 +86,27 @@ theorem ordered_ratio_circuit_strictRadon23
     have hsum : c0 + 1 + (-t1) = S := by
       dsimp [c0, c2, c3, S] at *
       linarith
+    have hvec' : r - t1 • q + c0 • v0 + c2 • v2 + c3 • v3 = 0 := by
+      simpa [c0, c2, c3] using hvec
+    have hbase : c0 • v0 + (1 : ℝ) • r =
+        t1 • q + (-c2) • v2 + (-c3) • v3 := by
+      rw [← sub_eq_zero]
+      calc
+        (c0 • v0 + (1 : ℝ) • r) -
+              (t1 • q + (-c2) • v2 + (-c3) • v3) =
+            r - t1 • q + c0 • v0 + c2 • v2 + c3 • v3 := by module
+        _ = 0 := hvec'
     have hcomb : (-c2) • v2 + (-c3) • v3 =
         c0 • v0 + (1 : ℝ) • r + (-t1) • q := by
-      dsimp [c0, c2, c3] at *
-      module at hvec ⊢
-      exact hvec
+      rw [← sub_eq_zero]
+      have hz : (c0 • v0 + (1 : ℝ) • r) -
+          (t1 • q + (-c2) • v2 + (-c3) • v3) = 0 := sub_eq_zero.mpr hbase
+      calc
+        ((-c2) • v2 + (-c3) • v3) -
+              (c0 • v0 + (1 : ℝ) • r + (-t1) • q) =
+            -((c0 • v0 + (1 : ℝ) • r) -
+              (t1 • q + (-c2) • v2 + (-c3) • v3)) := by module
+        _ = 0 := by rw [hz]; simp
     right
     refine ⟨(-c2) / S, (-c3) / S, c0 / S, 1 / S, (-t1) / S,
       div_pos (neg_pos.mpr hc2') hS, div_pos (neg_pos.mpr hc3') hS,
