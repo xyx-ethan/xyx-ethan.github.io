@@ -1,0 +1,68 @@
+name: Diophantine7 Round5 Skip-1543 Descent
+
+on:
+  push:
+    branches:
+      - math-research-diophantine7-round5-20260903
+
+jobs:
+  skip1543-descent:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run one-factor descent without bad prime 1543
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import html, pathlib, time, urllib.parse, urllib.request
+          import xml.etree.ElementTree as ET
+          root = pathlib.Path('research/diophantine7/round5')
+          code = (root / 'skip1543_descent.m').read_text()
+          endpoint = 'https://magma.maths.usyd.edu.au/xml/calculator.xml'
+          payload = urllib.parse.urlencode({'input': code}).encode()
+          raw = None
+          errors = []
+          for attempt in range(12):
+              try:
+                  req = urllib.request.Request(endpoint, data=payload, method='POST')
+                  req.add_header('Content-Type', 'application/x-www-form-urlencoded')
+                  req.add_header('User-Agent', 'diophantine7-round5-research/1.0')
+                  with urllib.request.urlopen(req, timeout=240) as response:
+                      candidate = response.read()
+                  if b'<offline>' in candidate:
+                      errors.append(candidate.decode(errors='replace'))
+                      time.sleep(65)
+                      continue
+                  raw = candidate
+                  break
+              except Exception as exc:
+                  errors.append(repr(exc))
+                  time.sleep(35)
+          if raw is None:
+              raise RuntimeError('Magma request failed: ' + repr(errors[-3:]))
+          (root / 'magma_skip1543.xml').write_bytes(raw)
+          doc = ET.fromstring(raw)
+          lines = [html.unescape(node.text or '') for node in doc.findall('.//line')]
+          text = '\n'.join(lines) + '\n'
+          (root / 'magma_skip1543.log').write_text(text)
+          print(text)
+          warning = doc.findtext('.//warning')
+          alert = doc.findtext('.//alert')
+          if warning or alert:
+              raise RuntimeError(f'Magma warning={warning!r} alert={alert!r}')
+          if 'SKIP1543_FINISHED' not in text:
+              raise RuntimeError('completion sentinel missing')
+          PY
+      - name: Upload exact result
+        uses: actions/upload-artifact@v4
+        with:
+          name: diophantine7-round5-skip1543
+          path: |
+            research/diophantine7/round5/skip1543_descent.m
+            research/diophantine7/round5/magma_skip1543.log
+            research/diophantine7/round5/magma_skip1543.xml
+          if-no-files-found: error
+          retention-days: 7
