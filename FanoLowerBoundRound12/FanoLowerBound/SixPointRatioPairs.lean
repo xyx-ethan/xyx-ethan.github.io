@@ -18,7 +18,7 @@ private theorem sum_fin4 {M : Type*} [AddCommMonoid M] (f : Fin 4 → M) :
   rw [Fin.sum_univ_succ]
   rw [Fin.sum_univ_succ]
   simp
-  ac_rfl
+  abel
 
 /-- The four points `p₅,p₄,p₂,p₃`. -/
 def ratioPairEmb01 : Fin 4 ↪ Fin 6 where
@@ -48,16 +48,12 @@ theorem sixPoint_ratio01_ne
   have hqsum : a0 • b 0 + a1 • b 1 + a2 • b 2 + a3 • b 3 = p 4 := by
     calc
       a0 • b 0 + a1 • b 1 + a2 • b 2 + a3 • b 3 =
-          ∑ i, b.coord i (p 4) • b i := by
-            rw [sum_fin4]
-            rfl
+          ∑ i, b.coord i (p 4) • b i := by rw [sum_fin4]
       _ = p 4 := hq0
   have hrsum : c0 • b 0 + c1 • b 1 + c2 • b 2 + c3 • b 3 = p 5 := by
     calc
       c0 • b 0 + c1 • b 1 + c2 • b 2 + c3 • b 3 =
-          ∑ i, b.coord i (p 5) • b i := by
-            rw [sum_fin4]
-            rfl
+          ∑ i, b.coord i (p 5) • b i := by rw [sum_fin4]
       _ = p 5 := hr0
   have hq : p 4 = a0 • b 0 + a1 • b 1 + a2 • b 2 + a3 • b 3 := hqsum.symm
   have hr : p 5 = c0 • b 0 + c1 • b 1 + c2 • b 2 + c3 • b 3 := hrsum.symm
@@ -65,15 +61,11 @@ theorem sixPoint_ratio01_ne
   have hc0 := b.sum_coord_apply_eq_one (p 5)
   have ha : a0 + a1 + a2 + a3 = 1 := by
     calc
-      a0 + a1 + a2 + a3 = ∑ i, b.coord i (p 4) := by
-        rw [sum_fin4]
-        rfl
+      a0 + a1 + a2 + a3 = ∑ i, b.coord i (p 4) := by rw [sum_fin4]
       _ = 1 := ha0
   have hc : c0 + c1 + c2 + c3 = 1 := by
     calc
-      c0 + c1 + c2 + c3 = ∑ i, b.coord i (p 5) := by
-        rw [sum_fin4]
-        rfl
+      c0 + c1 + c2 + c3 = ∑ i, b.coord i (p 5) := by rw [sum_fin4]
       _ = 1 := hc0
   have hfun : (![p 5, p 4, b 2, b 3] : Fin 4 → Point3) =
       p ∘ ratioPairEmb01 := by
