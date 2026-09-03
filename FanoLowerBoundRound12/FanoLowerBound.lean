@@ -15,15 +15,15 @@ import FanoLowerBound.BoundaryExit
 import FanoLowerBound.DoubleTriangle
 import FanoLowerBound.ParallelCrossing
 import FanoLowerBound.EndpointBranch
+import FanoLowerBound.OrderedLineCore
 
 /-!
 # Fano lower-bound Round 21
 
 This kernel target retains the complete six-point strict `2--3` Radon lemma
-and the strict-boundary parallel-crossing branch.  It adds the endpoint branch
-of the open-convex sunflower line-core proof: when the last point outside the
-core is the middle petal point itself, openness and convexity force the
-original transversal line to meet the core.
+and closes both boundary alternatives in the ordered open-convex sunflower
+line-core argument.  It also assembles them into a theorem for three collinear
+petal points with the second strictly between the first and third.
 -/
 
 #print axioms FanoLowerBound.ordered_ratio_circuit_core
@@ -70,3 +70,5 @@ original transversal line to meet the core.
 #print axioms FanoLowerBound.openSegment_subset_firstPetal_of_coreEdge
 #print axioms FanoLowerBound.endpointBoundary_openSegment_hitsCore
 #print axioms FanoLowerBound.endpointBoundary_baseLine_hitsCore
+#print axioms FanoLowerBound.exists_small_symmetric_points_mem_open
+#print axioms FanoLowerBound.ordered_openConvexThreeSunflower_line_hitsCore
