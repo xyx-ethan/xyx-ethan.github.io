@@ -32,7 +32,16 @@ jobs:
           test -s FanoLowerBoundRound12/FanoLowerBound/RatioDistinctness.lean
           test -s FanoLowerBoundRound12/FanoLowerBound/SixthCoordinates.lean
           test -s FanoLowerBoundRound12/FanoLowerBound/SixPointRatioPairs.lean
-          ! grep -R -E '(^|[^[:alnum:]_])(sorry|admit|by\?|exact\?|unsafe)([^[:alnum:]_]|$)' FanoLowerBoundRound12 --include='*.lean'
+          if grep -R -nE '(^|[^[:alnum:]_])(sorry|admit|by\?|exact\?|unsafe)([^[:alnum:]_]|$)' \
+              FanoLowerBoundRound12 --include='*.lean'; then
+            echo 'forbidden Lean placeholder or unsafe declaration found' >&2
+            exit 1
+          fi
+          if grep -R -nE '^[[:space:]]*axiom[[:space:]]+' \
+              FanoLowerBoundRound12 --include='*.lean'; then
+            echo 'custom axiom declaration found' >&2
+            exit 1
+          fi
           find FanoLowerBoundRound12 -maxdepth 2 -type f -print | sort
           sha256sum FanoLowerBoundRound12/FanoLowerBound.lean \
             FanoLowerBoundRound12/FanoLowerBound/RatioCircuitCore.lean \
