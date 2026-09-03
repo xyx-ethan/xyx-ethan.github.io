@@ -137,15 +137,20 @@ theorem onePositive0_sixPoint_hasStrictRadon23
     dsimp [w]
     field_simp [ha0ne] <;> linarith [hasum]
   have h00 : (1 / a0) * a0 = 1 := by field_simp [ha0ne]
-  have h01 : (1 / a0) * a1 + (-a1) / a0 = 0 := by field_simp [ha0ne]
-  have h02 : (1 / a0) * a2 + (-a2) / a0 = 0 := by field_simp [ha0ne]
-  have h03 : (1 / a0) * a3 + (-a3) / a0 = 0 := by field_simp [ha0ne]
+  have h01 : (1 / a0) * a1 + (-a1) / a0 = 0 := by
+    field_simp [ha0ne] <;> ring
+  have h02 : (1 / a0) * a2 + (-a2) / a0 = 0 := by
+    field_simp [ha0ne] <;> ring
+  have h03 : (1 / a0) * a3 + (-a3) / a0 = 0 := by
+    field_simp [ha0ne] <;> ring
   have hwcomb : ∑ i, w i • b' i = p' 4 := by
     rw [sum_fin4]
     change (1 / a0) • p 4 + ((-a1) / a0) • p 1 +
         ((-a2) / a0) • p 2 + ((-a3) / a0) • p 3 = p 0
     rw [hq]
     simp only [smul_add, smul_smul]
+    rw [h00]
+    simp only [one_smul]
     module
   have hapos' : ∀ i : Fin 4, 0 < b'.coord i (p' 4) := by
     intro i
