@@ -6,15 +6,13 @@ import FanoLowerBound.RatioDistinctness
 import FanoLowerBound.SixthCoordinates
 import FanoLowerBound.SixPointRatioPairs
 import FanoLowerBound.AllPositiveSixPointRadon
+import FanoLowerBound.OnePositiveRebase
 
 /-!
-# Fano lower-bound Round 15
+# Fano lower-bound Round 16
 
-This kernel target certifies the arithmetic-to-geometry Radon bridge, the
-affine-basis reduction from six-point general position in `ℝ³`, direct strict
-Radon witnesses for the two-positive and three-positive barycentric sign
-patterns, nonvanishing coordinates for both extra points, all six pairwise
-barycentric-ratio inequalities, and the sorted all-positive six-point branch.
+This kernel target adds the canonical one-positive barycentric rebase to the
+previously certified all-positive six-point branch.
 -/
 
 #print axioms FanoLowerBound.ordered_ratio_circuit_core
@@ -26,11 +24,7 @@ barycentric-ratio inequalities, and the sorted all-positive six-point branch.
 #print axioms FanoLowerBound.two_positive_direct_strictRadon23
 #print axioms FanoLowerBound.three_positive_direct_strictRadon23
 #print axioms FanoLowerBound.ratio01_ne_of_four_affineIndependent
-#print axioms FanoLowerBound.sixPoint_ratio01_ne
-#print axioms FanoLowerBound.sixPoint_ratio02_ne
-#print axioms FanoLowerBound.sixPoint_ratio03_ne
-#print axioms FanoLowerBound.sixPoint_ratio12_ne
-#print axioms FanoLowerBound.sixPoint_ratio13_ne
-#print axioms FanoLowerBound.sixPoint_ratio23_ne
 #print axioms FanoLowerBound.sixPointRatio_injective
 #print axioms FanoLowerBound.allPositive_sixPoint_strictRadon23
+#print axioms FanoLowerBound.affineBasis_coord_eq_of_linearCombination
+#print axioms FanoLowerBound.onePositive0_sixPoint_hasStrictRadon23
