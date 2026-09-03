@@ -1,0 +1,35 @@
+name: Diophantine 7-tuple round 5 exact computation
+
+on:
+  push:
+    branches:
+      - research/diophantine7-round5
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  exact-computation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    container:
+      image: sagemath/sagemath:10.9
+    steps:
+      - name: Install git and certificates
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y git ca-certificates
+      - name: Check out computation script
+        uses: actions/checkout@v4
+        with:
+          ref: research/diophantine7-round5
+      - name: Run exact Sage and Magma computations
+        run: |
+          sage -python research/diophantine7_round5.py | tee round5-computation.log
+      - name: Upload raw computation log
+        uses: actions/upload-artifact@v4
+        with:
+          name: diophantine7-round5-log
+          path: round5-computation.log
+          if-no-files-found: error
