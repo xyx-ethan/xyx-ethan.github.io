@@ -1,0 +1,37 @@
+name: Fano Lean kernel certificate
+
+on:
+  push:
+    branches:
+      - fano-lean-kernel-20260903
+    paths:
+      - 'research/fano-odim4-lean/**'
+      - '.github/workflows/fano-lean-kernel.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  kernel-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      LEAN_NUM_THREADS: 2
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and independently check Lean certificate
+        uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: research/fano-odim4-lean
+          auto-config: false
+          build: true
+          test: false
+          lint: false
+          use-mathlib-cache: true
+          use-github-cache: false
+          leanchecker: true
+          nanoda: true
+          nanoda-allow-sorry: false
+          axiom-audit: true
+          axiom-audit-root: FanoOdim4
