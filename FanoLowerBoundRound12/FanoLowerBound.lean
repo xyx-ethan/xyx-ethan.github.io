@@ -101,7 +101,7 @@ from six nonempty open subsets of `ℝ³` so that every four are affinely indepe
 #print axioms FanoLowerBound.arbitraryOrderedFive_strictRadon_contradicts_noFiveDistinctActive
 #print axioms FanoLowerBound.sixChosenFanoLines_hasStrictRadon_contradiction
 #print axioms FanoLowerBound.sixChosenFanoLines_generalPosition_contradiction
-#print axioms FanoLowerBound.IsOpen.exists_mem_not_mem_proper_affineSubspace
-#print axioms FanoLowerBound.IsOpen.exists_mem_avoid_affineSubspaces
+#print axioms FanoLowerBound.exists_mem_not_mem_proper_affineSubspace
+#print axioms FanoLowerBound.exists_mem_avoid_affineSubspaces
 #print axioms FanoLowerBound.every_fin4_emb_fin6_factors
 #print axioms FanoLowerBound.exists_six_generalPosition_representatives
