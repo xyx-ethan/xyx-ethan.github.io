@@ -122,24 +122,32 @@ theorem replacePoint_fifth_affineIndependent
         p ∘ replaceEmb0 := by
       funext j
       fin_cases j <;> rfl
+    change AffineIndependent ℝ
+      (replacePoint (firstFourAffineBasis p hgp) (p 4) (0 : Fin 4))
     rw [hfun]
     exact hgp replaceEmb0
   · have hfun : replacePoint (firstFourAffineBasis p hgp) (p 4) 1 =
         p ∘ replaceEmb1 := by
       funext j
       fin_cases j <;> rfl
+    change AffineIndependent ℝ
+      (replacePoint (firstFourAffineBasis p hgp) (p 4) (1 : Fin 4))
     rw [hfun]
     exact hgp replaceEmb1
   · have hfun : replacePoint (firstFourAffineBasis p hgp) (p 4) 2 =
         p ∘ replaceEmb2 := by
       funext j
       fin_cases j <;> rfl
+    change AffineIndependent ℝ
+      (replacePoint (firstFourAffineBasis p hgp) (p 4) (2 : Fin 4))
     rw [hfun]
     exact hgp replaceEmb2
   · have hfun : replacePoint (firstFourAffineBasis p hgp) (p 4) 3 =
         p ∘ replaceEmb3 := by
       funext j
       fin_cases j <;> rfl
+    change AffineIndependent ℝ
+      (replacePoint (firstFourAffineBasis p hgp) (p 4) (3 : Fin 4))
     rw [hfun]
     exact hgp replaceEmb3
 
