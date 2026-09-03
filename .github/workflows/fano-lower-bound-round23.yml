@@ -20,14 +20,17 @@ jobs:
           ref: scratch/fano-lower-bound-round23-2026-09-03
           fetch-depth: 1
 
-      - name: Generate compact 210-record Lean table
+      - name: Generate Round 23 Lean sources
         shell: bash
         working-directory: FanoLowerBoundRound12
         run: |
           set -euo pipefail
           python3 generate_fano_forcing_table.py
+          python3 apply_round23_source.py
           test -s FanoLowerBound/FanoForcingTable.lean
+          test -s FanoLowerBound/FanoRadonForcing.lean
           grep -q 'fano_forcing_certificate_count' FanoLowerBound/FanoForcingTable.lean
+          grep -q 'every_fano_radon_config_contradicts_noFiveDistinctActive' FanoLowerBound/FanoRadonForcing.lean
 
       - name: Audit direct Lean source tree
         shell: bash
@@ -101,6 +104,7 @@ jobs:
             FanoLowerBoundRound12/lake-manifest.json
             FanoLowerBoundRound12/LEAN_SOURCE_SHA256SUMS
             FanoLowerBoundRound12/generate_fano_forcing_table.py
+            FanoLowerBoundRound12/apply_round23_source.py
             FanoLowerBoundRound12/FanoLowerBound.lean
             FanoLowerBoundRound12/FanoLowerBound/FanoForcingTable.lean
             FanoLowerBoundRound12/FanoLowerBound/FanoRadonForcing.lean
