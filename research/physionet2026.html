@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Decoding Cognitive Impairment from Overnight Polysomnography &mdash; Ethan Xu</title>
-    <meta name="description" content="Research note on decoding cognitive impairment from overnight polysomnography (PSG): nonlinear EEG dynamics, sleep-stage-stratified features, brain–heart coupling, and EEG foundation models. George B. Moody PhysioNet Challenge 2026.">
+    <meta name="description" content="Accepted challenge paper on decoding cognitive impairment from overnight polysomnography (PSG) for the George B. Moody PhysioNet Challenge 2026; poster in preparation.">
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%232a3a4a'/%3E%3Cstop offset='100%25' stop-color='%231a2636'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx='50' cy='50' r='50' fill='url(%23g)'/%3E%3Ctext x='50' y='56' text-anchor='middle' dominant-baseline='middle' font-family='Inter,sans-serif' font-size='34' font-weight='700' fill='%23d0d8e4'%3EXY%3C/text%3E%3C/svg%3E">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -37,7 +37,7 @@
         <div class="note-sidebar-header">
             <span class="note-badge">PhysioNet 2026</span>
             <h2>Sleep PSG &rarr; Cognitive Impairment</h2>
-            <p>GT NeuroSignals Lab &middot; In progress</p>
+            <p>Solo entry &middot; Paper accepted &middot; Poster in preparation</p>
         </div>
         <div class="toc-title">Contents</div>
         <ol class="toc-list"></ol>
@@ -49,7 +49,7 @@
     <header class="note-header">
         <span class="note-badge">George B. Moody PhysioNet Challenge 2026</span>
         <h1>Decoding Cognitive Impairment from Overnight Polysomnography</h1>
-        <p class="note-intro">A research note (in progress) on decoding <strong>cognitive impairment from overnight polysomnography (PSG)</strong>. Will cover nonlinear EEG dynamics (recurrence quantification, multiscale and permutation entropy) stratified across N2, N3, and REM sleep; brain and heart coupling between HRV and EEG delta-band activity; slow-wave dissipation and REM-sleep muscle atonia as biomarkers of neurodegenerative decline; and integration of pretrained EEG foundation-model embeddings (BIOT, REVE) within a cross-site leak-free ensemble. PhysioNet challenge organized by <a href="https://research.gatech.edu/people/gari-clifford" target="_blank" rel="noopener">Gari Clifford</a> (Emory / Georgia Tech).</p>
+        <p class="note-intro">A project on decoding <strong>cognitive impairment from overnight polysomnography (PSG)</strong>. The challenge paper has been accepted and a poster is in preparation. This research note outlines work on nonlinear EEG dynamics, sleep-stage-stratified features, brain&ndash;heart coupling, and cross-site leakage-safe evaluation. Submitted as a solo entry under the leaderboard team name "GT NeuroSignals Lab."</p>
     </header>
 
     <!-- Inline TOC (hidden via notes.css; auto-populated into sidebar by notes.js) -->
@@ -71,11 +71,11 @@
     <div class="note-body">
 
 <div class="card-caution">
-<strong>Why this page is sparse &mdash; and why the code repository is private.</strong>
+<strong>Current status.</strong>
 <br><br>
-The George B. Moody PhysioNet Challenge 2026 is still in its active submission phase (Feb to Aug 2026). Per the challenge's sporting-conduct norms, <em>both</em> the detailed methodology writeup and the <a href="https://github.com/xyx-ethan/gt-neurosignals-lab-physionet2026-submission" target="_blank" rel="noopener">source-code repository</a> are kept private until the official phase closes, so that ideas, feature definitions, and engineering decisions aren't inadvertently shared across teams mid-competition. The <a href="https://moody-challenge.physionet.org/2026/leaderboard/" target="_blank" rel="noopener">live leaderboard</a> remains publicly viewable.
+The challenge paper has been accepted, and a poster is in preparation. Official final rankings have not yet been released, so this page does not report a provisional leaderboard position.
 <br><br>
-The methodological note below will be filled in after the official phase concludes (expected Aug&nbsp;2026), at which point the source repository will also be made public. The topic outline is included here as a preview of what the completed writeup will cover.
+Detailed methods and code remain private while the official process is ongoing. This page will be updated after final results and public-release materials become available.
 </div>
 
 <h2 id="t1">1. Polysomnography &amp; the Cognitive-Impairment Task</h2>
@@ -103,7 +103,7 @@ The methodological note below will be filled in after the official phase conclud
 <p><em>Content pending.</em> Will cover leave-one-site-out validation, the Stage-1 / Stage-2 meta-learning architecture, sequential &alpha;-blending of sub-models, and graceful-fallback cascade for deployment.</p>
 
 <h2 id="t9">9. Empirical Results &amp; Takeaways</h2>
-<p><em>Content pending.</em> Will report per-site AUROC, ablation on feature families, and broader lessons about sleep neurophysiology as a window into early neurodegenerative decline.</p>
+<p><em>Official results pending.</em> Final evaluation results and corresponding analyses will be added after the organizers release them.</p>
 
     </div><!-- /.note-body -->
 </article>
