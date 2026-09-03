@@ -1,0 +1,119 @@
+name: Fano lower-bound Round 27 structural code-level certificate
+
+on:
+  push:
+    branches:
+      - scratch/fano-lower-bound-round27-2026-09-03
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  kernel-round27-structural:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - name: Checkout isolated temporary branch
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: scratch/fano-lower-bound-round27-2026-09-03
+          fetch-depth: 1
+
+      - name: Materialize inherited and Round 27 sources
+        shell: bash
+        working-directory: FanoLowerBoundRound12
+        run: |
+          set -euo pipefail
+          python3 generate_fano_forcing_table.py
+          python3 apply_round23_source.py
+          sed -i 's/native_decide/decide/g' FanoLowerBound/FanoForcingTable.lean FanoLowerBound/FanoRadonForcing.lean
+          sed -i '2i set_option maxRecDepth 100000\nset_option maxHeartbeats 0' FanoLowerBound/FanoForcingTable.lean
+          sed -i '3i set_option maxRecDepth 100000\nset_option maxHeartbeats 0' FanoLowerBound/FanoRadonForcing.lean
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('FanoLowerBound/FanoIndexNormalization.lean')
+          s = p.read_text(encoding='utf-8')
+          s = s.replace(
+              'variable {E : Type*} [AddCommGroup E] [Module ℝ E]\n',
+              'variable {E : Type*} [AddCommGroup E] [Module ℝ E]\n'
+              '  [TopologicalSpace E] [IsTopologicalAddGroup E] [ContinuousSMul ℝ E]\n', 1)
+          s = s.replace('    {x₀ x₁ : E} {P : Nat → E}\n', '    {P : Nat → E}\n', 1)
+          s = s.replace(
+              'section Topological\n\nvariable [TopologicalSpace E] [IsTopologicalAddGroup E] [ContinuousSMul ℝ E]\n\n',
+              'section Topological\n\n', 1)
+          p.write_text(s, encoding='utf-8')
+          PY
+          python3 apply_round26_source.py
+          python3 apply_round26_fast_patch.py
+          python3 apply_round27_source.py
+          python3 apply_round27_structural_patch.py
+          grep -q 'def lineContains3' FanoLowerBound/FanoForcingTable.lean
+          grep -q 'decide \[a, b, c\].Nodup' FanoLowerBound/FanoForcingTable.lean
+          grep -q 'theorem no_openConvex_R3_realization_of_FP' FanoLowerBound/FanoCodeRealization.lean
+          grep -q 'private theorem fpWords_card_le_three' FanoLowerBound/FanoCodeRealization.lean
+
+      - name: Audit direct Lean source tree
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -R -nE '(^|[^[:alnum:]_])(sorry|admit|by\?|exact\?|unsafe)([^[:alnum:]_]|$)' FanoLowerBoundRound12 --include='*.lean'; then
+            echo 'forbidden Lean placeholder or unsafe declaration found' >&2
+            exit 1
+          fi
+          if grep -R -nE '^[[:space:]]*axiom[[:space:]]+' FanoLowerBoundRound12 --include='*.lean'; then
+            echo 'custom axiom declaration found' >&2
+            exit 1
+          fi
+          find FanoLowerBoundRound12 -maxdepth 2 -name '*.lean' -print0 | sort -z | xargs -0 sha256sum > FanoLowerBoundRound12/LEAN_SOURCE_SHA256SUMS_ROUND27
+
+      - name: Install pinned Elan
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --location --retry 3 https://github.com/leanprover/elan/releases/download/v4.2.4/elan-x86_64-unknown-linux-gnu.tar.gz --output /tmp/elan.tar.gz
+          echo '42b94d4244e8353142c456ec0e4ca6528fd898a6c604d4059f494e706e431f63  /tmp/elan.tar.gz' | sha256sum --check
+          tar -xzf /tmp/elan.tar.gz -C /tmp
+          /tmp/elan-init -y --default-toolchain none
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+      - name: Build pinned Lean and Mathlib certificate
+        shell: bash
+        working-directory: FanoLowerBoundRound12
+        run: |
+          set -euo pipefail
+          set -o pipefail
+          {
+            echo '=== pinned inputs ==='
+            cat lean-toolchain
+            cat lakefile.toml
+            elan toolchain install "$(cat lean-toolchain)"
+            lean --version
+            lake --version
+            lake update
+            lake exe cache get
+            echo '=== lake build ==='
+            lake build
+            echo '=== root re-elaboration and axiom report ==='
+            lake env lean FanoLowerBound.lean
+            echo 'LEAN_LOWER_BOUND_ROUND27_CODE_LEVEL_PASS'
+          } 2>&1 | tee LEAN_LOWER_BOUND_BUILD_ROUND27_STRUCTURAL.log
+          ! grep -q 'sorryAx' LEAN_LOWER_BOUND_BUILD_ROUND27_STRUCTURAL.log
+          ! grep -q '_native.native_decide.ax' LEAN_LOWER_BOUND_BUILD_ROUND27_STRUCTURAL.log
+
+      - name: Upload Round 27 evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: fano-lower-bound-round27-code-level-structural-evidence
+          path: |
+            FanoLowerBoundRound12/LEAN_LOWER_BOUND_BUILD_ROUND27_STRUCTURAL.log
+            FanoLowerBoundRound12/lake-manifest.json
+            FanoLowerBoundRound12/LEAN_SOURCE_SHA256SUMS_ROUND27
+            FanoLowerBoundRound12/apply_round27_source.py
+            FanoLowerBoundRound12/apply_round27_structural_patch.py
+            FanoLowerBoundRound12/FanoLowerBound.lean
+            FanoLowerBoundRound12/FanoLowerBound/FanoForcingTable.lean
+            FanoLowerBoundRound12/FanoLowerBound/FanoRadonForcing.lean
+            FanoLowerBoundRound12/FanoLowerBound/FanoCodeRealization.lean
+          if-no-files-found: warn
