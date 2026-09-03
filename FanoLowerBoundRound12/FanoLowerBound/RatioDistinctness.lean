@@ -4,7 +4,7 @@ import FanoLowerBound.RatioCircuitCore
 # Distinctness of two barycentric ratios from four-point general position
 
 If two barycentric ratios coincide, the ratio-circuit identity eliminates the
-corresponding two basis points.  The remaining four points then admit two
+corresponding two basis points.  The remaining four points then have two
 different affine-coordinate vectors with total weight one, contradicting
 affine independence.
 -/
