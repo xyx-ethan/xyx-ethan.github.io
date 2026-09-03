@@ -34,7 +34,7 @@ point to an exterior point.  The boundary point itself is exterior, while all
 points strictly between the interior endpoint and the boundary point remain
 inside the open set. -/
 theorem exists_boundaryPoint_between_inside_outside
-    {C : Set E} (hC : IsOpen C) {p c : E} (hp : p ∉ C) (hc : c ∈ C) :
+    {C : Set E} (hC : IsOpen C) {p c : E} (hp : p ∉ C) (_hc : c ∈ C) :
     ∃ q : E,
       q ∉ C ∧
       Wbtw ℝ c q p ∧
@@ -96,7 +96,8 @@ theorem exists_lastOutsideParameter
             (lineMap c p δ) :=
         (sbtw_lineMap_iff).2 ⟨hline_ne, hratio⟩
       have hs : Sbtw ℝ c (lineMap c p u) q := by
-        simpa [lineMap_lineMap_right, div_mul_cancel₀ u hδne, hδq] using hs0
+        rw [lineMap_lineMap_right, div_mul_cancel₀ u hδne, hδq] at hs0
+        exact hs0
       exact hinterior _ hs
 
 #print axioms exists_boundaryPoint_between_inside_outside
