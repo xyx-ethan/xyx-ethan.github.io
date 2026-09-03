@@ -14,14 +14,16 @@ import FanoLowerBound.SunflowerSegment
 import FanoLowerBound.BoundaryExit
 import FanoLowerBound.DoubleTriangle
 import FanoLowerBound.ParallelCrossing
+import FanoLowerBound.EndpointBranch
 
 /-!
-# Fano lower-bound Round 20
+# Fano lower-bound Round 21
 
-This kernel target retains the complete six-point strict `2--3` Radon lemma,
-the sunflower segment and boundary-exit deductions, and the double swept-
-triangle inclusions.  It adds the explicit local parallel-line crossing of the
-two swept triangles and audits the weak-boundary endpoint alternative.
+This kernel target retains the complete six-point strict `2--3` Radon lemma
+and the strict-boundary parallel-crossing branch.  It adds the endpoint branch
+of the open-convex sunflower line-core proof: when the last point outside the
+core is the middle petal point itself, openness and convexity force the
+original transversal line to meet the core.
 -/
 
 #print axioms FanoLowerBound.ordered_ratio_circuit_core
@@ -65,3 +67,6 @@ two swept triangles and audits the weak-boundary endpoint alternative.
 #print axioms FanoLowerBound.parallel_crossing_of_lineMap_parameters
 #print axioms FanoLowerBound.parallelLine_crosses_doubleSweptTriangles
 #print axioms FanoLowerBound.weakBoundary_endpoint_or_strict
+#print axioms FanoLowerBound.openSegment_subset_firstPetal_of_coreEdge
+#print axioms FanoLowerBound.endpointBoundary_openSegment_hitsCore
+#print axioms FanoLowerBound.endpointBoundary_baseLine_hitsCore
