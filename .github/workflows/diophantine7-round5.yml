@@ -27,11 +27,11 @@ jobs:
       - name: Run exact Sage and Magma computations
         run: |
           sage -python research/diophantine7_round5.py | tee round5-computation.log
-      - name: Run degree-six elliptic Chabauty diagnostics
+      - name: Run two reduced elliptic Chabauty curves
         run: |
-          python3 - <<'PY' | tee round5-degree6.log
+          python3 - <<'PY' | tee round5-twoquartics.log
           import pathlib, time, urllib.parse, urllib.request, xml.etree.ElementTree as ET
-          code=pathlib.Path('research/orbitC_degree6.m').read_text()
+          code=pathlib.Path('research/orbitC_twoquartics.m').read_text()
           data=urllib.parse.urlencode({'input':code}).encode('ascii')
           req=urllib.request.Request('https://magma.maths.usyd.edu.au/xml/calculator.xml',data=data,headers={'Content-Type':'application/x-www-form-urlencoded','Accept':'text/html, application/xml','Referer':'https://magma.maths.usyd.edu.au/calc/','User-Agent':'Mozilla/5.0 exact-research-check'},method='POST')
           for attempt in range(10):
@@ -53,5 +53,5 @@ jobs:
           name: diophantine7-round5-logs
           path: |
             round5-computation.log
-            round5-degree6.log
+            round5-twoquartics.log
           if-no-files-found: error
