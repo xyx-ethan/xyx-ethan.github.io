@@ -10,28 +10,18 @@ permissions:
   contents: read
 
 jobs:
-  exact-computation:
+  rational-points-genus2:
     runs-on: ubuntu-latest
-    timeout-minutes: 90
-    container:
-      image: sagemath/sagemath:10.9
+    timeout-minutes: 15
     steps:
-      - name: Install git and certificates
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y git ca-certificates
-      - name: Check out computation script
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           ref: research/diophantine7-round5
-      - name: Run exact Sage and Magma computations
+      - name: Run Magma V2.29 RationalPointsGenus2
         run: |
-          sage -python research/diophantine7_round5.py | tee round5-computation.log
-      - name: Run two reduced elliptic Chabauty curves
-        run: |
-          python3 - <<'PY' | tee round5-twoquartics.log
+          python3 - <<'PY' | tee round5-rpg2.log
           import pathlib, time, urllib.parse, urllib.request, xml.etree.ElementTree as ET
-          code=pathlib.Path('research/orbitC_twoquartics.m').read_text()
+          code=pathlib.Path('research/orbitC_rational_points_genus2.m').read_text()
           data=urllib.parse.urlencode({'input':code}).encode('ascii')
           req=urllib.request.Request('https://magma.maths.usyd.edu.au/xml/calculator.xml',data=data,headers={'Content-Type':'application/x-www-form-urlencoded','Accept':'text/html, application/xml','Referer':'https://magma.maths.usyd.edu.au/calc/','User-Agent':'Mozilla/5.0 exact-research-check'},method='POST')
           for attempt in range(10):
@@ -47,11 +37,8 @@ jobs:
               except Exception as exc:
                   print('ATTEMPT',attempt+1,type(exc).__name__,exc,flush=True); time.sleep(15+5*attempt)
           PY
-      - name: Upload raw computation logs
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
-          name: diophantine7-round5-logs
-          path: |
-            round5-computation.log
-            round5-twoquartics.log
+          name: diophantine7-round5-rpg2-log
+          path: round5-rpg2.log
           if-no-files-found: error
