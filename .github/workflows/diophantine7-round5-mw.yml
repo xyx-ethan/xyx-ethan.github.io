@@ -1,68 +1,10 @@
-name: Diophantine7 Round5 MW Rank
+name: Diophantine7 Round5 MW Rank Archive
 
 on:
-  push:
-    branches:
-      - math-research-diophantine7-round5-20260903
+  workflow_dispatch:
 
 jobs:
-  mw-rank:
+  archived:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
-    permissions:
-      contents: read
     steps:
-      - uses: actions/checkout@v4
-      - name: Run Magma Mordell-Weil computation
-        shell: bash
-        run: |
-          python3 - <<'PY'
-          import html, pathlib, time, urllib.parse, urllib.request
-          import xml.etree.ElementTree as ET
-          root = pathlib.Path('research/diophantine7/round5')
-          code = (root / 'mw_rank.m').read_text()
-          payload = urllib.parse.urlencode({'input': code}).encode()
-          endpoint = 'https://magma.maths.usyd.edu.au/xml/calculator.xml'
-          raw = None
-          errors = []
-          for attempt in range(12):
-              try:
-                  req = urllib.request.Request(endpoint, data=payload, method='POST')
-                  req.add_header('Content-Type', 'application/x-www-form-urlencoded')
-                  req.add_header('User-Agent', 'diophantine7-round5-research/1.0')
-                  with urllib.request.urlopen(req, timeout=240) as response:
-                      candidate = response.read()
-                  if b'<offline>' in candidate:
-                      errors.append(candidate.decode(errors='replace'))
-                      time.sleep(65)
-                      continue
-                  raw = candidate
-                  break
-              except Exception as exc:
-                  errors.append(repr(exc))
-                  time.sleep(35)
-          if raw is None:
-              raise RuntimeError('Magma request failed: ' + repr(errors[-3:]))
-          (root / 'magma_mw_rank.xml').write_bytes(raw)
-          doc = ET.fromstring(raw)
-          lines = [html.unescape(node.text or '') for node in doc.findall('.//line')]
-          text = '\n'.join(lines) + '\n'
-          (root / 'magma_mw_rank.log').write_text(text)
-          print(text)
-          warning = doc.findtext('.//warning')
-          alert = doc.findtext('.//alert')
-          if warning or alert:
-              raise RuntimeError(f'Magma warning={warning!r} alert={alert!r}')
-          if 'MW_RANK_FINISHED' not in text:
-              raise RuntimeError('completion sentinel missing')
-          PY
-      - name: Upload exact result
-        uses: actions/upload-artifact@v4
-        with:
-          name: diophantine7-round5-mw-rank
-          path: |
-            research/diophantine7/round5/mw_rank.m
-            research/diophantine7/round5/magma_mw_rank.log
-            research/diophantine7/round5/magma_mw_rank.xml
-          if-no-files-found: error
-          retention-days: 7
+      - run: echo 'Archived after successful rank-three computation in run 33786734384.'
