@@ -59,6 +59,7 @@ private lemma prod_lt_fold_pairs {p : ℕ} (hp : 0 < p) (ps : List ℕ)
   let start := concatenateNats p 1
   have hstart : p < start := by
     norm_num [start, concatenateNats]
+    omega
   have hstart_pos : 0 < start := hp.trans hstart
   have hprod_pos : 0 < ps.prod := List.prod_pos hps
   have hleft : p * ps.prod < start * ps.prod :=
