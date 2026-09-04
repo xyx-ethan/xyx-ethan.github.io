@@ -1,4 +1,4 @@
-name: Fano lower-bound Round 27 code-level kernel v6
+name: Fano lower-bound Round 27 code-level kernel v7
 
 on:
   push:
@@ -10,7 +10,7 @@ permissions:
   contents: read
 
 jobs:
-  kernel-codelevel-v6:
+  kernel-codelevel-v7:
     runs-on: ubuntu-24.04
     timeout-minutes: 45
     steps:
@@ -33,13 +33,13 @@ jobs:
           p = Path('FanoLowerBound/FanoForcingTable.lean')
           s = p.read_text(encoding='utf-8')
           old = '  · simpa [List.nodup_cons, and_comm, and_left_comm, and_assoc] using h.1\n'
-          new = '  · rcases h.1 with ⟨hab, hac, hbc⟩\n    exact ⟨Ne.symm hab, Ne.symm hac, Ne.symm hbc⟩\n'
+          new = '  · simpa using h.1.reverse\n'
           if old not in s:
               raise SystemExit('lineContains3_reverse proof line not found')
           p.write_text(s.replace(old, new, 1), encoding='utf-8')
           PY
           echo 'f1425d5b7fb3564ee2c14f6d097760031cded872857de6b7e43966f71b6ff9b1  FanoLowerBound/CodeLevelFano.lean' | sha256sum --check
-          echo '65199c980870e0edd912b416e27c1d4af6dab81e631b2fec361fb95453d4b118  FanoLowerBound/FanoForcingTable.lean' | sha256sum --check
+          echo '7ceefd526dfff97054e9725b0be04e054cbacaab9b7214ddb8f5110f40fa632f  FanoLowerBound/FanoForcingTable.lean' | sha256sum --check
           echo '217f7fc11b1ebba62ec551d9990f048ad6b2ae5aca97d2aab6844ea14ce6dff8  FanoLowerBound/FanoRadonForcing.lean' | sha256sum --check
           echo '74a7fe3eced4c37a995e08c22294ac4d356c7afebd294a6abccf866779865862  FanoLowerBound/GeneralPositionSelection.lean' | sha256sum --check
           echo 'd9b25452f6f2aa2c28801f5cb45a158e501918525227c49d655f2746a45824dc  FanoLowerBound.lean' | sha256sum --check
@@ -58,7 +58,7 @@ jobs:
             echo 'custom axiom declaration found' >&2
             exit 1
           fi
-          find . -maxdepth 2 -name '*.lean' -print0 | sort -z | xargs -0 sha256sum > LEAN_SOURCE_SHA256SUMS_ROUND27_CODELEVEL_V6
+          find . -maxdepth 2 -name '*.lean' -print0 | sort -z | xargs -0 sha256sum > LEAN_SOURCE_SHA256SUMS_ROUND27_CODELEVEL_V7
 
       - name: Install pinned Elan
         run: |
@@ -89,20 +89,20 @@ jobs:
             lake build
             echo '=== root re-elaboration and axiom report ==='
             lake env lean FanoLowerBound.lean
-            echo 'LEAN_LOWER_BOUND_ROUND27_CODELEVEL_V6_PASS'
-          } 2>&1 | tee LEAN_LOWER_BOUND_BUILD_ROUND27_CODELEVEL_V6.log
-          ! grep -q 'sorryAx' LEAN_LOWER_BOUND_BUILD_ROUND27_CODELEVEL_V6.log
-          ! grep -q '_native.native_decide.ax' LEAN_LOWER_BOUND_BUILD_ROUND27_CODELEVEL_V6.log
+            echo 'LEAN_LOWER_BOUND_ROUND27_CODELEVEL_V7_PASS'
+          } 2>&1 | tee LEAN_LOWER_BOUND_BUILD_ROUND27_CODELEVEL_V7.log
+          ! grep -q 'sorryAx' LEAN_LOWER_BOUND_BUILD_ROUND27_CODELEVEL_V7.log
+          ! grep -q '_native.native_decide.ax' LEAN_LOWER_BOUND_BUILD_ROUND27_CODELEVEL_V7.log
 
       - name: Upload kernel evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: fano-lower-bound-round27-codelevel-v6-kernel-evidence
+          name: fano-lower-bound-round27-codelevel-v7-kernel-evidence
           path: |
-            FanoLowerBoundRound12/LEAN_LOWER_BOUND_BUILD_ROUND27_CODELEVEL_V6.log
+            FanoLowerBoundRound12/LEAN_LOWER_BOUND_BUILD_ROUND27_CODELEVEL_V7.log
             FanoLowerBoundRound12/lake-manifest.json
-            FanoLowerBoundRound12/LEAN_SOURCE_SHA256SUMS_ROUND27_CODELEVEL_V6
+            FanoLowerBoundRound12/LEAN_SOURCE_SHA256SUMS_ROUND27_CODELEVEL_V7
             FanoLowerBoundRound12/FanoLowerBound.lean
             FanoLowerBoundRound12/FanoLowerBound/CodeLevelFano.lean
             FanoLowerBoundRound12/FanoLowerBound/FanoForcingTable.lean
