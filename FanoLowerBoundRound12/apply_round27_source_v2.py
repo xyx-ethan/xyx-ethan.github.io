@@ -1,0 +1,60 @@
+from __future__ import annotations
+
+import base64
+import gzip
+from pathlib import Path
+
+MODULE = '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'
+
+module_path = Path("FanoLowerBound/FanoCodeRealization.lean")
+module_path.write_bytes(gzip.decompress(base64.b64decode(MODULE)))
+
+p = Path("FanoLowerBound/FanoForcingTable.lean")
+s = p.read_text(encoding="utf-8")
+old = """def lineContains3 (a b c : Nat) : Bool :=
+  (List.range 7).any fun line =>
+    hasPoint line a && hasPoint line b && hasPoint line c
+"""
+new = """/-- Three *distinct* neuron labels lie on a common Fano line.  Distinctness is
+part of the intended incidence relation; without it, repeated inputs such as
+`(1,1,2)` would spuriously count as a Fano triple. -/
+def lineContains3 (a b c : Nat) : Bool :=
+  decide [a, b, c].Nodup &&
+    (List.range 7).any fun line =>
+      hasPoint line a && hasPoint line b && hasPoint line c
+"""
+if old not in s:
+    raise SystemExit("lineContains3 source block not found")
+p.write_text(s.replace(old, new, 1), encoding="utf-8")
+
+# Reorder the distinctness witness when the geometric proof reverses a Fano triple.
+p = Path("FanoLowerBound/FanoRadonForcing.lean")
+s = p.read_text(encoding="utf-8")
+old = """  have hkji : lineContains3 c.k c.j c.i = true := by
+    simpa [lineContains3, Bool.and_comm, Bool.and_left_comm, Bool.and_assoc]
+      using hijk
+"""
+new = """  have hkji : lineContains3 c.k c.j c.i = true := by
+    simp [lineContains3, List.nodup_cons,
+      Bool.and_comm, Bool.and_left_comm, Bool.and_assoc] at hijk ⊢
+    rcases hijk with ⟨hij, hik, hjk, hline⟩
+    exact ⟨Ne.symm hij, Ne.symm hik, Ne.symm hjk, hline⟩
+"""
+if old not in s:
+    raise SystemExit("FanoRadonForcing hkji block not found")
+p.write_text(s.replace(old, new, 1), encoding="utf-8")
+
+p = Path("FanoLowerBound.lean")
+s = p.read_text(encoding="utf-8")
+marker = "import FanoLowerBound.GeneralPositionSelection\n"
+imp = "import FanoLowerBound.FanoCodeRealization\n"
+if imp not in s:
+    if marker not in s:
+        raise SystemExit("root import marker not found")
+    s = s.replace(marker, marker + imp, 1)
+print_line = "#print axioms FanoLowerBound.no_openConvex_R3_realization_of_FP\n"
+if print_line not in s:
+    s += "\n" + print_line
+p.write_text(s, encoding="utf-8")
+
+print("ROUND27_SOURCE_MATERIALIZED")
