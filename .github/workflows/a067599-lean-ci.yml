@@ -1,0 +1,55 @@
+name: A067599 Lean CI
+
+on:
+  push:
+    branches:
+      - research/a067599-round3-ci
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Reject proof escape hatches
+        shell: bash
+        run: |
+          set -euo pipefail
+          file="research/a067599-ci/A067599CI.lean"
+          if grep -nE '(^|[^[:alnum:]_])(sorry|admit|axiom|unsafe)([^[:alnum:]_]|$)' "$file"; then
+            echo "Forbidden proof escape hatch found" >&2
+            exit 1
+          fi
+
+      - name: Build pinned Lean project
+        id: lean
+        uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: research/a067599-ci
+          build: true
+          test: false
+          lint: false
+          build-args: "--wfail"
+          use-mathlib-cache: true
+
+      - name: Repeat explicit full lake build
+        working-directory: research/a067599-ci
+        shell: bash
+        run: lake --wfail build
+
+      - name: Audit theorem axioms
+        working-directory: research/a067599-ci
+        shell: bash
+        run: |
+          set -euo pipefail
+          lake env lean CheckAxioms.lean | tee axioms.log
+          if grep -q 'sorryAx' axioms.log; then
+            echo "The theorem depends on sorryAx" >&2
+            exit 1
+          fi
