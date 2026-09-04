@@ -1,8 +1,14 @@
 import A067599CI
 
 /-!
-# Axiom audit for the A067599 squarefree exclusion
+# Axiom audit for the A067599 squarefree exclusion and periodic-divisor theorems
 -/
 
 #print axioms OeisA67599.lt_a_of_squarefree
 #print axioms OeisA67599.a_ne_of_squarefree
+#print axioms OeisA67599.seven_dvd_residualFamilyOne_six_mul
+#print axioms OeisA67599.thirteen_dvd_residualFamilyOne_two_add_six_mul
+#print axioms OeisA67599.seventyThree_dvd_residualFamilyOne_five_add_eight_mul
+#print axioms OeisA67599.seventeen_dvd_residualFamilyTwo_one_add_eight_mul
+#print axioms OeisA67599.oneFiftySeven_dvd_residualFamilyTwo_three_add_thirteen_mul
+#print axioms OeisA67599.fiftyThree_dvd_residualFamilyTwo_seven_add_thirteen_mul
