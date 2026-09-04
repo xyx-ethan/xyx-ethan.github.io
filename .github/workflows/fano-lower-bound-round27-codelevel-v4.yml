@@ -1,4 +1,4 @@
-name: Fano lower-bound Round 27 code-level kernel v4
+name: Fano lower-bound Round 27 code-level kernel v5
 
 on:
   push:
@@ -10,7 +10,7 @@ permissions:
   contents: read
 
 jobs:
-  kernel-codelevel-v4:
+  kernel-codelevel-v5:
     runs-on: ubuntu-24.04
     timeout-minutes: 45
     steps:
@@ -20,21 +20,37 @@ jobs:
           ref: scratch/fano-lower-bound-round27-codelevel-v4-2026-09-03
           fetch-depth: 1
 
-      - name: Materialize exact Round 27 source payload
+      - name: Materialize and patch exact Round 27 source payload
         working-directory: FanoLowerBoundRound12
         run: |
           set -euo pipefail
-          cat round27_codelevel_payload/part-*.b64 | base64 --decode | tar -xzf -
-          echo 'd60bcff02be625eebbe988eaf70640ccaf9a07d0b918969e0003417803e2f43b  /tmp/round27_payload.tar.gz' > /tmp/expected_payload_sha
-          cat round27_codelevel_payload/part-*.b64 | base64 --decode > /tmp/round27_payload.tar.gz
-          sha256sum --check /tmp/expected_payload_sha
+          PARTS="round27_codelevel_payload/part-00.b64 round27_codelevel_payload/part-01.b64 round27_codelevel_payload/part-02.b64 round27_codelevel_payload/part-03.b64 round27_codelevel_payload/part-04.b64 round27_codelevel_payload/part-05.b64"
+          cat $PARTS | base64 --decode > /tmp/round27_payload.tar.gz
+          echo 'd60bcff02be625eebbe988eaf70640ccaf9a07d0b918969e0003417803e2f43b  /tmp/round27_payload.tar.gz' | sha256sum --check
+          tar -xzf /tmp/round27_payload.tar.gz
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('FanoLowerBound/FanoForcingTable.lean')
+          s = p.read_text(encoding='utf-8')
+          old = '''  constructor
+          · simpa [List.nodup_cons, and_comm, and_left_comm, and_assoc] using h.1
+          · simpa [Bool.and_comm, Bool.and_left_comm, Bool.and_assoc] using h.2
+          '''
+          new = '''  constructor
+          · rcases h.1 with ⟨hab, hac, hbc⟩
+            exact ⟨Ne.symm hab, Ne.symm hac, Ne.symm hbc⟩
+          · simpa [Bool.and_comm, Bool.and_left_comm, Bool.and_assoc] using h.2
+          '''
+          if old not in s:
+              raise SystemExit('lineContains3_reverse source block not found')
+          p.write_text(s.replace(old, new, 1), encoding='utf-8')
+          PY
           echo 'f1425d5b7fb3564ee2c14f6d097760031cded872857de6b7e43966f71b6ff9b1  FanoLowerBound/CodeLevelFano.lean' | sha256sum --check
-          echo '29b8f8ce027344bd74430288963249483109fa800494390b794512a366ed2995  FanoLowerBound/FanoForcingTable.lean' | sha256sum --check
+          echo '65199c980870e0edd912b416e27c1d4af6dab81e631b2fec361fb95453d4b118  FanoLowerBound/FanoForcingTable.lean' | sha256sum --check
           echo '217f7fc11b1ebba62ec551d9990f048ad6b2ae5aca97d2aab6844ea14ce6dff8  FanoLowerBound/FanoRadonForcing.lean' | sha256sum --check
           echo '74a7fe3eced4c37a995e08c22294ac4d356c7afebd294a6abccf866779865862  FanoLowerBound/GeneralPositionSelection.lean' | sha256sum --check
           echo 'd9b25452f6f2aa2c28801f5cb45a158e501918525227c49d655f2746a45824dc  FanoLowerBound.lean' | sha256sum --check
           grep -q 'theorem no_openConvex_R3_realization_of_FP' FanoLowerBound/CodeLevelFano.lean
-          grep -q 'def lineContains3 (a b c : Nat)' FanoLowerBound/FanoForcingTable.lean
           grep -q 'decide (\[a, b, c\].Nodup)' FanoLowerBound/FanoForcingTable.lean
 
       - name: Audit direct Lean source tree
@@ -49,7 +65,7 @@ jobs:
             echo 'custom axiom declaration found' >&2
             exit 1
           fi
-          find . -maxdepth 2 -name '*.lean' -print0 | sort -z | xargs -0 sha256sum > LEAN_SOURCE_SHA256SUMS_ROUND27_CODELEVEL_V4
+          find . -maxdepth 2 -name '*.lean' -print0 | sort -z | xargs -0 sha256sum > LEAN_SOURCE_SHA256SUMS_ROUND27_CODELEVEL_V5
 
       - name: Install pinned Elan
         run: |
@@ -80,20 +96,20 @@ jobs:
             lake build
             echo '=== root re-elaboration and axiom report ==='
             lake env lean FanoLowerBound.lean
-            echo 'LEAN_LOWER_BOUND_ROUND27_CODELEVEL_V4_PASS'
-          } 2>&1 | tee LEAN_LOWER_BOUND_BUILD_ROUND27_CODELEVEL_V4.log
-          ! grep -q 'sorryAx' LEAN_LOWER_BOUND_BUILD_ROUND27_CODELEVEL_V4.log
-          ! grep -q '_native.native_decide.ax' LEAN_LOWER_BOUND_BUILD_ROUND27_CODELEVEL_V4.log
+            echo 'LEAN_LOWER_BOUND_ROUND27_CODELEVEL_V5_PASS'
+          } 2>&1 | tee LEAN_LOWER_BOUND_BUILD_ROUND27_CODELEVEL_V5.log
+          ! grep -q 'sorryAx' LEAN_LOWER_BOUND_BUILD_ROUND27_CODELEVEL_V5.log
+          ! grep -q '_native.native_decide.ax' LEAN_LOWER_BOUND_BUILD_ROUND27_CODELEVEL_V5.log
 
       - name: Upload kernel evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: fano-lower-bound-round27-codelevel-v4-kernel-evidence
+          name: fano-lower-bound-round27-codelevel-v5-kernel-evidence
           path: |
-            FanoLowerBoundRound12/LEAN_LOWER_BOUND_BUILD_ROUND27_CODELEVEL_V4.log
+            FanoLowerBoundRound12/LEAN_LOWER_BOUND_BUILD_ROUND27_CODELEVEL_V5.log
             FanoLowerBoundRound12/lake-manifest.json
-            FanoLowerBoundRound12/LEAN_SOURCE_SHA256SUMS_ROUND27_CODELEVEL_V4
+            FanoLowerBoundRound12/LEAN_SOURCE_SHA256SUMS_ROUND27_CODELEVEL_V5
             FanoLowerBoundRound12/FanoLowerBound.lean
             FanoLowerBoundRound12/FanoLowerBound/CodeLevelFano.lean
             FanoLowerBoundRound12/FanoLowerBound/FanoForcingTable.lean
