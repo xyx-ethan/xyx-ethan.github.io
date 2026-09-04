@@ -17,13 +17,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Reject proof escape hatches
+      - name: Reject proof escape hatches in added lines
         shell: bash
         run: |
           set -euo pipefail
-          file="research/a067599-ci/A067599CI.lean"
-          if grep -nE '(^|[^[:alnum:]_])(sorry|admit|axiom|unsafe)([^[:alnum:]_]|$)' "$file"; then
-            echo "Forbidden proof escape hatch found" >&2
+          patch="research/a067599-ci/a067599-squarefree.patch"
+          grep '^+' "$patch" | grep -v '^+++' > /tmp/a067599-added-lines.txt
+          if grep -nE '(^|[^[:alnum:]_])(sorry|admit|axiom|unsafe)([^[:alnum:]_]|$)' /tmp/a067599-added-lines.txt; then
+            echo "Forbidden proof escape hatch found in added lines" >&2
             exit 1
           fi
 
@@ -48,10 +49,28 @@ jobs:
         shell: bash
         run: lake update
 
+      - name: Apply exact source patch to pinned dependency
+        working-directory: research/a067599-ci
+        shell: bash
+        run: |
+          set -euo pipefail
+          dep=".lake/packages/formal_conjectures"
+          patch="$GITHUB_WORKSPACE/research/a067599-ci/a067599-squarefree.patch"
+          git -C "$dep" apply --check "$patch"
+          git -C "$dep" apply "$patch"
+          cp "$dep/FormalConjectures/OEIS/67599.lean" patched-67599.lean
+
       - name: Download Mathlib cache
         working-directory: research/a067599-ci
         shell: bash
         run: lake exe cache get
+
+      - name: Build patched upstream module
+        working-directory: research/a067599-ci
+        shell: bash
+        run: |
+          set -euo pipefail
+          lake --wfail build FormalConjectures.OEIS.«67599» 2>&1 | tee target-build.log
 
       - name: Full lake build
         working-directory: research/a067599-ci
@@ -83,23 +102,27 @@ jobs:
             echo "repository_commit=${{ github.sha }}"
             echo "formal_conjectures_commit=27f7d5b62fb86f586a5432bf2de56f99dc9b0aa6"
             echo "required_toolchain=leanprover/lean4:v4.33.1"
+            echo "integration_mode=patch_applied_to_pinned_dependency"
           } > verification-manifest.txt
 
       - name: Upload verification bundle
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: a067599-round3-lean-verification-${{ github.sha }}
+          name: a067599-round3-integrated-verification-${{ github.sha }}
           if-no-files-found: error
           retention-days: 30
           path: |
             research/a067599-ci/A067599CI.lean
             research/a067599-ci/CheckAxioms.lean
+            research/a067599-ci/a067599-squarefree.patch
+            research/a067599-ci/patched-67599.lean
             research/a067599-ci/lakefile.lean
             research/a067599-ci/lean-toolchain
             research/a067599-ci/lake-manifest.json
             research/a067599-ci/lean-version.log
             research/a067599-ci/lake-version.log
+            research/a067599-ci/target-build.log
             research/a067599-ci/full-build.log
             research/a067599-ci/axioms.log
             research/a067599-ci/verification-manifest.txt
