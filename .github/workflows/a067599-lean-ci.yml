@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - research/a067599-round3-ci
+      - research/a067599-round3-periodic-divisors
   workflow_dispatch:
 
 permissions:
@@ -17,14 +18,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Reject proof escape hatches in added lines
+      - name: Reject proof escape hatches
         shell: bash
         run: |
           set -euo pipefail
+          source_file="research/a067599-ci/A067599CI.lean"
+          if grep -nE '(^|[^[:alnum:]_])(sorry|admit|axiom|unsafe)([^[:alnum:]_]|$)' "$source_file"; then
+            echo "Forbidden proof escape hatch found in Lean source" >&2
+            exit 1
+          fi
           patch="research/a067599-ci/a067599-squarefree.patch"
           grep '^+' "$patch" | grep -v '^+++' > /tmp/a067599-added-lines.txt
           if grep -nE '(^|[^[:alnum:]_])(sorry|admit|axiom|unsafe)([^[:alnum:]_]|$)' /tmp/a067599-added-lines.txt; then
-            echo "Forbidden proof escape hatch found in added lines" >&2
+            echo "Forbidden proof escape hatch found in patch additions" >&2
             exit 1
           fi
 
@@ -87,7 +93,7 @@ jobs:
           set -euo pipefail
           lake env lean CheckAxioms.lean 2>&1 | tee axioms.log
           if grep -q 'sorryAx' axioms.log; then
-            echo "The theorem depends on sorryAx" >&2
+            echo "A theorem depends on sorryAx" >&2
             exit 1
           fi
 
@@ -109,7 +115,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: a067599-round3-integrated-verification-${{ github.sha }}
+          name: a067599-round3-verification-${{ github.sha }}
           if-no-files-found: error
           retention-days: 30
           path: |
