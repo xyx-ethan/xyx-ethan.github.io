@@ -1,5 +1,12 @@
 import FormalConjectures.OEIS.«67599»
 
+/-!
+# Squarefree exclusion for OEIS A067599
+
+This file proves that the decimal prime-factorization encoding of every squarefree natural
+number at least two is strictly larger than the number itself.
+-/
+
 namespace OeisA67599
 
 private lemma lt_ten_pow_digits_length (n : ℕ) :
@@ -42,7 +49,7 @@ private lemma mul_prod_le_fold_pairs (x : ℕ) (hx : 0 < x) :
         Nat.mul_le_mul_right ps.prod (Nat.le_of_lt hxy)
       have hih : y * ps.prod ≤
           (ps.flatMap fun q ↦ [q, 1]).foldl concatenateNats y :=
-        ih hy htail
+        ih y hy htail
       simpa [y, List.foldl_append, Nat.mul_assoc] using hmul.trans hih
 
 private lemma prod_lt_fold_pairs {p : ℕ} (hp : 0 < p) (ps : List ℕ)
@@ -51,8 +58,7 @@ private lemma prod_lt_fold_pairs {p : ℕ} (hp : 0 < p) (ps : List ℕ)
       ((p :: ps).flatMap fun q ↦ [q, 1]).foldl concatenateNats 0 := by
   let start := concatenateNats p 1
   have hstart : p < start := by
-    dsimp [start, concatenateNats]
-    omega
+    norm_num [start, concatenateNats]
   have hstart_pos : 0 < start := hp.trans hstart
   have hprod_pos : 0 < ps.prod := List.prod_pos hps
   have hleft : p * ps.prod < start * ps.prod :=
@@ -73,7 +79,7 @@ theorem lt_a_of_squarefree {n : ℕ} (hn : 2 ≤ n) (hsq : Squarefree n) : n < a
   obtain ⟨p, ps, hfac⟩ := List.exists_cons_of_ne_nil hne
   have hnodup : n.primeFactorsList.Nodup := hsq.nodup_primeFactorsList
   have hcount : ∀ q ∈ n.primeFactorsList, n.primeFactorsList.count q = 1 :=
-    (List.nodup_iff_count_eq_one.mp hnodup)
+    List.nodup_iff_count_eq_one.mp hnodup
   have hflat :
       n.primeFactorsList.flatMap (fun q ↦ [q, n.primeFactorsList.count q]) =
         n.primeFactorsList.flatMap (fun q ↦ [q, 1]) := by
@@ -99,8 +105,7 @@ theorem lt_a_of_squarefree {n : ℕ} (hn : 2 ≤ n) (hsq : Squarefree n) : n < a
     n = (p :: ps).prod := hprod_eq.symm
     _ < ((p :: ps).flatMap fun q ↦ [q, 1]).foldl concatenateNats 0 := hprod
     _ = a n := by
-      unfold a
-      rw [if_neg hnlt]
+      simp only [a, if_neg hnlt]
       rw [List.dedup_eq_self.mpr hnodup]
       rw [hflat, hfac]
 
