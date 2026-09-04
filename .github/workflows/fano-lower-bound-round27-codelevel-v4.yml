@@ -1,4 +1,4 @@
-name: Fano lower-bound Round 27 code-level kernel v8
+name: Fano lower-bound Round 27 code-level kernel v9
 
 on:
   push:
@@ -10,7 +10,7 @@ permissions:
   contents: read
 
 jobs:
-  kernel-codelevel-v8:
+  kernel-codelevel-v9:
     runs-on: ubuntu-24.04
     timeout-minutes: 45
     steps:
@@ -43,13 +43,9 @@ jobs:
           new = '''theorem lineContains3_reverse {a b c : Nat}
               (h : lineContains3 a b c = true) :
               lineContains3 c b a = true := by
-            simp only [lineContains3, Bool.and_eq_true] at h ⊢
+            simp only [lineContains3, Bool.and_eq_true, decide_eq_true_eq] at h ⊢
             constructor
-            · rw [decide_eq_true_eq]
-              have hn : [a, b, c].Nodup := of_decide_eq_true h.1
-              have hnr := hn.reverse
-              change [c, b, a].Nodup at hnr
-              exact hnr
+            · simpa [List.nodup_cons, ne_comm] using h.1.reverse
             · simpa [Bool.and_comm, Bool.and_left_comm, Bool.and_assoc] using h.2
           '''
           if old not in s:
@@ -57,7 +53,7 @@ jobs:
           p.write_text(s.replace(old, new, 1), encoding='utf-8')
           PY
           echo 'f1425d5b7fb3564ee2c14f6d097760031cded872857de6b7e43966f71b6ff9b1  FanoLowerBound/CodeLevelFano.lean' | sha256sum --check
-          echo '009bc6658f5ae489af1809ea017e88feac367a8d7031ca24907d1f94de657b7e  FanoLowerBound/FanoForcingTable.lean' | sha256sum --check
+          echo '12c2c86c6a2db4f39bf52a7fd28e0aeb8fb4cff23ee95a0d68472fc5543ab03c  FanoLowerBound/FanoForcingTable.lean' | sha256sum --check
           echo '217f7fc11b1ebba62ec551d9990f048ad6b2ae5aca97d2aab6844ea14ce6dff8  FanoLowerBound/FanoRadonForcing.lean' | sha256sum --check
           echo '74a7fe3eced4c37a995e08c22294ac4d356c7afebd294a6abccf866779865862  FanoLowerBound/GeneralPositionSelection.lean' | sha256sum --check
           echo 'd9b25452f6f2aa2c28801f5cb45a158e501918525227c49d655f2746a45824dc  FanoLowerBound.lean' | sha256sum --check
@@ -76,7 +72,7 @@ jobs:
             echo 'custom axiom declaration found' >&2
             exit 1
           fi
-          find . -maxdepth 2 -name '*.lean' -print0 | sort -z | xargs -0 sha256sum > LEAN_SOURCE_SHA256SUMS_ROUND27_CODELEVEL_V8
+          find . -maxdepth 2 -name '*.lean' -print0 | sort -z | xargs -0 sha256sum > LEAN_SOURCE_SHA256SUMS_ROUND27_CODELEVEL_V9
 
       - name: Install pinned Elan
         run: |
@@ -107,20 +103,20 @@ jobs:
             lake build
             echo '=== root re-elaboration and axiom report ==='
             lake env lean FanoLowerBound.lean
-            echo 'LEAN_LOWER_BOUND_ROUND27_CODELEVEL_V8_PASS'
-          } 2>&1 | tee LEAN_LOWER_BOUND_BUILD_ROUND27_CODELEVEL_V8.log
-          ! grep -q 'sorryAx' LEAN_LOWER_BOUND_BUILD_ROUND27_CODELEVEL_V8.log
-          ! grep -q '_native.native_decide.ax' LEAN_LOWER_BOUND_BUILD_ROUND27_CODELEVEL_V8.log
+            echo 'LEAN_LOWER_BOUND_ROUND27_CODELEVEL_V9_PASS'
+          } 2>&1 | tee LEAN_LOWER_BOUND_BUILD_ROUND27_CODELEVEL_V9.log
+          ! grep -q 'sorryAx' LEAN_LOWER_BOUND_BUILD_ROUND27_CODELEVEL_V9.log
+          ! grep -q '_native.native_decide.ax' LEAN_LOWER_BOUND_BUILD_ROUND27_CODELEVEL_V9.log
 
       - name: Upload kernel evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: fano-lower-bound-round27-codelevel-v8-kernel-evidence
+          name: fano-lower-bound-round27-codelevel-v9-kernel-evidence
           path: |
-            FanoLowerBoundRound12/LEAN_LOWER_BOUND_BUILD_ROUND27_CODELEVEL_V8.log
+            FanoLowerBoundRound12/LEAN_LOWER_BOUND_BUILD_ROUND27_CODELEVEL_V9.log
             FanoLowerBoundRound12/lake-manifest.json
-            FanoLowerBoundRound12/LEAN_SOURCE_SHA256SUMS_ROUND27_CODELEVEL_V8
+            FanoLowerBoundRound12/LEAN_SOURCE_SHA256SUMS_ROUND27_CODELEVEL_V9
             FanoLowerBoundRound12/FanoLowerBound.lean
             FanoLowerBoundRound12/FanoLowerBound/CodeLevelFano.lean
             FanoLowerBoundRound12/FanoLowerBound/FanoForcingTable.lean
