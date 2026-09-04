@@ -1,13 +1,15 @@
 --- a/FormalConjectures/OEIS/67599.lean
 +++ b/FormalConjectures/OEIS/67599.lean
-@@ -60,6 +60,112 @@
+@@ -60,6 +60,117 @@
  theorem a_6 : a 6 = 2131 := by
    decide +native
  
++@[category API, AMS 11]
 +private lemma lt_ten_pow_digits_length (n : ℕ) :
 +    n < 10 ^ (Nat.digits 10 n).length := by
 +  exact (Nat.digits_length_le_iff (by norm_num : 1 < 10) n).mp le_rfl
 +
++@[category API, AMS 11]
 +private lemma mul_lt_concatenateNats {x y : ℕ} (hx : 0 < x) :
 +    x * y < concatenateNats x y := by
 +  unfold concatenateNats
@@ -16,6 +18,7 @@
 +    (Nat.mul_lt_mul_left hx).2 hy
 +  omega
 +
++@[category API, AMS 11]
 +private lemma mul_lt_append_prime_one {x p : ℕ} (hx : 0 < x) (hp : 0 < p) :
 +    x * p < concatenateNats (concatenateNats x p) 1 := by
 +  have h₁ : x * p < concatenateNats x p := mul_lt_concatenateNats hx
@@ -25,6 +28,7 @@
 +    mul_lt_concatenateNats hxp
 +  exact h₁.trans (by simpa using h₂)
 +
++@[category API, AMS 11]
 +private lemma mul_prod_le_fold_pairs (x : ℕ) (hx : 0 < x) :
 +    ∀ ps : List ℕ, (∀ p ∈ ps, 0 < p) →
 +      x * ps.prod ≤
@@ -47,6 +51,7 @@
 +        ih y hy htail
 +      simpa [y, List.foldl_append, Nat.mul_assoc] using hmul.trans hih
 +
++@[category API, AMS 11]
 +private lemma prod_lt_fold_pairs {p : ℕ} (hp : 0 < p) (ps : List ℕ)
 +    (hps : ∀ q ∈ ps, 0 < q) :
 +    (p :: ps).prod <
