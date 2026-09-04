@@ -57,41 +57,41 @@ theorem seven_dvd_residualFamilyOne_six_mul (k : ℕ) :
     7 ∣ residualFamilyOne (6 * k) := by
   simpa [residualFamilyOne] using
     dvd_residual_of_period 740 2391 136 199 6 0 7 k
-      (by norm_num) (by norm_num [Nat.ModEq])
+      (by decide +kernel) (by decide +kernel)
 
 /-- Every term with index `2 mod 6` in the first residual family has divisor `13`. -/
 theorem thirteen_dvd_residualFamilyOne_two_add_six_mul (k : ℕ) :
     13 ∣ residualFamilyOne (2 + 6 * k) := by
   simpa [residualFamilyOne] using
     dvd_residual_of_period 740 2391 136 199 6 2 13 k
-      (by norm_num) (by norm_num [Nat.ModEq])
+      (by decide +kernel) (by decide +kernel)
 
 /-- Every term with index `5 mod 8` in the first residual family has divisor `73`. -/
 theorem seventyThree_dvd_residualFamilyOne_five_add_eight_mul (k : ℕ) :
     73 ∣ residualFamilyOne (5 + 8 * k) := by
   simpa [residualFamilyOne] using
     dvd_residual_of_period 740 2391 136 199 8 5 73 k
-      (by norm_num) (by norm_num [Nat.ModEq])
+      (by decide +kernel) (by decide +kernel)
 
 /-- Every term with index `1 mod 8` in the second residual family has divisor `17`. -/
 theorem seventeen_dvd_residualFamilyTwo_one_add_eight_mul (k : ℕ) :
     17 ∣ residualFamilyTwo (1 + 8 * k) := by
   simpa [residualFamilyTwo] using
     dvd_residual_of_period 370 2177 666 930 8 1 17 k
-      (by norm_num) (by norm_num [Nat.ModEq])
+      (by decide +kernel) (by decide +kernel)
 
 /-- Every term with index `3 mod 13` in the second residual family has divisor `157`. -/
 theorem oneFiftySeven_dvd_residualFamilyTwo_three_add_thirteen_mul (k : ℕ) :
     157 ∣ residualFamilyTwo (3 + 13 * k) := by
   simpa [residualFamilyTwo] using
     dvd_residual_of_period 370 2177 666 930 13 3 157 k
-      (by norm_num) (by norm_num [Nat.ModEq])
+      (by decide +kernel) (by decide +kernel)
 
 /-- Every term with index `7 mod 13` in the second residual family has divisor `53`. -/
 theorem fiftyThree_dvd_residualFamilyTwo_seven_add_thirteen_mul (k : ℕ) :
     53 ∣ residualFamilyTwo (7 + 13 * k) := by
   simpa [residualFamilyTwo] using
     dvd_residual_of_period 370 2177 666 930 13 7 53 k
-      (by norm_num) (by norm_num [Nat.ModEq])
+      (by decide +kernel) (by decide +kernel)
 
 end OeisA67599
