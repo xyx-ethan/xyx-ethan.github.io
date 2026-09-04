@@ -27,18 +27,33 @@ jobs:
             exit 1
           fi
 
-      - name: Build pinned Lean project
-        id: lean
-        uses: leanprover/lean-action@v1
-        with:
-          lake-package-directory: research/a067599-ci
-          build: true
-          test: false
-          lint: false
-          build-args: "--wfail"
-          use-mathlib-cache: true
+      - name: Install pinned Lean toolchain
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
+            | sh -s -- -y --default-toolchain leanprover/lean4:v4.33.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
 
-      - name: Repeat explicit full lake build
+      - name: Verify toolchain
+        working-directory: research/a067599-ci
+        shell: bash
+        run: |
+          set -euo pipefail
+          lean --version
+          lake --version
+
+      - name: Resolve pinned dependencies
+        working-directory: research/a067599-ci
+        shell: bash
+        run: lake update
+
+      - name: Download Mathlib cache
+        working-directory: research/a067599-ci
+        shell: bash
+        run: lake exe cache get
+
+      - name: Full lake build
         working-directory: research/a067599-ci
         shell: bash
         run: lake --wfail build
