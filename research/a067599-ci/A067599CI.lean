@@ -73,11 +73,53 @@ theorem seventyThree_dvd_residualFamilyOne_five_add_eight_mul (k : ℕ) :
     dvd_residual_of_period 740 2391 136 199 8 5 73 k
       (by decide +kernel) (by decide +kernel)
 
+/-- Every term with index `6 mod 16` in the first residual family has divisor `17`. -/
+theorem seventeen_dvd_residualFamilyOne_six_add_sixteen_mul (k : ℕ) :
+    17 ∣ residualFamilyOne (6 + 16 * k) := by
+  simpa [residualFamilyOne] using
+    dvd_residual_of_period 740 2391 136 199 16 6 17 k
+      (by decide +kernel) (by decide +kernel)
+
+/-- Every term with index `13 mod 22` in the first residual family has divisor `23`. -/
+theorem twentyThree_dvd_residualFamilyOne_thirteen_add_twentyTwo_mul (k : ℕ) :
+    23 ∣ residualFamilyOne (13 + 22 * k) := by
+  simpa [residualFamilyOne] using
+    dvd_residual_of_period 740 2391 136 199 22 13 23 k
+      (by decide +kernel) (by decide +kernel)
+
+/-- Every term with index `19 mod 28` in the first residual family has divisor `29`. -/
+theorem twentyNine_dvd_residualFamilyOne_nineteen_add_twentyEight_mul (k : ℕ) :
+    29 ∣ residualFamilyOne (19 + 28 * k) := by
+  simpa [residualFamilyOne] using
+    dvd_residual_of_period 740 2391 136 199 28 19 29 k
+      (by decide +kernel) (by decide +kernel)
+
 /-- Every term with index `1 mod 8` in the second residual family has divisor `17`. -/
 theorem seventeen_dvd_residualFamilyTwo_one_add_eight_mul (k : ℕ) :
     17 ∣ residualFamilyTwo (1 + 8 * k) := by
   simpa [residualFamilyTwo] using
     dvd_residual_of_period 370 2177 666 930 8 1 17 k
+      (by decide +kernel) (by decide +kernel)
+
+/-- Every term with index `7 mod 14` in the second residual family has divisor `29`. -/
+theorem twentyNine_dvd_residualFamilyTwo_seven_add_fourteen_mul (k : ℕ) :
+    29 ∣ residualFamilyTwo (7 + 14 * k) := by
+  simpa [residualFamilyTwo] using
+    dvd_residual_of_period 370 2177 666 930 14 7 29 k
+      (by decide +kernel) (by decide +kernel)
+
+/-- Every term with index `6 mod 16` in the second residual family has divisor `97`. -/
+theorem ninetySeven_dvd_residualFamilyTwo_six_add_sixteen_mul (k : ℕ) :
+    97 ∣ residualFamilyTwo (6 + 16 * k) := by
+  simpa [residualFamilyTwo] using
+    dvd_residual_of_period 370 2177 666 930 16 6 97 k
+      (by decide +kernel) (by decide +kernel)
+
+/-- Every term with index `11 mod 18` in the second residual family has divisor `109`. -/
+theorem oneHundredNine_dvd_residualFamilyTwo_eleven_add_eighteen_mul (k : ℕ) :
+    109 ∣ residualFamilyTwo (11 + 18 * k) := by
+  simpa [residualFamilyTwo] using
+    dvd_residual_of_period 370 2177 666 930 18 11 109 k
       (by decide +kernel) (by decide +kernel)
 
 /-- Every term with index `3 mod 13` in the second residual family has divisor `157`. -/
