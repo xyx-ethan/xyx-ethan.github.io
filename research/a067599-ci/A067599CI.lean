@@ -136,4 +136,118 @@ theorem fiftyThree_dvd_residualFamilyTwo_seven_add_thirteen_mul (k : ℕ) :
     dvd_residual_of_period 370 2177 666 930 13 7 53 k
       (by decide +kernel) (by decide +kernel)
 
+private lemma not_prime_of_dvd_lt {p n : ℕ} (hp : p ≠ 1)
+    (hdiv : p ∣ n) (hlt : p < n) : ¬ n.Prime := by
+  intro hn
+  have hEq : n = p := (hn.dvd_iff_eq hp).mp hdiv
+  omega
+
+/-- Every term in the first residual family is larger than every fixed divisor used above. -/
+theorem twoHundredEleven_lt_residualFamilyOne (t : ℕ) :
+    211 < residualFamilyOne t := by
+  rw [residualFamilyOne, Nat.lt_div_iff_mul_lt (by norm_num : 0 < 2391)]
+  have hExp : 3 ≤ 136 + 199 * t := by omega
+  have hPow : 10 ^ 3 ≤ 10 ^ (136 + 199 * t) :=
+    Nat.pow_le_pow_right (by norm_num : 0 < 10) hExp
+  have hMul : 740 * 10 ^ 3 ≤ 740 * 10 ^ (136 + 199 * t) :=
+    Nat.mul_le_mul_left 740 hPow
+  have hConst : 211 * 2391 < 740 * 10 ^ 3 + 1 := by norm_num
+  exact hConst.trans_le (Nat.add_le_add_right hMul 1)
+
+/-- Every term in the second residual family is larger than every fixed divisor used above. -/
+theorem oneFiftySeven_lt_residualFamilyTwo (t : ℕ) :
+    157 < residualFamilyTwo t := by
+  rw [residualFamilyTwo, Nat.lt_div_iff_mul_lt (by norm_num : 0 < 2177)]
+  have hExp : 3 ≤ 666 + 930 * t := by omega
+  have hPow : 10 ^ 3 ≤ 10 ^ (666 + 930 * t) :=
+    Nat.pow_le_pow_right (by norm_num : 0 < 10) hExp
+  have hMul : 370 * 10 ^ 3 ≤ 370 * 10 ^ (666 + 930 * t) :=
+    Nat.mul_le_mul_left 370 hPow
+  have hConst : 157 * 2177 < 370 * 10 ^ 3 + 1 := by norm_num
+  exact hConst.trans_le (Nat.add_le_add_right hMul 1)
+
+private lemma residualFamilyOne_not_prime_of_dvd {p t : ℕ}
+    (hp : p ≠ 1) (hpBound : p ≤ 211) (hdiv : p ∣ residualFamilyOne t) :
+    ¬ (residualFamilyOne t).Prime :=
+  not_prime_of_dvd_lt hp hdiv
+    (lt_of_le_of_lt hpBound (twoHundredEleven_lt_residualFamilyOne t))
+
+private lemma residualFamilyTwo_not_prime_of_dvd {p t : ℕ}
+    (hp : p ≠ 1) (hpBound : p ≤ 157) (hdiv : p ∣ residualFamilyTwo t) :
+    ¬ (residualFamilyTwo t).Prime :=
+  not_prime_of_dvd_lt hp hdiv
+    (lt_of_le_of_lt hpBound (oneFiftySeven_lt_residualFamilyTwo t))
+
+/-- The first residual family is composite on indices `0 mod 6`. -/
+theorem residualFamilyOne_six_mul_not_prime (k : ℕ) :
+    ¬ (residualFamilyOne (6 * k)).Prime :=
+  residualFamilyOne_not_prime_of_dvd (by norm_num) (by norm_num)
+    (seven_dvd_residualFamilyOne_six_mul k)
+
+/-- The first residual family is composite on indices `2 mod 6`. -/
+theorem residualFamilyOne_two_add_six_mul_not_prime (k : ℕ) :
+    ¬ (residualFamilyOne (2 + 6 * k)).Prime :=
+  residualFamilyOne_not_prime_of_dvd (by norm_num) (by norm_num)
+    (thirteen_dvd_residualFamilyOne_two_add_six_mul k)
+
+/-- The first residual family is composite on indices `5 mod 8`. -/
+theorem residualFamilyOne_five_add_eight_mul_not_prime (k : ℕ) :
+    ¬ (residualFamilyOne (5 + 8 * k)).Prime :=
+  residualFamilyOne_not_prime_of_dvd (by norm_num) (by norm_num)
+    (seventyThree_dvd_residualFamilyOne_five_add_eight_mul k)
+
+/-- The first residual family is composite on indices `6 mod 16`. -/
+theorem residualFamilyOne_six_add_sixteen_mul_not_prime (k : ℕ) :
+    ¬ (residualFamilyOne (6 + 16 * k)).Prime :=
+  residualFamilyOne_not_prime_of_dvd (by norm_num) (by norm_num)
+    (seventeen_dvd_residualFamilyOne_six_add_sixteen_mul k)
+
+/-- The first residual family is composite on indices `13 mod 22`. -/
+theorem residualFamilyOne_thirteen_add_twentyTwo_mul_not_prime (k : ℕ) :
+    ¬ (residualFamilyOne (13 + 22 * k)).Prime :=
+  residualFamilyOne_not_prime_of_dvd (by norm_num) (by norm_num)
+    (twentyThree_dvd_residualFamilyOne_thirteen_add_twentyTwo_mul k)
+
+/-- The first residual family is composite on indices `19 mod 28`. -/
+theorem residualFamilyOne_nineteen_add_twentyEight_mul_not_prime (k : ℕ) :
+    ¬ (residualFamilyOne (19 + 28 * k)).Prime :=
+  residualFamilyOne_not_prime_of_dvd (by norm_num) (by norm_num)
+    (twentyNine_dvd_residualFamilyOne_nineteen_add_twentyEight_mul k)
+
+/-- The second residual family is composite on indices `1 mod 8`. -/
+theorem residualFamilyTwo_one_add_eight_mul_not_prime (k : ℕ) :
+    ¬ (residualFamilyTwo (1 + 8 * k)).Prime :=
+  residualFamilyTwo_not_prime_of_dvd (by norm_num) (by norm_num)
+    (seventeen_dvd_residualFamilyTwo_one_add_eight_mul k)
+
+/-- The second residual family is composite on indices `7 mod 14`. -/
+theorem residualFamilyTwo_seven_add_fourteen_mul_not_prime (k : ℕ) :
+    ¬ (residualFamilyTwo (7 + 14 * k)).Prime :=
+  residualFamilyTwo_not_prime_of_dvd (by norm_num) (by norm_num)
+    (twentyNine_dvd_residualFamilyTwo_seven_add_fourteen_mul k)
+
+/-- The second residual family is composite on indices `6 mod 16`. -/
+theorem residualFamilyTwo_six_add_sixteen_mul_not_prime (k : ℕ) :
+    ¬ (residualFamilyTwo (6 + 16 * k)).Prime :=
+  residualFamilyTwo_not_prime_of_dvd (by norm_num) (by norm_num)
+    (ninetySeven_dvd_residualFamilyTwo_six_add_sixteen_mul k)
+
+/-- The second residual family is composite on indices `11 mod 18`. -/
+theorem residualFamilyTwo_eleven_add_eighteen_mul_not_prime (k : ℕ) :
+    ¬ (residualFamilyTwo (11 + 18 * k)).Prime :=
+  residualFamilyTwo_not_prime_of_dvd (by norm_num) (by norm_num)
+    (oneHundredNine_dvd_residualFamilyTwo_eleven_add_eighteen_mul k)
+
+/-- The second residual family is composite on indices `3 mod 13`. -/
+theorem residualFamilyTwo_three_add_thirteen_mul_not_prime (k : ℕ) :
+    ¬ (residualFamilyTwo (3 + 13 * k)).Prime :=
+  residualFamilyTwo_not_prime_of_dvd (by norm_num) (by norm_num)
+    (oneFiftySeven_dvd_residualFamilyTwo_three_add_thirteen_mul k)
+
+/-- The second residual family is composite on indices `7 mod 13`. -/
+theorem residualFamilyTwo_seven_add_thirteen_mul_not_prime (k : ℕ) :
+    ¬ (residualFamilyTwo (7 + 13 * k)).Prime :=
+  residualFamilyTwo_not_prime_of_dvd (by norm_num) (by norm_num)
+    (fiftyThree_dvd_residualFamilyTwo_seven_add_thirteen_mul k)
+
 end OeisA67599
