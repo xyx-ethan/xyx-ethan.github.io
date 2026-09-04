@@ -5,6 +5,7 @@ on:
     branches:
       - research/a067599-round3-ci
       - research/a067599-round3-periodic-divisors
+      - research/a067599-round4-axiom-clean
   workflow_dispatch:
 
 permissions:
@@ -92,8 +93,8 @@ jobs:
         run: |
           set -euo pipefail
           lake env lean CheckAxioms.lean 2>&1 | tee axioms.log
-          if grep -q 'sorryAx' axioms.log; then
-            echo "A theorem depends on sorryAx" >&2
+          if grep -Eq 'sorryAx|native_decide\.ax' axioms.log; then
+            echo "A theorem depends on a forbidden proof-generation axiom" >&2
             exit 1
           fi
 
@@ -109,13 +110,14 @@ jobs:
             echo "formal_conjectures_commit=27f7d5b62fb86f586a5432bf2de56f99dc9b0aa6"
             echo "required_toolchain=leanprover/lean4:v4.33.1"
             echo "integration_mode=patch_applied_to_pinned_dependency"
+            echo "axiom_policy=no_sorryAx_no_native_decide_axioms"
           } > verification-manifest.txt
 
       - name: Upload verification bundle
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: a067599-round3-verification-${{ github.sha }}
+          name: a067599-round4-axiom-clean-${{ github.sha }}
           if-no-files-found: error
           retention-days: 30
           path: |
