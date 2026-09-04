@@ -1,0 +1,54 @@
+name: Fano lower-bound Round 27 diagnose v4
+
+on:
+  push:
+    branches:
+      - scratch/fano-lower-bound-round27-codelevel-v4-2026-09-03
+    paths:
+      - '.github/workflows/fano-lower-bound-round27-diagnose-v4.yml'
+      - 'FanoLowerBoundRound12/**'
+  workflow_dispatch:
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout isolated temporary branch
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: scratch/fano-lower-bound-round27-codelevel-v4-2026-09-03
+          fetch-depth: 1
+      - name: Materialize Round 27 v2 source and print critical regions
+        working-directory: FanoLowerBoundRound12
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 generate_fano_forcing_table.py
+          python3 apply_round23_source.py
+          sed -i 's/native_decide/decide/g' FanoLowerBound/FanoForcingTable.lean FanoLowerBound/FanoRadonForcing.lean
+          sed -i '2i set_option maxRecDepth 100000\nset_option maxHeartbeats 0' FanoLowerBound/FanoForcingTable.lean
+          sed -i '3i set_option maxRecDepth 100000\nset_option maxHeartbeats 0' FanoLowerBound/FanoRadonForcing.lean
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('FanoLowerBound/FanoIndexNormalization.lean')
+          s = p.read_text(encoding='utf-8')
+          s = s.replace(
+              'variable {E : Type*} [AddCommGroup E] [Module ℝ E]\n',
+              'variable {E : Type*} [AddCommGroup E] [Module ℝ E]\n'
+              '  [TopologicalSpace E] [IsTopologicalAddGroup E] [ContinuousSMul ℝ E]\n', 1)
+          s = s.replace('    {x₀ x₁ : E} {P : Nat → E}\n', '    {P : Nat → E}\n', 1)
+          s = s.replace(
+              'section Topological\n\nvariable [TopologicalSpace E] [IsTopologicalAddGroup E] [ContinuousSMul ℝ E]\n\n',
+              'section Topological\n\n', 1)
+          p.write_text(s, encoding='utf-8')
+          PY
+          python3 apply_round26_source.py
+          python3 apply_round26_fast_patch.py
+          python3 apply_round27_source_v2.py
+          python3 apply_round27_structural_patch_v2.py
+          echo '=== FanoForcingTable corrected predicate ==='
+          grep -n -A18 -B5 'def lineContains3' FanoLowerBound/FanoForcingTable.lean || true
+          echo '=== FanoCodeRealization lines 1-470 ==='
+          nl -ba FanoLowerBound/FanoCodeRealization.lean | sed -n '1,470p'
+          echo '=== root imports/tail ==='
+          nl -ba FanoLowerBound.lean | tail -60
