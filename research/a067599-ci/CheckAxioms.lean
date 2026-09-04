@@ -1,7 +1,7 @@
 import A067599CI
 
 /-!
-# Axiom audit for the A067599 squarefree exclusion and periodic-divisor theorems
+# Axiom audit for the A067599 squarefree exclusion and periodic-compositeness theorems
 -/
 
 #print axioms OeisA67599.lt_a_of_squarefree
@@ -19,3 +19,17 @@ import A067599CI
 #print axioms OeisA67599.oneHundredNine_dvd_residualFamilyTwo_eleven_add_eighteen_mul
 #print axioms OeisA67599.oneFiftySeven_dvd_residualFamilyTwo_three_add_thirteen_mul
 #print axioms OeisA67599.fiftyThree_dvd_residualFamilyTwo_seven_add_thirteen_mul
+#print axioms OeisA67599.twoHundredEleven_lt_residualFamilyOne
+#print axioms OeisA67599.oneFiftySeven_lt_residualFamilyTwo
+#print axioms OeisA67599.residualFamilyOne_six_mul_not_prime
+#print axioms OeisA67599.residualFamilyOne_two_add_six_mul_not_prime
+#print axioms OeisA67599.residualFamilyOne_five_add_eight_mul_not_prime
+#print axioms OeisA67599.residualFamilyOne_six_add_sixteen_mul_not_prime
+#print axioms OeisA67599.residualFamilyOne_thirteen_add_twentyTwo_mul_not_prime
+#print axioms OeisA67599.residualFamilyOne_nineteen_add_twentyEight_mul_not_prime
+#print axioms OeisA67599.residualFamilyTwo_one_add_eight_mul_not_prime
+#print axioms OeisA67599.residualFamilyTwo_seven_add_fourteen_mul_not_prime
+#print axioms OeisA67599.residualFamilyTwo_six_add_sixteen_mul_not_prime
+#print axioms OeisA67599.residualFamilyTwo_eleven_add_eighteen_mul_not_prime
+#print axioms OeisA67599.residualFamilyTwo_three_add_thirteen_mul_not_prime
+#print axioms OeisA67599.residualFamilyTwo_seven_add_thirteen_mul_not_prime
