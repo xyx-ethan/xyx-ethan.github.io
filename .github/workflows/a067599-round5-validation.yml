@@ -5,6 +5,9 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
+concurrency:
+  group: a067599-round5-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   verify:
     runs-on: ubuntu-latest
@@ -22,13 +25,16 @@ jobs:
           set -euo pipefail
           curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.33.1
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
-      - name: Prepare original dependency and proper-factor repair
+      - name: Prepare dependency and binary modular certificates
         run: |
           set -euo pipefail
           lean --version | tee lean-version.log
           lake update
           git -C .lake/packages/formal_conjectures apply "$GITHUB_WORKSPACE/research/a067599-ci/a067599-squarefree.patch"
           python round5_patch.py
+          g++ -O3 -std=c++17 round5_discover.cpp -o round5-discover
+          ./round5-discover 10000000 5000 > round5-classes.csv
+          python round5_allclasses.py
           if grep -nE '(^|[^[:alnum:]_])(sorry|admit|axiom|unsafe|native_decide|maxRecDepth)([^[:alnum:]_]|$)' A067599CI.lean; then exit 1; fi
           lake exe cache get
       - name: Build and kernel-check
@@ -46,6 +52,7 @@ jobs:
             research/a067599-ci/*.lean
             research/a067599-ci/*.log
             research/a067599-ci/*.patch
+            research/a067599-ci/round5-classes.csv
             research/a067599-ci/lean-toolchain
             research/a067599-ci/lake-manifest.json
           retention-days: 30
