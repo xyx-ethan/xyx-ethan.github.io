@@ -34,7 +34,7 @@ jobs:
           python round5_patch.py
           g++ -O3 -std=c++17 round5_discover.cpp -o round5-discover
           ./round5-discover 10000000 5000 > round5-classes.csv
-          python round5_allclasses.py
+          python round5_allclasses_safe.py
           if grep -nE '(^|[^[:alnum:]_])(sorry|admit|axiom|unsafe|native_decide|maxRecDepth)([^[:alnum:]_]|$)' A067599CI.lean; then exit 1; fi
           lake exe cache get
       - name: Build and kernel-check
