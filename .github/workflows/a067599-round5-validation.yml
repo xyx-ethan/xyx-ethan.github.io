@@ -1,0 +1,51 @@
+name: A067599 round5 proper factors
+on:
+  push:
+    branches: [research/a067599-round5-crt-proper-factors]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: research/a067599-ci
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install pinned Lean
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.33.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Prepare original dependency and proper-factor repair
+        run: |
+          set -euo pipefail
+          lean --version | tee lean-version.log
+          lake update
+          git -C .lake/packages/formal_conjectures apply "$GITHUB_WORKSPACE/research/a067599-ci/a067599-squarefree.patch"
+          python round5_patch.py
+          if grep -nE '(^|[^[:alnum:]_])(sorry|admit|axiom|unsafe|native_decide|maxRecDepth)([^[:alnum:]_]|$)' A067599CI.lean; then exit 1; fi
+          lake exe cache get
+      - name: Build and kernel-check
+        run: |
+          set -euo pipefail
+          lake --wfail build 2>&1 | tee round5-build.log
+          lake env lean CheckAxioms.lean 2>&1 | tee round5-axioms.log
+          if grep -Eq 'sorryAx|native_decide\.ax' round5-axioms.log; then exit 1; fi
+      - name: Save verification results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: a067599-round5-${{ github.sha }}
+          path: |
+            research/a067599-ci/*.lean
+            research/a067599-ci/*.log
+            research/a067599-ci/*.patch
+            research/a067599-ci/lean-toolchain
+            research/a067599-ci/lake-manifest.json
+          retention-days: 30
